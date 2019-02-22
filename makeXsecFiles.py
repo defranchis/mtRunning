@@ -3,9 +3,8 @@ from ROOT import *
 import os
 import rundec
 
-#######
 
-# input values
+# input values (global variables)
 
 xsec_1 = 255.37
 err_xsec_1_up = 4.845
@@ -14,14 +13,12 @@ extr_1_up = [ -0.152 , 2.666 , -0.117 , -0.025 , 2.134 , 2.326 , ]
 extr_1_down = [ 0.679 , -0.183 , 0.449 , 0.239 , -1.428 , -3.133 , ]
 err_xsec_toys_1 = 3.918
 
-
 xsec_2 = 307.11
 err_xsec_2_up = 4.864
 err_xsec_2_down = 4.629
 extr_2_up = [ -0.158 , 1.779 , -0.328 , -0.12 , 1.339 , -1.786 , ]
 extr_2_down = [ 0.433 , -0.11 , 0.726 , 0.021 , -0.901 , 1.227 , ]
 err_xsec_toys_2 = 5.134
-
 
 xsec_3 = 180.86
 err_xsec_3_up = 4.474
@@ -44,42 +41,31 @@ mu_1 = 383.95
 mu_2 = 476.19
 mu_3 = 644.27
 
-# mu_1 = 385.0
-# mu_2 = 472.0
-# mu_3 = 629.0
+MZ = 91.1876
+asMZ = 0.11905
+err_as = 0.0011
+nflav = 5
+nloops = 2
+   
+# end global variables
 
 
+################################
 
+# "setMasses" initializes which masses should be considered
 
+################################
 
-#######
+def setMasses():
 
-# calculation of cross section errors in pb
-
-xsec_err_1 = xsec_1/100.*(err_xsec_1_up+err_xsec_1_down)/2.
-xsec_err_2 = xsec_2/100.*(err_xsec_2_up+err_xsec_2_down)/2.
-xsec_err_3 = xsec_3/100.*(err_xsec_3_up+err_xsec_3_down)/2.
-
-A_1 = (err_xsec_1_up-err_xsec_1_down)/(err_xsec_1_up+err_xsec_1_down)
-A_2 = (err_xsec_2_up-err_xsec_2_down)/(err_xsec_2_up+err_xsec_2_down)
-A_3 = (err_xsec_3_up-err_xsec_3_down)/(err_xsec_3_up+err_xsec_3_down)
-
-#adding toy uncert
-xsec_err_1 = (xsec_err_1**2 + err_xsec_toys_1**2)**.5
-xsec_err_2 = (xsec_err_2**2 + err_xsec_toys_2**2)**.5
-xsec_err_3 = (xsec_err_3**2 + err_xsec_toys_3**2)**.5
-
-mass_v = []
-i_mass = mass_max
-while i_mass >= mass_min :
-    mass_v.append(i_mass)
-    if i_mass <= mass_fine_max and i_mass > mass_fine_min+.1 : i_mass-= 0.2
-    else : i_mass-= 1.0
-
-crd = rundec.CRunDec()
-
-    
-#######
+    global mass_v
+    mass_v = []
+    i_mass = mass_max
+    while i_mass >= mass_min :
+        mass_v.append(i_mass)
+        if i_mass <= mass_fine_max and i_mass > mass_fine_min+.1 : i_mass-= 0.2
+        else : i_mass-= 1.0
+    return
 
 
 ################################
@@ -92,10 +78,7 @@ crd = rundec.CRunDec()
 
 def mtmt2mtmu(mt, mu):
 
-    MZ = 91.1876
-    asMZ = 0.11905
-    nflav = 5
-    nloops = 2
+    crd = rundec.CRunDec()
 
     asmt = crd.AlphasExact(asMZ, MZ, mt, nflav, nloops)
     asmu = crd.AlphasExact(asMZ, MZ, mu, nflav, nloops)
@@ -104,30 +87,34 @@ def mtmt2mtmu(mt, mu):
     
     return mtmu
 
-def mtmu2mtmu(mtmu1, mu1, mu2, var_as):
 
-    MZ = 91.1876
-    asMZ_nom = 0.11905
-    err_as = 0.0011
-    nflav = 5
-    nloops = 2
 
-    asMZ = 0
-    if var_as == 'nominal' : asMZ = asMZ_nom
-    elif var_as == 'up' : asMZ = asMZ_nom+err_as
-    elif var_as == 'down' : asMZ = asMZ_nom-err_as
+################################
+
+# "mtmu2mtmu" converts mt(mu1) to mt(mu2) for a given scale
+# as(MZ), MZ, n. of flavours and n. of loops should be set above
+
+################################
+
+
+def mtmu2mtmu (mtmu1, mu1, mu2, var_as):
+
+    alphaS = 0
+    if var_as == 'nominal' : alphaS = asMZ
+    elif var_as == 'up' : alphaS = asMZ+err_as
+    elif var_as == 'down' : alphaS = asMZ-err_as
     else :
         print 'ERROR!'
         return 0
+
+    crd = rundec.CRunDec()
     
-    asmu1 = crd.AlphasExact(asMZ, MZ, mu1, nflav, nloops)
-    asmu2 = crd.AlphasExact(asMZ, MZ, mu2, nflav, nloops)
+    asmu1 = crd.AlphasExact(alphaS, MZ, mu1, nflav, nloops)
+    asmu2 = crd.AlphasExact(alphaS, MZ, mu2, nflav, nloops)
     
     mtmu2 = crd.mMS2mMS(mtmu1, asmu1, asmu2, nflav, nloops)
     
     return mtmu2
-
-
 
 
 ################################
@@ -250,7 +237,7 @@ def getMassAndError(mttbin, murscale, mufscale, pdfmember, extrapol):
         xsec_exp = xsec_err = 0.
         if mttbin == 1 : 
             xsec_exp = xsec_1 
-            xsec_err = xsec_err_1
+            xsec_err = ((xsec_1/100.*(err_xsec_1_up+err_xsec_1_down)/2.)**2 + err_xsec_toys_1**2)**.5
             if extrapol != 0:
                 if extrapol > 0 :
                     xsec_exp *= 1 + extr_1_up[abs(extrapol)-1]/100.
@@ -260,7 +247,7 @@ def getMassAndError(mttbin, murscale, mufscale, pdfmember, extrapol):
                     xsec_err *= 1 + extr_1_down[abs(extrapol)-1]/100.
         elif mttbin == 2 : 
             xsec_exp = xsec_2 
-            xsec_err = xsec_err_2
+            xsec_err = ((xsec_2/100.*(err_xsec_2_up+err_xsec_2_down)/2.)**2 + err_xsec_toys_2**2)**.5
             if extrapol != 0:
                 if extrapol > 0 :
                     xsec_exp *= 1 + extr_2_up[abs(extrapol)-1]/100.
@@ -270,7 +257,7 @@ def getMassAndError(mttbin, murscale, mufscale, pdfmember, extrapol):
                     xsec_err *= 1 + extr_2_down[abs(extrapol)-1]/100.
         else : # mttbin = 3
             xsec_exp = xsec_3 
-            xsec_err = xsec_err_3
+            xsec_err = ((xsec_3/100.*(err_xsec_3_up+err_xsec_3_down)/2.)**2 + err_xsec_toys_3**2)**.5
             if extrapol != 0:
                 if extrapol > 0 :
                     xsec_exp *= 1 + extr_3_up[abs(extrapol)-1]/100.
@@ -283,9 +270,9 @@ def getMassAndError(mttbin, murscale, mufscale, pdfmember, extrapol):
         # chi2 = abs(xsec_th-xsec_exp)/xsec_err
         chi2 = (xsec_th-xsec_exp)/xsec_err
         fact_A = 0
-        if mttbin == 1 : fact_A = A_1
-        elif mttbin == 2 : fact_A = A_2
-        else : fact_A = A_3
+        if mttbin == 1 : fact_A = (err_xsec_1_up-err_xsec_1_down)/(err_xsec_1_up+err_xsec_1_down)
+        elif mttbin == 2 : fact_A = (err_xsec_2_up-err_xsec_2_down)/(err_xsec_2_up+err_xsec_2_down)
+        else : fact_A = (err_xsec_3_up-err_xsec_3_down)/(err_xsec_3_up+err_xsec_3_down)
         chi2 *= (1-2*fact_A*chi2+5*fact_A*fact_A*chi2*chi2)**.5
         # graph.SetPoint(i,mass,chi2)
         if mass != mass_v[0]:
@@ -365,11 +352,8 @@ def getMassAndError(mttbin, murscale, mufscale, pdfmember, extrapol):
         
     fitted_mass_err = (fitted_mass_up - fitted_mass_down)/2
 
+    return [fitted_mass, fitted_mass_err]
 
-    mass_and_err = []
-    mass_and_err.append(fitted_mass)
-    mass_and_err.append(fitted_mass_err)
-    return mass_and_err
 
 ################################
 
@@ -390,14 +374,8 @@ def getRatios(mass_1, mass_2, mass_3, err_1, err_2, err_3):
     err_ratio_3_2 = err_ratio_3_2**.5
     err_ratio_3_2*= ratio_3_2
 
-    ratios_and_errs = []
-    ratios_and_errs.append(ratio_1_2)
-    ratios_and_errs.append(ratio_3_2)
-    ratios_and_errs.append(err_ratio_1_2)
-    ratios_and_errs.append(err_ratio_3_2)
-
-    return ratios_and_errs
-
+    return [ratio_1_2, ratio_3_2, err_ratio_1_2, err_ratio_3_2]
+    
 
 ################################
 
@@ -441,14 +419,8 @@ def getScaleUncertainties (central_ratio_1_2, central_ratio_3_2):
     err_scale_down_1_2 = central_ratio_1_2 - err_scale_down_1_2
     err_scale_down_3_2 = central_ratio_3_2 - err_scale_down_3_2
 
-    errs = []
-    errs.append(err_scale_up_1_2)
-    errs.append(err_scale_down_1_2)
-    errs.append(err_scale_up_3_2)
-    errs.append(err_scale_down_3_2)
-
-    return errs
-
+    return [err_scale_up_1_2, err_scale_down_1_2, err_scale_up_3_2, err_scale_down_3_2]
+    
 
 ################################
 
@@ -482,14 +454,9 @@ def getPDFUncertainties (central_ratio_1_2, central_ratio_3_2):
 
         if ratio_3_2 > central_ratio_3_2 : err_pdf_up_3_2 += err_pdf_3_2
         else : err_pdf_down_3_2 += err_pdf_3_2
-
-    errs = []
-    errs.append(err_pdf_up_1_2**.5)
-    errs.append(err_pdf_down_1_2**.5)
-    errs.append(err_pdf_up_3_2**.5)
-    errs.append(err_pdf_down_3_2**.5)
-
-    return errs
+        
+    return [err_pdf_up_1_2**.5, err_pdf_down_1_2**.5, err_pdf_up_3_2**.5, err_pdf_down_3_2**.5]
+        
 
 ################################
 
@@ -526,42 +493,45 @@ def getExtrapolationUncertainties (central_ratio_1_2, central_ratio_3_2):
         if ratio_3_2 > central_ratio_3_2 : err_extr_up_3_2 += err_extr_3_2
         else : err_extr_down_3_2 += err_extr_3_2
 
-    errs = []
-    errs.append(err_extr_up_1_2**.5)
-    errs.append(err_extr_down_1_2**.5)
-    errs.append(err_extr_up_3_2**.5)
-    errs.append(err_extr_down_3_2**.5)
 
-    return errs
+    return [err_extr_up_1_2**.5, err_extr_down_1_2**.5, err_extr_up_3_2**.5, err_extr_down_3_2**.5]
+
+
+################################
+
+# "makeTheoryPrediction" calculates the running of mt(mu) starting from m(mu_2)
+
+################################
+
 
 def makeTheoryPrediction(outfile, mass_2):
-    out = open(outfile+'.txt','w')
-    # out_up = open(outfile+'_up.txt','w')
-    # out_down = open(outfile+'_down.txt','w')
+
     scales = []
     r_up = []
     r_down = []
+    out = open(outfile+'.txt','w')
         
     for scale in range(350,670+1):
         ratio = mtmu2mtmu(mass_2, mu_2, scale, 'nominal')/mass_2
         out.write(str(scale)+'\t'+str(ratio)+'\n')
         ratio_up = mtmu2mtmu(mass_2, mu_2, scale, 'up')/mass_2
-        # out_up.write(str(scale)+'\t'+str(ratio_up)+'\n')
         ratio_down = mtmu2mtmu(mass_2, mu_2, scale, 'down')/mass_2
-        # out_down.write(str(scale)+'\t'+str(ratio_down)+'\n')
         r_up.append(ratio_up)
         r_down.append(ratio_down)
         scales.append(scale)
         
     out.close()
-    l = []
-    l.append(scales)
-    l.append(r_up)
-    l.append(r_down)
-    # out_up.close()
-    # out_down.close()
         
-    return l
+    return [scales, r_up, r_down]
+
+
+
+################################
+
+# "makeAdditionalTheoryPrediction" calculates the running of mt(mu) starting from m(mt)
+
+################################
+
 
 def makeAdditionalTheoryPrediction (mtmt, err_mtmt, mtmu):
     r = []
@@ -706,8 +676,8 @@ def makePlot (mass_2, ratio_12, ratio_32, err_12, err_32):
     c.SaveAs(outdir+'/test_incl.pdf')
     c.SaveAs(outdir+'/test_incl.root')
 
-    
     return
+
 
 ################################
 
@@ -716,66 +686,66 @@ def makePlot (mass_2, ratio_12, ratio_32, err_12, err_32):
 ################################
 
 
-mass_and_err_1 = getMassAndError(1, 'nominal', 'nominal', 0 , 0)
-mass_and_err_2 = getMassAndError(2, 'nominal', 'nominal', 0 , 0)
-mass_and_err_3 = getMassAndError(3, 'nominal', 'nominal', 0 , 0)
+def execute():
 
-ratios_and_errs = getRatios(mass_and_err_1[0], mass_and_err_2[0], mass_and_err_3[0],
-                            mass_and_err_1[1], mass_and_err_2[1], mass_and_err_3[1])
+    setMasses()
+    mass_and_err_1 = getMassAndError(1, 'nominal', 'nominal', 0 , 0)
+    mass_and_err_2 = getMassAndError(2, 'nominal', 'nominal', 0 , 0)
+    mass_and_err_3 = getMassAndError(3, 'nominal', 'nominal', 0 , 0)
 
+    ratios_and_errs = getRatios(mass_and_err_1[0], mass_and_err_2[0], mass_and_err_3[0],
+                                mass_and_err_1[1], mass_and_err_2[1], mass_and_err_3[1])
 
-ratio_1_2 = ratios_and_errs[0]
-ratio_3_2 = ratios_and_errs[1]
-err_ratio_1_2 = ratios_and_errs[2]
-err_ratio_3_2 = ratios_and_errs[3]
-
-# scale_errors = getScaleUncertainties(ratio_1_2, ratio_3_2)
-# err_scale_1_2_up = scale_errors[0]
-# err_scale_1_2_down = scale_errors[1]
-# err_scale_3_2_up = scale_errors[2]
-# err_scale_3_2_down = scale_errors[3]
-
-pdf_errors = getPDFUncertainties(ratio_1_2, ratio_3_2)
-
-err_pdf_1_2_up = pdf_errors[0]
-err_pdf_1_2_down = pdf_errors[1]
-err_pdf_3_2_up = pdf_errors[2]
-err_pdf_3_2_down = pdf_errors[3]
+    ratio_1_2 = ratios_and_errs[0]
+    ratio_3_2 = ratios_and_errs[1]
+    err_ratio_1_2 = ratios_and_errs[2]
+    err_ratio_3_2 = ratios_and_errs[3]
 
 
-extr_errors = getExtrapolationUncertainties(ratio_1_2, ratio_3_2)
+    pdf_errors = getPDFUncertainties(ratio_1_2, ratio_3_2)
 
-err_extr_1_2_up = extr_errors[0]
-err_extr_1_2_down = extr_errors[1]
-err_extr_3_2_up = extr_errors[2]
-err_extr_3_2_down = extr_errors[3]
-
-
-err_1_2_up = (err_ratio_1_2**2 + err_pdf_1_2_up**2 + err_extr_1_2_up **2)**.5
-err_1_2_down = (err_ratio_1_2**2 + err_pdf_1_2_down**2 + err_extr_1_2_down **2)**.5
-
-err_3_2_up = (err_ratio_3_2**2 + err_pdf_3_2_up**2 + err_extr_3_2_up **2)**.5
-err_3_2_down = (err_ratio_3_2**2 + err_pdf_3_2_down**2 + err_extr_3_2_down **2)**.5
+    err_pdf_1_2_up = pdf_errors[0]
+    err_pdf_1_2_down = pdf_errors[1]
+    err_pdf_3_2_up = pdf_errors[2]
+    err_pdf_3_2_down = pdf_errors[3]
 
 
-print 'ratio_1_2 =', ratio_1_2, '+' , err_1_2_up, '-' , err_1_2_down 
-print 'ratio_3_2 =', ratio_3_2, '+' , err_3_2_up, '-' , err_3_2_down 
-print
+    extr_errors = getExtrapolationUncertainties(ratio_1_2, ratio_3_2)
+
+    err_extr_1_2_up = extr_errors[0]
+    err_extr_1_2_down = extr_errors[1]
+    err_extr_3_2_up = extr_errors[2]
+    err_extr_3_2_down = extr_errors[3]
+
+    err_1_2_up = (err_ratio_1_2**2 + err_pdf_1_2_up**2 + err_extr_1_2_up **2)**.5
+    err_1_2_down = (err_ratio_1_2**2 + err_pdf_1_2_down**2 + err_extr_1_2_down **2)**.5
+
+    err_3_2_up = (err_ratio_3_2**2 + err_pdf_3_2_up**2 + err_extr_3_2_up **2)**.5
+    err_3_2_down = (err_ratio_3_2**2 + err_pdf_3_2_down**2 + err_extr_3_2_down **2)**.5
+
+    print 'ratio_1_2 =', ratio_1_2, '+' , err_1_2_up, '-' , err_1_2_down 
+    print 'ratio_3_2 =', ratio_3_2, '+' , err_3_2_up, '-' , err_3_2_down 
+    print
+
+    print 'ratio_1_2 =', round(ratio_1_2,3), '+' , round(err_1_2_up,3), '-' , round(err_1_2_down,3)
+    print 'ratio_3_2 =', round(ratio_3_2,3), '+' , round(err_3_2_up,3), '-' , round(err_3_2_down,3) 
+    print
+
+    makePlot (mass_and_err_2[0], ratio_1_2, ratio_3_2, err_ratio_1_2, err_ratio_3_2)
+
+    return
 
 
-print 'ratio_1_2 =', round(ratio_1_2,3), '+' , round(err_1_2_up,3), '-' , round(err_1_2_down,3)
-print 'ratio_3_2 =', round(ratio_3_2,3), '+' , round(err_3_2_up,3), '-' , round(err_3_2_down,3) 
-print
+################################
+
+# execute main program
+
+################################
 
 
-makePlot (mass_and_err_2[0], ratio_1_2, ratio_3_2, err_ratio_1_2, err_ratio_3_2)
+execute()
 
 
-
-# print
-# print ratio_1_2, err_ratio_1_2, err_scale_1_2_up, err_scale_1_2_down, err_pdf_1_2_up, err_pdf_1_2_down, err_extr_1_2_up, err_extr_1_2_down
-# print ratio_3_2, err_ratio_3_2, err_scale_3_2_up, err_scale_3_2_down, err_pdf_3_2_up, err_pdf_3_2_down, err_extr_3_2_up, err_extr_3_2_down
-# print
 
 
 
