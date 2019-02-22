@@ -1,0 +1,244 @@
+  ( Intermediate result for iteration           9 )
+ ( Cross-section is:      -104945.1008428245 +/-            6.2540661235)
+
+  ( Contribution from parton sub-processes:
+ (        GG     |               NaN     NaN%
+ (        GQ     |               NaN     NaN%
+ (        GQB    |               NaN     NaN%
+ (        QG     |               NaN     NaN%
+ (        QBG    |               NaN     NaN%
+ (        QQ     |               NaN     NaN%
+ (        QBQB   |               NaN     NaN%
+ (        QQB    |               NaN     NaN%
+ (        QBQ    |               NaN     NaN%
+
+  ( Run corresponds to this input file)
+
+  ( [Flags to specify the mode in which MCFM is run] )
+ (                  -1            [nevtrequested] )
+ (                   F            [creatent] )
+ (                   F            [skipnt] )
+ (                   F            [dswhisto] )
+ (                   F            [creategrid] )
+ (                   F            [writetop] )
+ (                   T            [writedat] )
+ (                   F            [writegnu] )
+ (                   F            [writeroot] )
+ (                   F            [writepwg] )
+
+  ( [General options to specify the process and execution] )
+ (                 157            [nproc] )
+ (                msbr            [part] )
+ (MSbar                           [runstring] )
+ (          13000.0000            [sqrts] )
+ (                   1            [ih1] )
+ (                   1            [ih2] )
+ (            125.9000            [hmass] )
+ (            169.0000            [scale] )
+ (            169.0000            [facscale] )
+ (no                              [dynamicscale] )
+ (                   T            [zerowidth] )
+ (                   T            [removebr] )
+ (                  10            [itmx1] )
+ (             1000000            [ncall1] )
+ (                  10            [itmx2] )
+ (             1000000            [ncall2] )
+ (                1069            [ij] )
+ (                   F            [dryrun] )
+ (                   T            [Qflag] )
+ (                   T            [Gflag] )
+
+  ( [Heavy quark masses] )
+ (            169.0000            [top mass] )
+ (              4.5000            [bottom mass] )
+ (              1.4300            [charm mass] )
+
+  ( [Pdf selection] )
+ (             ABMP16_            [pdlabel] )
+ (                   4            [NGROUP] )
+ (                  46            [NSET] )
+ (ABMP16_5_nlo.LHgrid             [LHAPDF group] )
+ (                  11            [LHAPDF set] )
+
+  ( [Jet definition and event cuts] )
+ (              0.0000            [m34min] )
+ (           8000.0000            [m34max] )
+ (              0.0000            [m56min] )
+ (           8000.0000            [m56max] )
+ (                   T            [inclusive] )
+ (                ankt            [algorithm] )
+ (              0.0000            [ptjetmin] )
+ (              0.0000            [etajetmin] )
+ (              4.7000            [etajetmax] )
+ (              0.5000            [Rcut] )
+ (                   F            [makecuts] )
+ (              0.0000            [leptpt] )
+ (             99.0000            [leptrap] )
+ (   0.000,   0.000                [leptveto] )
+ (              0.0000            [misspt] )
+ (              0.0000            [leptpt2] )
+ (             99.0000            [leptrap2] )
+ (   0.000,   0.000                [leptveto2] )
+ (              0.0000            [mtrans34cut] )
+ (              0.0000            [Rjlmin] )
+ (              0.0000            [Rllmin] )
+ (              0.0000            [delyjjmin] )
+ (                   F            [jetsopphem] )
+ (                   0            [lbjscheme] )
+ (              0.0000            [ptbjetmin] )
+ (             99.0000            [etabjetmax] )
+
+  ( [Settings for photon processes] )
+ (                   F            [frag] )
+ (            GdRG__LO            [fragset] )
+ (             80.0000            [frag_scale] )
+ (             20.0000            [gammpt] )
+ (              2.5000            [gammrap] )
+ (             20.0000            [gammpt2] )
+ (             20.0000            [gammpt3] )
+ (              0.0000            [Rgalmin] )
+ (              0.4000            [Rgagamin] )
+ (              0.4000            [Rgajetmin] )
+ (              0.4000            [cone_ang] )
+ (              0.5000            [epsilon_h] )
+
+  ( [Anomalous couplings of the W and Z] )
+ (              0.0000            [delg1_z] )
+ (              0.0000            [delk_z] )
+ (              0.0000            [delk_g] )
+ (              0.0000            [lambda_z] )
+ (              0.0000            [lambda_g] )
+ (              0.0000            [h1Z] )
+ (              0.0000            [h1gam] )
+ (              0.0000            [h2Z] )
+ (              0.0000            [h2gam] )
+ (              0.0000            [h3Z] )
+ (              0.0000            [h3gam] )
+ (              0.0000            [h4Z] )
+ (              0.0000            [h4gam] )
+ (              2.0000            [tevscale] )
+ (              1.0000            [cttH] )
+ (              1.0000            [cWWH] )
+ (              1.0000            [Gamma_H/Gamma_H(SM)] )
+
+  ( [How to resume/save a run] )
+ (                   F            [readin] )
+ (                   F            [writeout] )
+ (                                [ingridfile] )
+ (dvegas_real.grid                [outgridfile] )
+
+  ( [Technical parameters that should not normally be changed]
+ (                   F            [debug] )
+ (                   T            [verbose] )
+ (                   F            [new_pspace] )
+ (                   F            [virtonly] )
+ (                   F            [realonly] )
+ (                   T            [spira] )
+ (                   F            [noglue] )
+ (                   F            [ggonly] )
+ (                   F            [gqonly] )
+ (                   F            [omitgg] )
+ (                   F            [vanillafiles] )
+ (                   1            [nmin] )
+ (                   2            [nmax] )
+ (                   T            [clustering] )
+ (                   F            [realwt] )
+ (                   0            [colourchoice] )
+ (              0.0100            [rtsmin] )
+ (              0.0042            [cutoff] )
+ (              0.1000            [aii] )
+ (              0.1000            [aif] )
+ (              0.1000            [afi] )
+ (              1.0000            [aff] )
+ (              1.0000            [bfi] )
+ (              1.0000            [bff] )
+
+    HIST =   1
+ m34                                                                                                 
+     355.000        -570.853         2.69015    
+     485.000        -171.013        0.402422    
+     615.000        -41.2809        0.918698E-01
+
+ AVG = 0.397E+03     RMS = 0.000E+00 INTEGRAL =-0.916E+06
+
+ENTRIES=  60353832 U`FLOW=         0 O`FLOW=  20381406
+
+
+    HIST =   2
+ m34                                                                                                 
+     225.000         0.00000         0.00000    
+     355.000        -570.853         2.69015    
+     485.000        -171.013        0.402422    
+     615.000        -41.2809        0.918698E-01
+     745.000        -13.1595        0.298289E-01
+     875.000        -5.01481        0.127438E-01
+     1005.00        -2.15598        0.849431E-02
+     1135.00        -1.00910        0.662422E-02
+     1265.00       -0.505295        0.443964E-02
+     1395.00       -0.261011        0.447183E-02
+     1525.00       -0.144001        0.383846E-02
+     1655.00       -0.803636E-01    0.218723E-02
+     1785.00       -0.465151E-01    0.150965E-02
+     1915.00       -0.291308E-01    0.137889E-02
+     2045.00       -0.171462E-01    0.769116E-03
+     2175.00       -0.107871E-01    0.523608E-03
+     2305.00       -0.671863E-02    0.291122E-03
+     2435.00       -0.442493E-02    0.204982E-03
+     2565.00       -0.278670E-02    0.128035E-03
+     2695.00       -0.182750E-02    0.880629E-04
+     2825.00       -0.131024E-02    0.690982E-04
+     2955.00       -0.761913E-03    0.357568E-04
+     3085.00       -0.589533E-03    0.306052E-04
+     3215.00       -0.377255E-03    0.185263E-04
+     3345.00       -0.264428E-03    0.136831E-04
+     3475.00       -0.176023E-03    0.985112E-05
+     3605.00       -0.119444E-03    0.632507E-05
+     3735.00       -0.770004E-04    0.398527E-05
+     3865.00       -0.569891E-04    0.299066E-05
+     3995.00       -0.360701E-04    0.189715E-05
+     4125.00       -0.284043E-04    0.163246E-05
+     4255.00       -0.203306E-04    0.122349E-05
+     4385.00       -0.136472E-04    0.796769E-06
+     4515.00       -0.945705E-05    0.472144E-06
+     4645.00       -0.587736E-05    0.349189E-06
+     4775.00       -0.449518E-05    0.283288E-06
+     4905.00       -0.300178E-05    0.188691E-06
+     5035.00       -0.230026E-05    0.159156E-06
+     5165.00       -0.159392E-05    0.110324E-06
+     5295.00       -0.115425E-05    0.690061E-07
+     5425.00       -0.839594E-06    0.542251E-07
+     5555.00       -0.565704E-06    0.396685E-07
+     5685.00       -0.405160E-06    0.277144E-07
+     5815.00       -0.276326E-06    0.199361E-07
+     5945.00       -0.190313E-06    0.117147E-07
+     6075.00       -0.146714E-06    0.958861E-08
+     6205.00       -0.966944E-07    0.672901E-08
+     6335.00       -0.700157E-07    0.455293E-08
+     6465.00       -0.510649E-07    0.340143E-08
+     6595.00       -0.301547E-07    0.207263E-08
+     6725.00       -0.214419E-07    0.138692E-08
+     6855.00       -0.161843E-07    0.111687E-08
+     6985.00       -0.101094E-07    0.685756E-09
+     7115.00       -0.794617E-08    0.550411E-09
+     7245.00       -0.559563E-08    0.403346E-09
+     7375.00       -0.374271E-08    0.258608E-09
+     7505.00       -0.254136E-08    0.173464E-09
+     7635.00       -0.171039E-08    0.114806E-09
+     7765.00       -0.103515E-08    0.783591E-10
+     7895.00       -0.810318E-09    0.541718E-10
+     8025.00       -0.123049E-09    0.156885E-10
+     8155.00         0.00000         0.00000    
+     8285.00         0.00000         0.00000    
+     8415.00         0.00000         0.00000    
+     8545.00         0.00000         0.00000    
+     8675.00         0.00000         0.00000    
+     8805.00         0.00000         0.00000    
+     8935.00         0.00000         0.00000    
+     9065.00         0.00000         0.00000    
+     9195.00         0.00000         0.00000    
+
+ AVG = 0.410E+03     RMS = 0.000E+00 INTEGRAL =-0.943E+06
+
+ENTRIES=  80735238 U`FLOW=         0 O`FLOW=         0
+
+
