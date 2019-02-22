@@ -554,7 +554,15 @@ def makeAdditionalTheoryPrediction (mtmt, err_mtmt, mtmu):
     return [r, ru, rd, scales]
 
 
-def makePlot (mass_2, ratio_12, ratio_32, err_12, err_32):
+
+################################
+
+# "makePlots" produces the plots for the running of mt
+
+################################
+
+
+def makePlots (mass_2, ratio_12, ratio_32, err_12, err_32):
 
     graph = TGraphErrors(3)
 
@@ -731,7 +739,7 @@ def execute():
     print 'ratio_3_2 =', round(ratio_3_2,3), '+' , round(err_3_2_up,3), '-' , round(err_3_2_down,3) 
     print
 
-    makePlot (mass_and_err_2[0], ratio_1_2, ratio_3_2, err_ratio_1_2, err_ratio_3_2)
+    makePlots (mass_and_err_2[0], ratio_1_2, ratio_3_2, err_ratio_1_2, err_ratio_3_2)
 
     return
 
