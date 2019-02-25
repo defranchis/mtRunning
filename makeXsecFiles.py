@@ -35,7 +35,7 @@ n_mttbins = 4
 mass_min = 152.0
 mass_max = 172.0
 mass_fine_min = 152.0
-mass_fine_max = 168.0
+mass_fine_max = 172.0
 
 mu_1 = 383.95
 mu_2 = 476.19
@@ -306,7 +306,7 @@ def getMassAndError(mttbin, murscale, mufscale, pdfmember, extrapol):
     funct.SetParameter(1,-12)
     funct.SetParameter(2,0.033)
     # graph.Fit(funct,'q','',163,166)
-    graph.Fit(funct,'q','',mass_min+0.1,mass_max-1)
+    graph.Fit(funct,'q','',mass_min+0.1,mass_max-0.1)
 
     line_up = ROOT.TLine(mass_min,1.,mass_max,1.)
     line_down = ROOT.TLine(mass_min,-1.,mass_max,-1.)
