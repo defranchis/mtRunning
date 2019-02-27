@@ -687,6 +687,37 @@ def makePlots (mass_2, ratio_12, ratio_32, err_12, err_32):
     return
 
 
+
+################################
+
+# "makeChi2Test" calculates the significance of the obseved running
+#  using a chi2 test
+
+################################
+
+
+def makeChi2Test(mass2, ratio12, ratio32, err12, err32):
+
+    th_ratio12 = mtmu2mtmu(mass2, mu_2, mu_1, 'nominal')/mass2
+    th_ratio32 = mtmu2mtmu(mass2, mu_2, mu_3, 'nominal')/mass2
+
+    print 'theory:', th_ratio12, th_ratio32
+    
+    chi2_no_run = ((ratio12-1)/err12)**2 + ((ratio32-1)/err32)**2
+    chi2_run = ((ratio12-th_ratio12)/err12)**2 + ((ratio32-th_ratio32)/err32)**2
+
+    print 
+    print 'chi2: running hp', chi2_run
+    print 'chi2: no running hp', chi2_no_run
+    print
+    print 'significance =', round((chi2_no_run-chi2_run)**.5,2)
+    print
+    
+    
+    return
+
+
+
 ################################
 
 # main program
@@ -741,6 +772,8 @@ def execute():
 
     makePlots (mass_and_err_2[0], ratio_1_2, ratio_3_2, err_ratio_1_2, err_ratio_3_2)
 
+    makeChi2Test(mass_and_err_2[0], ratio_1_2, ratio_3_2, err_ratio_1_2, err_ratio_3_2)
+    
     return
 
 
