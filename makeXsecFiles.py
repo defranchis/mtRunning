@@ -6,6 +6,8 @@ import rundec
 
 # input values (global variables)
 
+estimate_contribs = False
+
 xsec_1 = 255.37
 err_xsec_1_up = 4.845
 err_xsec_1_down = 4.497
@@ -48,7 +50,63 @@ asMZ = 0.11905
 err_as = 0.0011
 nflav = 5
 nloops = 2
-   
+
+syst_names = [ 'b-tag_b_fragm' , 'b-tag_b_templ_corr' , 'b-tag_JP_corr' , 'b-tag_c_fragm' , 'b-tag_D_tp_mu_X_BR' ,
+               'b-tag_gluon_split' , 'b-tag_JES' , 'b-tag_away_jet_tag' , 'b-tag_Ks0_Lambda_prod' , 'b-tag_l/c_ratio' ,
+               'b-tag_LT_others' , 'b-tag_muon_DR' , 'b-tag_muon_pT' , 'b-tag_muon_pT_rel' , 'b-tag_sample_dep' ,
+               'b-tag_stat' , 'b-mistag' , 'DY_ME_scale' , 'Electron_ER_phi' , 'Electron_ER_rho' ,
+               'Electron_energy_scale' , 'Electron_ID_isolation' , 'Jet_energy_resolution' , 'JES_MPF' , 'JES_Absolute_Scale' ,
+               'JES_Absolute_Stat' , 'JES_Fragmentation' , 'JES_Pileup_Data/MC' , 'JES_Pileup_pT_BB' , 'JES_PileUp_pT_EC1' ,
+               'JES_PileUp_pT_Ref' , 'JES_Relative_Balance' , 'JES_Intercalibration' , 'JES_Relative_JER_EC1' , 'JES_Relative_pT_BB' ,
+               'JES_Relative_pT_EC1' , 'JES_Relative_Stat_EC' , 'JES_Relative_Stat_FSR' , 'JES_Single_pion_ECAL' , 'JES_Single_pion_HCAL' ,
+               'JES_Time_pT_eta' , 'Muon_energy_scale' , 'Muon_ID_isolation' , 'Pile-up' , 'tW_FSR_scale' ,
+               'tW_ISR_scale' , 'tW_ME_scale' , 'top_mass' , 'Top_pT' , 'Trigger' ,
+               'B-hadron_BR' , 'CR_ERD_on' , 'CR_Gluon_move' , 'CR_QCD-inspired' , 'fragm_Peterson' ,
+               'fragmentation' , 'ttbar_FSR_scale' , 'NLO_generator' , 'ttbar_ISR_scale' , 'ME/PS_matching' ,
+               'ttbar_ME_scale' , 'UE_tune' , 'PDF_10' , 'PDF_11' , 'PDF_12' ,
+               'PDF_13' , 'PDF_14' , 'PDF_15' , 'PDF_16' , 'PDF_17' ,
+               'PDF_18' , 'PDF_19' , 'PDF_1' , 'PDF_20' , 'PDF_21' ,
+               'PDF_22' , 'PDF_23' , 'PDF_24' , 'PDF_25' , 'PDF_26' ,
+               'PDF_27' , 'PDF_28' , 'PDF_2' , 'PDF_3' , 'PDF_4' ,
+               'PDF_5' , 'PDF_6' , 'PDF_7' , 'PDF_8' , 'PDF_9' ,
+               'JES_Flavor' , 'tW_background' , 'W+jets_background' , 'Diboson_background' , 'ttbar_background' ,
+               'DY_bg_0_b-jets' , 'DY_bg_1_b-jets' , 'DY_bg_2_b-jets' , 'Luminosity' , ]
+
+contribs_1 = [ 0.071 , -0.042 , -0.026 , 0.0 , -0.019 , -0.138 , -0.099 , -0.102 , 0.001 , 0.007 ,
+               -0.049 , -0.038 , -0.058 , -0.062 , -0.136 , -0.104 , 0.0 , -0.031 , 0.253 , -0.118 ,
+               0.0 , -1.838 , 0.267 , 0.101 , 0.072 , -0.212 , -0.373 , -0.075 , -0.395 , -0.178 ,
+               -0.081 , 0.104 , -0.174 , -0.26 , -0.155 , -0.129 , 0.156 , -0.061 , -0.118 , -0.245 ,
+               -0.087 , 0.108 , -1.337 , 0.623 , 0.127 , -0.092 , -0.133 , 0.178 , 0.0 , -0.358 ,
+               0.171 , -0.405 , 0.3 , 0.321 , 0.855 , -0.571 , 0.709 , 0.0 , 0.067 , -0.104 ,
+               -0.309 , -0.002 , 0.783 , 0.235 , -0.423 , -0.332 , -0.308 , -0.224 , 0.084 , -0.124 ,
+               0.654 , 0.78 , -0.033 , 0.262 , 0.023 , 0.161 , -0.21 , -0.195 , 0.349 , 0.003 ,
+               0.23 , -0.004 , 0.534 , 0.299 , 0.273 , -0.885 , 0.202 , -1.192 , -0.298 , 0.165 ,
+               0.155 , -0.928 , -0.072 , 0.067 , -0.133 , 0.211 , -0.096 , 0.006 , -2.676 , ]
+
+contribs_2 = [ 0.024 , 0.014 , -0.015 , 0.0 , -0.003 , -0.13 , -0.035 , -0.201 , 0.0 , -0.006 ,
+               -0.1 , 0.034 , 0.063 , -0.024 , -0.128 , -0.141 , 0.0 , -0.117 , -0.318 , 0.135 ,
+               0.127 , -1.873 , -0.519 , -0.292 , -0.26 , -0.1 , 0.401 , -0.253 , -0.605 , -0.226 ,
+               -0.443 , -0.876 , 0.269 , 0.194 , -0.142 , 0.168 , -0.091 , 0.214 , -0.356 , -0.182 ,
+               -0.041 , -0.302 , -1.31 , 0.163 , 0.096 , 0.083 , -0.035 , 0.534 , 0.0 , -0.357 ,
+               0.292 , 0.118 , -0.259 , 0.813 , 0.575 , -0.828 , 1.399 , 0.0 , -0.805 , -0.635 ,
+               -1.403 , -0.12 , 0.595 , 0.205 , -0.331 , 0.073 , -0.168 , -0.124 , 0.088 , -0.215 ,
+               0.203 , 0.499 , -0.047 , 0.204 , -0.14 , -0.158 , -0.115 , 0.019 , 0.123 , 0.015 ,
+               0.124 , -0.028 , 0.208 , 0.207 , 0.17 , -0.562 , 0.22 , -0.74 , -0.114 , -0.013 ,
+               -0.161 , -1.086 , 0.047 , 0.032 , 0.034 , 0.504 , 0.013 , 0.008 , -2.635 , ]
+
+contribs_3 = [ 0.006 , 0.049 , 0.008 , 0.0 , 0.035 , -0.097 , -0.033 , -0.15 , 0.0 , 0.012 ,
+               0.037 , 0.03 , 0.073 , 0.019 , 0.028 , 0.0 , 0.0 , -0.109 , 0.523 , -0.144 ,
+               -0.207 , -1.807 , -0.036 , 0.201 , 0.18 , -0.321 , -0.89 , 0.212 , -0.411 , -0.177 ,
+               -0.141 , -0.01 , -0.248 , 0.007 , -0.063 , -0.271 , -0.046 , -0.024 , -0.304 , -0.09 ,
+               0.028 , 0.175 , -1.165 , 0.247 , 0.079 , -0.065 , -0.101 , 0.215 , 0.0 , -0.364 ,
+               0.232 , 0.271 , 0.302 , 0.203 , -0.16 , -1.299 , 0.585 , 0.0 , -0.313 , 0.669 ,
+               -0.454 , 0.131 , 0.242 , 0.135 , -0.153 , 0.565 , 0.032 , 0.033 , 0.083 , -0.297 ,
+               -0.392 , 0.04 , -0.047 , 0.051 , -0.354 , -0.563 , 0.045 , 0.314 , -0.22 , 0.031 ,
+               -0.022 , -0.042 , -0.297 , 0.074 , -0.019 , -0.045 , 0.136 , -0.033 , 0.159 , -0.189 ,
+               -0.135 , -0.537 , 0.037 , 0.08 , 0.107 , 0.524 , 0.044 , 0.003 , -2.564 , ]
+
+
+
 # end global variables
 
 
@@ -220,7 +278,7 @@ def readCalculatedXsec (renscale, facscale, topmass, pdfmember, mttbin):
 
 ################################
 
-def getMassAndError(mttbin, murscale, mufscale, pdfmember, extrapol): 
+def getMassAndError(mttbin, murscale, mufscale, pdfmember, extrapol, contrib): 
 
     graph = ROOT.TGraph()
     i=-1
@@ -247,6 +305,10 @@ def getMassAndError(mttbin, murscale, mufscale, pdfmember, extrapol):
                 else :
                     xsec_exp *= 1 + extr_1_down[abs(extrapol)-1]/100.
                     xsec_err *= 1 + extr_1_down[abs(extrapol)-1]/100.
+            if contrib !=0 :
+                if contrib > 0 : xsec_exp *= 1 + contribs_1[abs(contrib)-1]/100.
+                else : xsec_exp *= 1 - contribs_1[abs(contrib)-1]/100.
+                
         elif mttbin == 2 : 
             xsec_exp = xsec_2 
             xsec_err = ((xsec_2/100.*(err_xsec_2_up+err_xsec_2_down)/2.)**2 + err_xsec_toys_2**2)**.5
@@ -257,6 +319,10 @@ def getMassAndError(mttbin, murscale, mufscale, pdfmember, extrapol):
                 else :
                     xsec_exp *= 1 + extr_2_down[abs(extrapol)-1]/100.
                     xsec_err *= 1 + extr_2_down[abs(extrapol)-1]/100.
+            if contrib !=0 :
+                if contrib > 0 : xsec_exp *= 1 + contribs_2[abs(contrib)-1]/100.
+                else : xsec_exp *= 1 - contribs_2[abs(contrib)-1]/100.
+
         else : # mttbin = 3
             xsec_exp = xsec_3 
             xsec_err = ((xsec_3/100.*(err_xsec_3_up+err_xsec_3_down)/2.)**2 + err_xsec_toys_3**2)**.5
@@ -267,6 +333,9 @@ def getMassAndError(mttbin, murscale, mufscale, pdfmember, extrapol):
                 else :
                     xsec_exp *= 1 + extr_3_down[abs(extrapol)-1]/100.
                     xsec_err *= 1 + extr_3_down[abs(extrapol)-1]/100.
+            if contrib !=0 :
+                if contrib > 0 : xsec_exp *= 1 + contribs_3[abs(contrib)-1]/100.
+                else : xsec_exp *= 1 - contribs_3[abs(contrib)-1]/100.
 
 
         # chi2 = abs(xsec_th-xsec_exp)/xsec_err
@@ -329,7 +398,7 @@ def getMassAndError(mttbin, murscale, mufscale, pdfmember, extrapol):
     line_up.Draw('same')
     line_down.Draw('same')
     line_central.Draw('same')
-    c.Print(outdir+'/test_mtt'+str(mttbin)+'_mur_'+murscale+'_muf_'+mufscale+'_extrapol'+str(extrapol)+'_pdf'+str(pdfmember)+'.png')
+    c.Print(outdir+'/test_mtt'+str(mttbin)+'_mur_'+murscale+'_muf_'+mufscale+'_extrapol'+str(extrapol)+'_pdf'+str(pdfmember)+'_contrib'+str(contrib)+'.png')
 
     fitted_mass = funct.GetX(0)
     fitted_mass_up = funct.GetX(-1)
@@ -341,7 +410,7 @@ def getMassAndError(mttbin, murscale, mufscale, pdfmember, extrapol):
     elif mttbin == 2 : mu = mu_2
     else : mu = mu_3 # mttbin = 3
 
-    if murscale=='nominal' and mufscale=='nominal' and pdfmember==0 and extrapol==0:
+    if murscale=='nominal' and mufscale=='nominal' and pdfmember==0 and extrapol==0 and contrib==0:
         print
         print 'mt(mt) bin', mttbin,'=', round(fitted_mass,2), round(fitted_mass_up-fitted_mass,2), round(fitted_mass-fitted_mass_down,2)
     
@@ -349,7 +418,7 @@ def getMassAndError(mttbin, murscale, mufscale, pdfmember, extrapol):
     fitted_mass_up = mtmt2mtmu(fitted_mass_up, mu)
     fitted_mass_down = mtmt2mtmu(fitted_mass_down, mu)
 
-    if murscale=='nominal' and mufscale=='nominal' and pdfmember==0 and extrapol==0:
+    if murscale=='nominal' and mufscale=='nominal' and pdfmember==0 and extrapol==0 and contrib==0:
         print 'mt(mu) bin', mttbin,'=', round(fitted_mass,2), round(fitted_mass_up-fitted_mass,2), round(fitted_mass-fitted_mass_down,2)
         
     fitted_mass_err = (fitted_mass_up - fitted_mass_down)/2
@@ -400,9 +469,9 @@ def getScaleUncertainties (central_ratio_1_2, central_ratio_3_2):
             if facscale == 'up' and renscale == 'down': continue
             if facscale == 'nominal' and renscale == 'nominal': continue
             
-            mass_and_err_1 = getMassAndError(1, renscale, facscale, 0 , 0)
-            mass_and_err_2 = getMassAndError(2, renscale, facscale, 0 , 0)
-            mass_and_err_3 = getMassAndError(3, renscale, facscale, 0 , 0)
+            mass_and_err_1 = getMassAndError(1, renscale, facscale, 0 , 0 , 0 )
+            mass_and_err_2 = getMassAndError(2, renscale, facscale, 0 , 0 , 0 )
+            mass_and_err_3 = getMassAndError(3, renscale, facscale, 0 , 0 , 0 )
 
             ratios_and_errs = getRatios(mass_and_err_1[0], mass_and_err_2[0], mass_and_err_3[0],
                                         mass_and_err_1[1], mass_and_err_2[1], mass_and_err_3[1])
@@ -438,9 +507,9 @@ def getPDFUncertainties (central_ratio_1_2, central_ratio_3_2):
     err_pdf_down_3_2 = 0
     
     for pdf in range(1,30):
-        mass_and_err_1 = getMassAndError(1, 'nominal', 'nominal', pdf , 0)
-        mass_and_err_2 = getMassAndError(2, 'nominal', 'nominal', pdf , 0)
-        mass_and_err_3 = getMassAndError(3, 'nominal', 'nominal', pdf , 0)
+        mass_and_err_1 = getMassAndError(1, 'nominal', 'nominal', pdf , 0 , 0 )
+        mass_and_err_2 = getMassAndError(2, 'nominal', 'nominal', pdf , 0 , 0 )
+        mass_and_err_3 = getMassAndError(3, 'nominal', 'nominal', pdf , 0 , 0 )
 
         ratios_and_errs = getRatios(mass_and_err_1[0], mass_and_err_2[0], mass_and_err_3[0],
                                     mass_and_err_1[1], mass_and_err_2[1], mass_and_err_3[1])
@@ -478,9 +547,9 @@ def getExtrapolationUncertainties (central_ratio_1_2, central_ratio_3_2):
     for extr in range(-len(extr_1_up),len(extr_1_up)+1) :
         if extr == 0 : continue
 
-        mass_and_err_1 = getMassAndError(1, 'nominal', 'nominal', 0 , extr)
-        mass_and_err_2 = getMassAndError(2, 'nominal', 'nominal', 0 , extr)
-        mass_and_err_3 = getMassAndError(3, 'nominal', 'nominal', 0 , extr)
+        mass_and_err_1 = getMassAndError(1, 'nominal', 'nominal', 0 , extr , 0 )
+        mass_and_err_2 = getMassAndError(2, 'nominal', 'nominal', 0 , extr , 0 )
+        mass_and_err_3 = getMassAndError(3, 'nominal', 'nominal', 0 , extr , 0 )
 
         ratios_and_errs = getRatios(mass_and_err_1[0], mass_and_err_2[0], mass_and_err_3[0],
                                     mass_and_err_1[1], mass_and_err_2[1], mass_and_err_3[1])
@@ -538,7 +607,7 @@ def makeTheoryPrediction(outfile, mass_2):
 
 ################################
 
-# "makeAdditionalTheoryPrediction" calculates the running of mt(mu) starting from m(mt)
+# "makeAdditionalTheoryPrediction" calculates the running of mt(mu) starting from mt(mt)
 
 ################################
 
@@ -731,6 +800,64 @@ def makeChi2Test(mass2, ratio12, ratio32, err12, err32):
 
 ################################
 
+# "estimateSystContributions" estimates the contribution to the total uncertainty
+#  of each individual systematics source
+
+################################
+
+
+def estimateSystContributions(central_ratio_1_2, central_ratio_3_2):
+    
+    print
+    print 'contribs\n'
+
+    for contrib in range(1,len(contribs_1)+1) :
+
+        mass_and_err_1 = getMassAndError(1, 'nominal', 'nominal', 0 , 0 , contrib )
+        mass_and_err_2 = getMassAndError(2, 'nominal', 'nominal', 0 , 0 , contrib )
+        mass_and_err_3 = getMassAndError(3, 'nominal', 'nominal', 0 , 0 , contrib )
+
+        ratios_and_errs = getRatios(mass_and_err_1[0], mass_and_err_2[0], mass_and_err_3[0],
+                                    mass_and_err_1[1], mass_and_err_2[1], mass_and_err_3[1])
+
+        ratio_1_2_up = ratios_and_errs[0]
+        ratio_3_2_up = ratios_and_errs[1]
+
+        mass_and_err_1 = getMassAndError(1, 'nominal', 'nominal', 0 , 0 , int(-1*contrib) )
+        mass_and_err_2 = getMassAndError(2, 'nominal', 'nominal', 0 , 0 , int(-1*contrib) )
+        mass_and_err_3 = getMassAndError(3, 'nominal', 'nominal', 0 , 0 , int(-1*contrib) )
+
+        ratios_and_errs = getRatios(mass_and_err_1[0], mass_and_err_2[0], mass_and_err_3[0],
+                                    mass_and_err_1[1], mass_and_err_2[1], mass_and_err_3[1])
+
+        ratio_1_2_down = ratios_and_errs[0]
+        ratio_3_2_down = ratios_and_errs[1]
+
+        contr_1_2_up = (ratio_1_2_up/central_ratio_1_2-1)*100
+        contr_1_2_down = (ratio_1_2_down/central_ratio_1_2-1)*100
+        contr_3_2_up = (ratio_3_2_up/central_ratio_3_2-1)*100
+        contr_3_2_down = (ratio_3_2_down/central_ratio_3_2-1)*100
+
+        
+        if (contr_1_2_up*contr_1_2_down) < 0:
+            contr_1_2 = abs(contr_1_2_up-contr_1_2_down)/2.
+        else : contr_1_2 = max(abs(contr_1_2_up),abs(contr_1_2_down))
+
+        if (contr_3_2_up*contr_3_2_down) < 0:
+            contr_3_2 = abs(contr_3_2_up-contr_3_2_down)/2.
+        else : contr_3_2 = max(abs(contr_3_2_up),abs(contr_3_2_down))
+
+        if contr_1_2 > 0.3 or contr_3_2 > 0.5 :
+            print syst_names[contrib-1], round(contr_1_2,2), round(contr_3_2,2)
+
+
+    print
+    
+    return
+
+
+################################
+
 # main program
 
 ################################
@@ -739,9 +866,9 @@ def makeChi2Test(mass2, ratio12, ratio32, err12, err32):
 def execute():
 
     setMasses()
-    mass_and_err_1 = getMassAndError(1, 'nominal', 'nominal', 0 , 0)
-    mass_and_err_2 = getMassAndError(2, 'nominal', 'nominal', 0 , 0)
-    mass_and_err_3 = getMassAndError(3, 'nominal', 'nominal', 0 , 0)
+    mass_and_err_1 = getMassAndError(1, 'nominal', 'nominal', 0 , 0 , 0)
+    mass_and_err_2 = getMassAndError(2, 'nominal', 'nominal', 0 , 0 , 0)
+    mass_and_err_3 = getMassAndError(3, 'nominal', 'nominal', 0 , 0 , 0)
 
     ratios_and_errs = getRatios(mass_and_err_1[0], mass_and_err_2[0], mass_and_err_3[0],
                                 mass_and_err_1[1], mass_and_err_2[1], mass_and_err_3[1])
@@ -791,8 +918,8 @@ def execute():
     print
 
     makePlots (mass_and_err_2[0], ratio_1_2, ratio_3_2, err_ratio_1_2, err_ratio_3_2)
-
-    makeChi2Test(mass_and_err_2[0], ratio_1_2, ratio_3_2, err_ratio_1_2, err_ratio_3_2)
+    makeChi2Test (mass_and_err_2[0], ratio_1_2, ratio_3_2, err_ratio_1_2, err_ratio_3_2)
+    if estimate_contribs : estimateSystContributions (ratio_1_2,ratio_3_2)
     
     return
 
