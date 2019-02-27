@@ -7,6 +7,7 @@ import rundec
 # input values (global variables)
 
 estimate_contribs = False
+ntoys = 0
 
 xsec_1 = 255.37
 err_xsec_1_up = 4.845
@@ -398,7 +399,8 @@ def getMassAndError(mttbin, murscale, mufscale, pdfmember, extrapol, contrib):
     line_up.Draw('same')
     line_down.Draw('same')
     line_central.Draw('same')
-    c.Print(outdir+'/test_mtt'+str(mttbin)+'_mur_'+murscale+'_muf_'+mufscale+'_extrapol'+str(extrapol)+'_pdf'+str(pdfmember)+'_contrib'+str(contrib)+'.png')
+    if not doingToys:
+        c.Print(outdir+'/test_mtt'+str(mttbin)+'_mur_'+murscale+'_muf_'+mufscale+'_extrapol'+str(extrapol)+'_pdf'+str(pdfmember)+'_contrib'+str(contrib)+'.png')
 
     fitted_mass = funct.GetX(0)
     fitted_mass_up = funct.GetX(-1)
@@ -410,7 +412,7 @@ def getMassAndError(mttbin, murscale, mufscale, pdfmember, extrapol, contrib):
     elif mttbin == 2 : mu = mu_2
     else : mu = mu_3 # mttbin = 3
 
-    if murscale=='nominal' and mufscale=='nominal' and pdfmember==0 and extrapol==0 and contrib==0:
+    if murscale=='nominal' and mufscale=='nominal' and pdfmember==0 and extrapol==0 and contrib==0 and not doingToys:
         print
         print 'mt(mt) bin', mttbin,'=', round(fitted_mass,2), round(fitted_mass_up-fitted_mass,2), round(fitted_mass-fitted_mass_down,2)
     
@@ -418,7 +420,7 @@ def getMassAndError(mttbin, murscale, mufscale, pdfmember, extrapol, contrib):
     fitted_mass_up = mtmt2mtmu(fitted_mass_up, mu)
     fitted_mass_down = mtmt2mtmu(fitted_mass_down, mu)
 
-    if murscale=='nominal' and mufscale=='nominal' and pdfmember==0 and extrapol==0 and contrib==0:
+    if murscale=='nominal' and mufscale=='nominal' and pdfmember==0 and extrapol==0 and contrib==0 and not doingToys:
         print 'mt(mu) bin', mttbin,'=', round(fitted_mass,2), round(fitted_mass_up-fitted_mass,2), round(fitted_mass-fitted_mass_down,2)
         
     fitted_mass_err = (fitted_mass_up - fitted_mass_down)/2
@@ -856,6 +858,87 @@ def estimateSystContributions(central_ratio_1_2, central_ratio_3_2):
     return
 
 
+
+################################
+
+# "throwToyCrossSections" throws toy cross sections taking the correlations into account
+#  the results are used to estimate the correlation between the fitted masses
+
+################################
+
+def throwToyCrossSections(r):
+
+    global xsec_1, xsec_2, xsec_3
+
+    orig_xsec_1 = xsec_1
+    orig_xsec_2 = xsec_2
+    orig_xsec_3 = xsec_3
+
+    err_1 = xsec_1*(err_xsec_1_up+err_xsec_1_down)/2./100.
+    err_2 = xsec_2*(err_xsec_2_up+err_xsec_2_down)/2./100.
+    err_3 = xsec_3*(err_xsec_3_up+err_xsec_3_down)/2./100.
+
+    xsec_2 = r.Gaus(xsec_2,err_2)
+    xsec_1 = r.Gaus(xsec_1,err_1*(1-corr_1_2*corr_1_2)**.5) + corr_1_2*err_1/err_2*(xsec_2-orig_xsec_2)
+    xsec_3 = r.Gaus(xsec_3,err_3*(1-corr_3_2*corr_3_2)**.5) + corr_3_2*err_3/err_2*(xsec_2-orig_xsec_2)
+    
+    return
+
+
+
+################################
+
+# "estimateMassCorrelations" estimates the correlation between the fitted masses
+#  to run, set "ntoys" to some positive numbers (at least 10k)
+#  N.B. it is absolutely safe to use the correlaton between the cross section (i.e. ntoys=0)
+
+################################
+
+
+def estimateMassCorrelations():
+
+    global doingToys
+    global xsec_1, xsec_2, xsec_3
+    global corr_1_2, corr_3_2
+    
+    orig_xsec_1 = xsec_1
+    orig_xsec_2 = xsec_2
+    orig_xsec_3 = xsec_3
+    
+    doingToys = True
+    
+    r=TRandom3()
+
+    m12 = TH2D('m12','m12',100,100,200,100,100,200)
+    m32 = TH2D('m32','m32',100,100,200,100,100,200)
+    
+    for i in range(1,ntoys+1):
+        if i%1000==0 or i==1: print 'toy n.', i
+        throwToyCrossSections(r)
+        mass_and_err_1 = getMassAndError(1, 'nominal', 'nominal', 0 , 0 , 0)
+        mass_and_err_2 = getMassAndError(2, 'nominal', 'nominal', 0 , 0 , 0)
+        mass_and_err_3 = getMassAndError(3, 'nominal', 'nominal', 0 , 0 , 0)
+        m12.Fill(mass_and_err_1[0],mass_and_err_2[0])
+        m32.Fill(mass_and_err_3[0],mass_and_err_2[0])
+
+        #extremely important
+        xsec_1 = orig_xsec_1
+        xsec_2 = orig_xsec_2
+        xsec_3 = orig_xsec_3
+    
+    doingToys = False
+
+    corr_1_2 = m12.GetCorrelationFactor()
+    corr_3_2 = m32.GetCorrelationFactor()
+    
+
+    print
+    print 'new corr_1_2 =', round(m12.GetCorrelationFactor(),3)
+    print 'new corr_1_2 =', round(m32.GetCorrelationFactor(),3)
+    print
+    
+    return
+
 ################################
 
 # main program
@@ -865,7 +948,12 @@ def estimateSystContributions(central_ratio_1_2, central_ratio_3_2):
 
 def execute():
 
+    global doingToys
+    doingToys = False
+
     setMasses()
+    if ntoys>0 : estimateMassCorrelations()
+
     mass_and_err_1 = getMassAndError(1, 'nominal', 'nominal', 0 , 0 , 0)
     mass_and_err_2 = getMassAndError(2, 'nominal', 'nominal', 0 , 0 , 0)
     mass_and_err_3 = getMassAndError(3, 'nominal', 'nominal', 0 , 0 , 0)
