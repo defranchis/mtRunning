@@ -13,6 +13,8 @@ extr_1_up = [ -0.152 , 2.666 , -0.117 , -0.025 , 2.134 , 2.326 , ]
 extr_1_down = [ 0.679 , -0.183 , 0.449 , 0.239 , -1.428 , -3.133 , ]
 err_xsec_toys_1 = 3.918
 
+extr_name = [ 'ISR_scale' , 'FSR_scale' , 'ME_scale' , 'UE_tune' , 'PDF' , 'mt' , ]
+
 xsec_2 = 307.11
 err_xsec_2_up = 4.864
 err_xsec_2_down = 4.629
@@ -340,15 +342,15 @@ def getMassAndError(mttbin, murscale, mufscale, pdfmember, extrapol):
     else : mu = mu_3 # mttbin = 3
 
     if murscale=='nominal' and mufscale=='nominal' and pdfmember==0 and extrapol==0:
-        print 'mt(mt) bin', mttbin,'=', fitted_mass, fitted_mass_up-fitted_mass, fitted_mass - fitted_mass_down
+        print
+        print 'mt(mt) bin', mttbin,'=', round(fitted_mass,2), round(fitted_mass_up-fitted_mass,2), round(fitted_mass-fitted_mass_down,2)
     
     fitted_mass = mtmt2mtmu(fitted_mass, mu)
     fitted_mass_up = mtmt2mtmu(fitted_mass_up, mu)
     fitted_mass_down = mtmt2mtmu(fitted_mass_down, mu)
 
     if murscale=='nominal' and mufscale=='nominal' and pdfmember==0 and extrapol==0:
-        print 'mt(mu) bin', mttbin,'=', fitted_mass, fitted_mass_up-fitted_mass, fitted_mass - fitted_mass_down
-        print
+        print 'mt(mu) bin', mttbin,'=', round(fitted_mass,2), round(fitted_mass_up-fitted_mass,2), round(fitted_mass-fitted_mass_down,2)
         
     fitted_mass_err = (fitted_mass_up - fitted_mass_down)/2
 
@@ -471,6 +473,8 @@ def getExtrapolationUncertainties (central_ratio_1_2, central_ratio_3_2):
     err_extr_down_1_2 = 0
     err_extr_down_3_2 = 0
 
+    print '\n'
+    print 'extrapol', 'ratio_1_2', 'ratio_3_2\n'
     for extr in range(-len(extr_1_up),len(extr_1_up)+1) :
         if extr == 0 : continue
 
@@ -487,6 +491,12 @@ def getExtrapolationUncertainties (central_ratio_1_2, central_ratio_3_2):
         err_extr_1_2 = (ratio_1_2-central_ratio_1_2)**2
         err_extr_3_2 = (ratio_3_2-central_ratio_3_2)**2
 
+        name = extr_name[abs(extr)-1]
+        if extr>0 : name+='_up'
+        else : name+='_down'
+        print name, round(100*(ratio_1_2/central_ratio_1_2-1),2), round(100*(ratio_3_2/central_ratio_3_2-1),2),'%'
+
+        
         if ratio_1_2 > central_ratio_1_2 : err_extr_up_1_2 += err_extr_1_2
         else : err_extr_down_1_2 += err_extr_1_2
 
@@ -701,14 +711,15 @@ def makeChi2Test(mass2, ratio12, ratio32, err12, err32):
     th_ratio12 = mtmu2mtmu(mass2, mu_2, mu_1, 'nominal')/mass2
     th_ratio32 = mtmu2mtmu(mass2, mu_2, mu_3, 'nominal')/mass2
 
-    print 'theory:', th_ratio12, th_ratio32
+    print 
+    print 'theory:', round(th_ratio12,3), round(th_ratio32,3)
     
     chi2_no_run = ((ratio12-1)/err12)**2 + ((ratio32-1)/err32)**2
     chi2_run = ((ratio12-th_ratio12)/err12)**2 + ((ratio32-th_ratio32)/err32)**2
 
     print 
-    print 'chi2: running hp', chi2_run
-    print 'chi2: no running hp', chi2_no_run
+    print 'chi2: running hp', round(chi2_run,2)
+    print 'chi2: no running hp', round(chi2_no_run,2)
     print
     print 'significance =', round((chi2_no_run-chi2_run)**.5,2)
     print
@@ -762,10 +773,19 @@ def execute():
     err_3_2_up = (err_ratio_3_2**2 + err_pdf_3_2_up**2 + err_extr_3_2_up **2)**.5
     err_3_2_down = (err_ratio_3_2**2 + err_pdf_3_2_down**2 + err_extr_3_2_down **2)**.5
 
-    print 'ratio_1_2 =', ratio_1_2, '+' , err_1_2_up, '-' , err_1_2_down 
-    print 'ratio_3_2 =', ratio_3_2, '+' , err_3_2_up, '-' , err_3_2_down 
-    print
+    print '\n'
+    print 'uncertainties ratio_1_2:\n'
+    print 'experimental =', round(err_ratio_1_2,4)
+    print 'PDFs up/down =', round(err_pdf_1_2_up,4), round(err_pdf_1_2_down,4)
+    print 'extr up/down =', round(err_extr_1_2_up,4), round(err_extr_1_2_down,4)
+    print '\n'
+    print 'uncertainties ratio_3_2:\n'
+    print 'experimental =', round(err_ratio_3_2,4)
+    print 'PDFs up/down =', round(err_pdf_3_2_up,4), round(err_pdf_3_2_down,4)
+    print 'extr up/down =', round(err_extr_3_2_up,4), round(err_extr_3_2_down,4)
+    print '\n'
 
+    print 'results:\n'
     print 'ratio_1_2 =', round(ratio_1_2,3), '+' , round(err_1_2_up,3), '-' , round(err_1_2_down,3)
     print 'ratio_3_2 =', round(ratio_3_2,3), '+' , round(err_3_2_up,3), '-' , round(err_3_2_down,3) 
     print
