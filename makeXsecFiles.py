@@ -909,8 +909,8 @@ def estimateMassCorrelations():
     
     r=TRandom3()
 
-    m12 = TH2D('m12','m12',100,100,200,100,100,200)
-    m32 = TH2D('m32','m32',100,100,200,100,100,200)
+    m12 = TH2D('m12','m12',100,150,160,100,130,170)
+    m32 = TH2D('m32','m32',100,120,180,100,130,170)
     
     for i in range(1,ntoys+1):
         if i%1000==0 or i==1: print 'toy n.', i
@@ -930,8 +930,28 @@ def estimateMassCorrelations():
 
     corr_1_2 = m12.GetCorrelationFactor()
     corr_3_2 = m32.GetCorrelationFactor()
-    
 
+    outdir = 'plots_running'
+    if not os.path.exists(outdir):
+        os.makedirs(outdir)
+
+    c = TCanvas()
+    m12.SetTitle('correlation = '+str(round(corr_1_2,2)))
+    m12.GetXaxis().SetTitle('mt ('+str(int(mu_1))+' GeV) [GeV]')
+    m12.GetYaxis().SetTitle('mt ('+str(int(mu_2))+' GeV) [GeV]')
+    m12.DrawNormalized('colz')
+    c.SaveAs(outdir+'/mass_corr_1_2.png')
+    c.SaveAs(outdir+'/mass_corr_1_2.pdf')
+    c.SaveAs(outdir+'/mass_corr_1_2.root')
+    c.Clear()
+    m32.SetTitle('correlation = '+str(round(corr_3_2,2)))
+    m32.GetXaxis().SetTitle('mt ('+str(int(mu_3))+' GeV) [GeV]')
+    m32.GetYaxis().SetTitle('mt ('+str(int(mu_2))+' GeV) [GeV]')
+    m32.DrawNormalized('colz')
+    c.SaveAs(outdir+'/mass_corr_3_2.png')
+    c.SaveAs(outdir+'/mass_corr_3_2.pdf')
+    c.SaveAs(outdir+'/mass_corr_3_2.root')
+    
     print
     print 'new corr_1_2 =', round(m12.GetCorrelationFactor(),3)
     print 'new corr_1_2 =', round(m32.GetCorrelationFactor(),3)
