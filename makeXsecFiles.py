@@ -1010,14 +1010,16 @@ def execute():
 
     print '\n'
     print 'uncertainties ratio_1_2:\n'
-    print 'experimental =', round(err_ratio_1_2,4)
-    print 'PDFs up/down =', round(err_pdf_1_2_up,4), round(err_pdf_1_2_down,4)
-    print 'extr up/down =', round(err_extr_1_2_up,4), round(err_extr_1_2_down,4)
+    print 'experimental =', round(err_ratio_1_2/ratio_1_2*100.,2), '%'
+    print 'PDFs up/down =', round(err_pdf_1_2_up/ratio_1_2*100.,2), round(err_pdf_1_2_down/ratio_1_2*100.,2), '%'
+    print 'extr up/down =', round(err_extr_1_2_up/ratio_1_2*100.,2), round(err_extr_1_2_down/ratio_1_2*100.,2), '%'
+    print 'total =', round(max(err_1_2_up,err_1_2_down)/ratio_1_2*100.,2), '%'
     print '\n'
     print 'uncertainties ratio_3_2:\n'
-    print 'experimental =', round(err_ratio_3_2,4)
-    print 'PDFs up/down =', round(err_pdf_3_2_up,4), round(err_pdf_3_2_down,4)
-    print 'extr up/down =', round(err_extr_3_2_up,4), round(err_extr_3_2_down,4)
+    print 'experimental =', round(err_ratio_3_2/ratio_3_2*100.,2)
+    print 'PDFs up/down =', round(err_pdf_3_2_up/ratio_3_2*100.,2), round(err_pdf_3_2_down/ratio_3_2*100.,2), '%'
+    print 'extr up/down =', round(err_extr_3_2_up/ratio_3_2*100.,2), round(err_extr_3_2_down/ratio_3_2*100.,2), '%'
+    print 'total =', round(max(err_3_2_up,err_3_2_down)/ratio_3_2*100.,2), '%'
     print '\n'
 
     print 'results:\n'
