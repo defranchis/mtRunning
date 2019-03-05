@@ -6,8 +6,10 @@ import rundec
 
 # input values (global variables)
 
-estimate_contribs = False
+estimate_contribs = True
 ntoys = 0
+
+replace_corr = False
 
 n_mttbins = 4
 
@@ -106,8 +108,6 @@ contribs_3 = [ 0.123 , 0.081 , 0.018 , 0.001 , 0.077 , -0.175 , -0.107 , -0.229 
 
 corr_1_2 = 0.57
 corr_3_2 = 0.47
-
-
 
 # end global variables
 
@@ -743,7 +743,7 @@ def makePlots (mass_2, ratio_12, ratio_32, err_12, err_32):
     leg2 = leg.Clone()
     leg2.Clear()
     leg2.AddEntry(graph,'MCFM @NLO from diff. #sigma_{t#bar{t}}','pe')
-    leg2.AddEntry(gr_add,'Hathor @NLO from incl. #sigma_{t#bar{t}}')
+    leg2.AddEntry(gr_add,'Hathor @NLO from incl. #sigma_{t#bar{t}} (same data)')
     leg2.AddEntry(gr_band,'RunDec @ 2 loops (5 flav.)','f')
 
     g = graph.Clone()
@@ -900,7 +900,6 @@ def estimateMassCorrelations():
 
     global doingToys
     global xsec_1, xsec_2, xsec_3
-    global corr_1_2, corr_3_2
     
     orig_xsec_1 = xsec_1
     orig_xsec_2 = xsec_2
@@ -912,6 +911,9 @@ def estimateMassCorrelations():
 
     m12 = TH2D('m12','m12',100,150,160,100,130,170)
     m32 = TH2D('m32','m32',100,120,180,100,130,170)
+
+    r_corr = TH2D('r_corr','r_corr',100,0.9,1.15,100,0.75,1.15)
+    
     
     for i in range(1,ntoys+1):
         if i%1000==0 or i==1: print 'toy n.', i
@@ -922,6 +924,11 @@ def estimateMassCorrelations():
         m12.Fill(mass_and_err_1[0],mass_and_err_2[0])
         m32.Fill(mass_and_err_3[0],mass_and_err_2[0])
 
+        ratios_and_errs = getRatios(mass_and_err_1[0], mass_and_err_2[0], mass_and_err_3[0],
+                                    mass_and_err_1[1], mass_and_err_2[1], mass_and_err_3[1])
+
+        r_corr.Fill(ratios_and_errs[0],ratios_and_errs[1])
+        
         #extremely important
         xsec_1 = orig_xsec_1
         xsec_2 = orig_xsec_2
@@ -929,15 +936,17 @@ def estimateMassCorrelations():
     
     doingToys = False
 
-    corr_1_2 = m12.GetCorrelationFactor()
-    corr_3_2 = m32.GetCorrelationFactor()
-
+    if replace_corr:
+        global corr_1_2, corr_3_2
+        corr_1_2 = m12.GetCorrelationFactor()
+        corr_3_2 = m32.GetCorrelationFactor()
+    
     outdir = 'plots_running'
     if not os.path.exists(outdir):
         os.makedirs(outdir)
 
     c = TCanvas()
-    m12.SetTitle('correlation = '+str(round(corr_1_2,2)))
+    m12.SetTitle('correlation = '+str(round(m12.GetCorrelationFactor(),2)))
     m12.GetXaxis().SetTitle('mt ('+str(int(mu_1))+' GeV) [GeV]')
     m12.GetYaxis().SetTitle('mt ('+str(int(mu_2))+' GeV) [GeV]')
     m12.DrawNormalized('colz')
@@ -945,17 +954,30 @@ def estimateMassCorrelations():
     c.SaveAs(outdir+'/mass_corr_1_2.pdf')
     c.SaveAs(outdir+'/mass_corr_1_2.root')
     c.Clear()
-    m32.SetTitle('correlation = '+str(round(corr_3_2,2)))
+    m32.SetTitle('correlation = '+str(round(m32.GetCorrelationFactor(),2)))
     m32.GetXaxis().SetTitle('mt ('+str(int(mu_3))+' GeV) [GeV]')
     m32.GetYaxis().SetTitle('mt ('+str(int(mu_2))+' GeV) [GeV]')
     m32.DrawNormalized('colz')
     c.SaveAs(outdir+'/mass_corr_3_2.png')
     c.SaveAs(outdir+'/mass_corr_3_2.pdf')
     c.SaveAs(outdir+'/mass_corr_3_2.root')
-    
+    c.Clear()
+    r_corr.SetTitle('correlation = '+str(round(r_corr.GetCorrelationFactor(),2)))
+    r_corr.GetXaxis().SetTitle('mt ('+str(int(mu_1))+' GeV) / mt ('+str(int(mu_2))+' GeV)')
+    r_corr.GetYaxis().SetTitle('mt ('+str(int(mu_3))+' GeV) / mt ('+str(int(mu_2))+' GeV)')
+    r_corr.DrawNormalized('colz')
+    c.SaveAs(outdir+'/ratio_corr.png')
+    c.SaveAs(outdir+'/ratio_corr.pdf')
+    c.SaveAs(outdir+'/ratio_corr.root')
+
     print
-    print 'new corr_1_2 =', round(m12.GetCorrelationFactor(),3)
-    print 'new corr_1_2 =', round(m32.GetCorrelationFactor(),3)
+    if replace_corr:
+        print 'new corr_1_2 =', round(m12.GetCorrelationFactor(),3)
+        print 'new corr_3_2 =', round(m32.GetCorrelationFactor(),3)
+    else:    
+        print 'estimated corr_1_2 =', round(m12.GetCorrelationFactor(),3)
+        print 'estimated corr_3_2 =', round(m32.GetCorrelationFactor(),3)
+    print 'estimated corr ratios  =', round(r_corr.GetCorrelationFactor(),3)
     print
     
     return
