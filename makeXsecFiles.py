@@ -3,113 +3,20 @@ from ROOT import *
 import os
 import rundec
 
+from variables import *
+from constants import *
 
-# input values (global variables)
+
+
+# options
 
 estimate_contribs = True
 ntoys = 0
 
 replace_corr = False
 
-n_mttbins = 4
+# end options
 
-mass_min = 152.0
-mass_max = 172.0
-mass_fine_min = 152.0
-mass_fine_max = 172.0
-
-mu_1 = 383.95
-mu_2 = 476.19
-mu_3 = 644.27
-
-MZ = 91.1876
-asMZ = 0.11905
-err_as = 0.0011
-nflav = 5
-nloops = 2
-
-
-xsec_1 = 248.98
-err_xsec_1_up = 5.759
-err_xsec_1_down = 5.333
-extr_1_up = [ -0.14 , 2.545 , -0.118 , -0.049 , 2.107 , -1.832 , 1.504 , ]
-extr_1_down = [ 0.663 , -0.274 , 0.448 , 0.262 , -1.422 , 0.519 , -3.826 , ]
-err_xsec_toys_1 = 3.818
-
-extr_name = [ 'ISR_scale' , 'FSR_scale' , 'ME_scale' , 'UE_tune' , 'PDF' , 'top_pt' , 'mt' , ]
-
-syst_names = [ 'b-tag_b_fragm' , 'b-tag_b_templ_corr' , 'b-tag_JP_corr' , 'b-tag_c_fragm' , 'b-tag_D_tp_mu_X_BR' ,
-               'b-tag_gluon_split' , 'b-tag_JES' , 'b-tag_away_jet_tag' , 'b-tag_Ks0_Lambda_prod' , 'b-tag_l/c_ratio' ,
-               'b-tag_LT_others' , 'b-tag_muon_DR' , 'b-tag_muon_pT' , 'b-tag_muon_pT_rel' , 'b-tag_sample_dep' ,
-               'b-tag_stat' , 'b-mistag' , 'DY_ME_scale' , 'Electron_ER_phi' , 'Electron_ER_rho' ,
-               'Electron_energy_scale' , 'Electron_ID_isolation' , 'Jet_energy_resolution' , 'JES_MPF' , 'JES_Absolute_Scale' ,
-               'JES_Absolute_Stat' , 'JES_Fragmentation' , 'JES_Pileup_Data/MC' , 'JES_Pileup_pT_BB' , 'JES_PileUp_pT_EC1' ,
-               'JES_PileUp_pT_Ref' , 'JES_Relative_Balance' , 'JES_Intercalibration' , 'JES_Relative_JER_EC1' , 'JES_Relative_pT_BB' ,
-               'JES_Relative_pT_EC1' , 'JES_Relative_Stat_EC' , 'JES_Relative_Stat_FSR' , 'JES_Single_pion_ECAL' , 'JES_Single_pion_HCAL' ,
-               'JES_Time_pT_eta' , 'Muon_energy_scale' , 'Muon_ID_isolation' , 'Pile-up' , 'tW_FSR_scale' ,
-               'tW_ISR_scale' , 'tW_ME_scale' , 'top_mass' , 'Top_pT' , 'Trigger' ,
-               'B-hadron_BR' , 'CR_ERD_on' , 'CR_Gluon_move' , 'CR_QCD-inspired' , 'fragm_Peterson' ,
-               'fragmentation' , 'ttbar_FSR_scale' , 'NLO_generator' , 'ttbar_ISR_scale' , 'ME/PS_matching' ,
-               'ttbar_ME_scale' , 'UE_tune' , 'PDF_10' , 'PDF_11' , 'PDF_12' ,
-               'PDF_13' , 'PDF_14' , 'PDF_15' , 'PDF_16' , 'PDF_17' ,
-               'PDF_18' , 'PDF_19' , 'PDF_1' , 'PDF_20' , 'PDF_21' ,
-               'PDF_22' , 'PDF_23' , 'PDF_24' , 'PDF_25' , 'PDF_26' ,
-               'PDF_27' , 'PDF_28' , 'PDF_2' , 'PDF_3' , 'PDF_4' ,
-               'PDF_5' , 'PDF_6' , 'PDF_7' , 'PDF_8' , 'PDF_9' ,
-               'JES_Flavor' , 'tW_background' , 'W+jets_background' , 'Diboson_background' , 'ttbar_background' ,
-               'DY_bg_0_b-jets' , 'DY_bg_1_b-jets' , 'DY_bg_2_b-jets' , 'Luminosity' , ]
-
-contribs_1 = [ -0.015 , -0.062 , -0.03 , 0.0 , -0.054 , -0.05 , -0.019 , -0.02 , -0.001 , -0.026 ,
-               -0.184 , 0.006 , -0.014 , -0.043 , -0.236 , -0.133 , 0.0 , -0.032 , 0.275 , -0.071 ,
-               -0.009 , -1.853 , 0.307 , 0.033 , -0.023 , -0.101 , -0.211 , -0.159 , -0.5 , -0.04 ,
-               0.028 , 0.135 , -0.02 , -0.7 , -0.373 , -0.109 , 0.152 , 0.048 , -0.16 , -0.388 ,
-               -0.257 , -0.012 , -1.357 , 0.595 , 0.032 , -0.063 , -0.113 , 0.314 , -3.019 , -0.357 ,
-               0.102 , -0.859 , 0.683 , 0.022 , 0.662 , -0.603 , 0.311 , 0.0 , 0.172 , 0.189 ,
-               -0.605 , 0.159 , 0.749 , 0.225 , -0.404 , -0.347 , -0.302 , -0.213 , 0.077 , -0.099 ,
-               0.645 , 0.759 , -0.03 , 0.25 , 0.016 , 0.15 , -0.179 , -0.206 , 0.353 , 0.006 ,
-               0.245 , 0.009 , 0.518 , 0.302 , 0.246 , -0.873 , 0.151 , -1.155 , -0.297 , 0.208 ,
-               0.042 , -0.943 , -0.065 , 0.093 , -0.193 , 0.18 , -0.122 , -0.001 , -2.696 , ]
-
-xsec_2 = 310.3
-err_xsec_2_up = 4.779
-err_xsec_2_down = 4.469
-extr_2_up = [ -0.131 , 1.717 , -0.346 , -0.111 , 1.33 , 0.021 , -2.224 , ]
-extr_2_down = [ 0.459 , -0.166 , 0.707 , 0.029 , -0.906 , -0.071 , 0.809 , ]
-err_xsec_toys_2 = 4.918
-
-contribs_2 = [ 0.148 , 0.052 , 0.012 , 0.0 , 0.029 , -0.083 , -0.028 , -0.151 , 0.002 , 0.028 ,
-               0.174 , 0.004 , 0.024 , -0.026 , 0.081 , 0.002 , 0.0 , -0.127 , -0.241 , 0.032 ,
-               0.085 , -1.874 , -0.448 , -0.226 , -0.237 , -0.141 , 0.06 , -0.128 , -0.253 , -0.186 ,
-               -0.301 , -0.367 , 0.146 , 0.694 , 0.087 , 0.133 , -0.04 , 0.155 , -0.297 , 0.311 ,
-               -0.013 , -0.203 , -1.31 , 0.271 , 0.091 , 0.05 , -0.002 , -0.062 , 0.104 , -0.358 ,
-               0.134 , 0.38 , -0.335 , 0.595 , 0.504 , -0.745 , 1.488 , 0.0 , -0.655 , -0.849 ,
-               -1.37 , -0.17 , 0.579 , 0.199 , -0.324 , 0.057 , -0.168 , -0.126 , 0.084 , -0.206 ,
-               0.214 , 0.494 , -0.042 , 0.201 , -0.124 , -0.117 , -0.127 , 0.015 , 0.126 , 0.014 ,
-               0.13 , -0.032 , 0.228 , 0.193 , 0.186 , -0.541 , 0.216 , -0.724 , -0.114 , -0.002 ,
-               -0.035 , -0.875 , -0.059 , -0.074 , 0.109 , 0.771 , 0.027 , -0.005 , -2.644 , ]
-
-xsec_3 = 186.91
-err_xsec_3_up = 5.527
-err_xsec_3_down = 5.176
-extr_3_up = [ -0.187 , 1.609 , 0.652 , 0.147 , 1.031 , 0.689 , -3.36 , ]
-extr_3_down = [ 0.019 , -0.07 , -0.125 , -0.091 , -0.869 , -2.306 , 1.22 , ]
-err_xsec_toys_3 = 2.68
-
-contribs_3 = [ 0.123 , 0.081 , 0.018 , 0.001 , 0.077 , -0.175 , -0.107 , -0.229 , 0.002 , 0.052 ,
-               0.249 , -0.013 , 0.029 , 0.001 , 0.168 , 0.061 , 0.0 , -0.123 , 0.598 , -0.138 ,
-               -0.318 , -1.826 , 0.091 , 0.206 , 0.295 , -0.364 , -0.76 , 0.258 , -0.364 , -0.38 ,
-               -0.177 , 0.255 , -0.3 , -0.563 , 0.037 , -0.389 , -0.076 , 0.075 , -0.29 , -0.068 ,
-               -0.008 , 0.113 , -1.172 , 0.181 , 0.104 , -0.022 , -0.143 , 0.371 , 3.186 , -0.375 ,
-               -0.029 , 0.411 , -0.1 , 0.314 , 0.349 , -1.055 , 0.626 , 0.0 , 0.049 , 0.194 ,
-               -0.079 , -0.084 , 0.266 , 0.146 , -0.166 , 0.591 , 0.033 , 0.026 , 0.093 , -0.322 ,
-               -0.398 , 0.047 , -0.049 , 0.054 , -0.348 , -0.552 , 0.018 , 0.338 , -0.229 , 0.028 ,
-               -0.039 , -0.057 , -0.286 , 0.063 , 0.007 , -0.04 , 0.188 , -0.054 , 0.171 , -0.246 ,
-               -0.129 , -0.523 , -0.065 , 0.014 , 0.139 , 0.619 , 0.09 , 0.013 , -2.594 , ]
-
-corr_1_2 = 0.57
-corr_3_2 = 0.47
-
-# end global variables
 
 
 ################################
