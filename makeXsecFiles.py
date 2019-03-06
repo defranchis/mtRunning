@@ -14,7 +14,7 @@ from variables import xsec_1, xsec_2, xsec_3
 # options
 
 estimate_contribs = True
-ntoys = 10
+ntoys = 100
 
 replace_corr = False
 
@@ -928,8 +928,8 @@ def estimateMassCorrelations():
     
     print
     if replace_corr:
-        print 'new corr_1_2 =', round(m12.GetCorrelationFactor(),3)
-        print 'new corr_3_2 =', round(m32.GetCorrelationFactor(),3)
+        print 'new corr_1_2 =', round(var.corr_1_2,3)
+        print 'new corr_3_2 =', round(var.corr_3_2,3)
     else:    
         print 'estimated corr_1_2 =', round(m12.GetCorrelationFactor(),3)
         print 'estimated corr_3_2 =', round(m32.GetCorrelationFactor(),3)
