@@ -1,9 +1,11 @@
 
-import ROOT
-from ROOT import *
 import os
 import rundec
 import numpy as np
+
+import ROOT as rt
+from ROOT import TString, TH2D, TRandom3, TF1, TGraph, TLine, TCanvas, TGraphErrors, TLegend, TLatex
+
 
 from variables import *
 from constants import *
@@ -191,7 +193,7 @@ def readCalculatedXsec (renscale, facscale, topmass, pdfmember, mttbin):
 
 def getMassAndError(mttbin, murscale, mufscale, pdfmember, extrapol, contrib): 
 
-    graph = ROOT.TGraph()
+    graph = TGraph()
     i=-1
     chi2_v = []
     mass_v_sel = []
@@ -290,18 +292,18 @@ def getMassAndError(mttbin, murscale, mufscale, pdfmember, extrapol, contrib):
     # graph.Fit(funct,'q','',163,166)
     graph.Fit(funct,'q','',mass_min+0.1,mass_max-0.1)
 
-    line_up = ROOT.TLine(mass_min,1.,mass_max,1.)
-    line_down = ROOT.TLine(mass_min,-1.,mass_max,-1.)
-    line_central = ROOT.TLine(mass_min,0.,mass_max,0.)
-    line_up.SetLineColor(kGreen+2)
-    line_down.SetLineColor(kGreen+2)
-    line_central.SetLineColor(kRed)
+    line_up = TLine(mass_min,1.,mass_max,1.)
+    line_down = TLine(mass_min,-1.,mass_max,-1.)
+    line_central = TLine(mass_min,0.,mass_max,0.)
+    line_up.SetLineColor(rt.kGreen+2)
+    line_down.SetLineColor(rt.kGreen+2)
+    line_central.SetLineColor(rt.kRed)
 
     outdir = 'plots_chi2'
     if not os.path.exists(outdir):
         os.makedirs(outdir)
 
-    c = ROOT.TCanvas()
+    c = TCanvas()
     c.SetGrid()
     graph.Draw('ap')
     graph.SetMarkerStyle(7)
@@ -569,7 +571,7 @@ def makePlots (mass_2, ratio_12, ratio_32, err_12, err_32):
     theoryFileName = 'theory_prediction'
     l = makeTheoryPrediction(theoryFileName,mass_2)
     th = TGraph(theoryFileName+'.txt')
-    th.SetLineColor(kRed);
+    th.SetLineColor(rt.kRed);
     th.SetLineWidth(2);
 
     scales = l[0]
@@ -583,7 +585,7 @@ def makePlots (mass_2, ratio_12, ratio_32, err_12, err_32):
         th_band.SetPoint(th.GetN()+i,scales[th.GetN()-i-1],min(r_up[th.GetN()-i-1],r_down[th.GetN()-i-1]));
 
     th_band.SetFillStyle(3001);
-    th_band.SetFillColor(kRed);
+    th_band.SetFillColor(rt.kRed);
     
     leg = TLegend(.15,.2,.6,.32)
     leg.AddEntry(graph,'MCFM @NLO from diff. #sigma_{t#bar{t}}','pe')
@@ -637,15 +639,15 @@ def makePlots (mass_2, ratio_12, ratio_32, err_12, err_32):
         gr_band.SetPoint(len(r)+i,scales[len(r)-i-1],r_down[len(r)-i-1]);
 
     gr_band.SetFillStyle(3002);
-    gr_band.SetFillColor(kRed+1);
+    gr_band.SetFillColor(rt.kRed+1);
 
     gr_band.GetXaxis().SetTitle('#mu [GeV]')
     gr_band.GetYaxis().SetTitle('m_{t}(#mu) / m_{t}('+str(int(mu_2))+' GeV)')
     gr_band.SetTitle('running of m_{t}(#mu) as a function of #mu')
 
     gr_add.SetMarkerStyle(8)
-    gr_add.SetMarkerColor(kBlue)
-    gr_add.SetLineColor(kBlue)
+    gr_add.SetMarkerColor(rt.kBlue)
+    gr_add.SetLineColor(rt.kBlue)
 
     gr_band.GetYaxis().SetRangeUser(0.9,1.1)
 
