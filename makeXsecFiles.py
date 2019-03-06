@@ -1,7 +1,9 @@
+
 import ROOT
 from ROOT import *
 import os
 import rundec
+import numpy as np
 
 from variables import *
 from constants import *
@@ -11,7 +13,7 @@ from constants import *
 # options
 
 estimate_contribs = True
-ntoys = 0
+ntoys = 10
 
 replace_corr = False
 
@@ -778,18 +780,28 @@ def throwToyCrossSections(r):
 
     global xsec_1, xsec_2, xsec_3
 
-    orig_xsec_1 = xsec_1
-    orig_xsec_2 = xsec_2
-    orig_xsec_3 = xsec_3
-
     err_1 = xsec_1*(err_xsec_1_up+err_xsec_1_down)/2./100.
     err_2 = xsec_2*(err_xsec_2_up+err_xsec_2_down)/2./100.
     err_3 = xsec_3*(err_xsec_3_up+err_xsec_3_down)/2./100.
 
-    xsec_2 = r.Gaus(xsec_2,err_2)
-    xsec_1 = r.Gaus(xsec_1,err_1*(1-corr_1_2*corr_1_2)**.5) + corr_1_2*err_1/err_2*(xsec_2-orig_xsec_2)
-    xsec_3 = r.Gaus(xsec_3,err_3*(1-corr_3_2*corr_3_2)**.5) + corr_3_2*err_3/err_2*(xsec_2-orig_xsec_2)
-    
+    V = [[err_1*err_1, corr_1_2*err_1*err_2, corr_1_3*err_1*err_3],
+         [corr_1_2*err_1*err_2, err_2*err_2, corr_3_2*err_2*err_3],
+         [corr_1_3*err_1*err_3, corr_3_2*err_2*err_3, err_3*err_3]]
+
+
+
+    L = np.linalg.cholesky(V) # Cholesky decomposition 
+
+    mu = [xsec_1, xsec_2, xsec_3]
+    z = [r.Gaus(0,1),r.Gaus(0,1),r.Gaus(0,1)]
+
+    y = L.dot(z)
+    y += mu
+
+    xsec_1 = y[0]
+    xsec_2 = y[1]
+    xsec_3 = y[2]
+        
     return
 
 
@@ -819,12 +831,26 @@ def estimateMassCorrelations():
     m12 = TH2D('m12','m12',100,150,160,100,130,170)
     m32 = TH2D('m32','m32',100,120,180,100,130,170)
 
+    xs12 = TH2D('xs12','xs12',100,xsec_1*(1-5*err_xsec_1_down/100.),xsec_1*(1+5*err_xsec_1_up/100.),
+                100,xsec_2*(1-5*err_xsec_2_down/100.),xsec_2*(1-5*err_xsec_2_down/100.))
+    xs13 = TH2D('xs13','xs13',100,xsec_1*(1-5*err_xsec_1_down/100.),xsec_1*(1+5*err_xsec_1_up/100.),
+                100,xsec_3*(1-5*err_xsec_3_down/100.),xsec_3*(1-5*err_xsec_3_down/100.))
+    xs23 = TH2D('xs23','xs23',100,xsec_2*(1-5*err_xsec_2_down/100.),xsec_2*(1+5*err_xsec_2_up/100.),
+                100,xsec_3*(1-5*err_xsec_3_down/100.),xsec_3*(1-5*err_xsec_3_down/100.))
+
+
+    
     r_corr = TH2D('r_corr','r_corr',100,0.9,1.15,100,0.75,1.15)
     
     
     for i in range(1,ntoys+1):
         if i%1000==0 or i==1: print 'toy n.', i
         throwToyCrossSections(r)
+
+        xs12.Fill(xsec_1,xsec_2)
+        xs13.Fill(xsec_1,xsec_3)
+        xs23.Fill(xsec_2,xsec_3)
+        
         mass_and_err_1 = getMassAndError(1, 'nominal', 'nominal', 0 , 0 , 0)
         mass_and_err_2 = getMassAndError(2, 'nominal', 'nominal', 0 , 0 , 0)
         mass_and_err_3 = getMassAndError(3, 'nominal', 'nominal', 0 , 0 , 0)
@@ -877,6 +903,29 @@ def estimateMassCorrelations():
     c.SaveAs(outdir+'/ratio_corr.pdf')
     c.SaveAs(outdir+'/ratio_corr.root')
 
+    xs12.SetTitle('correlation = '+str(round(xs12.GetCorrelationFactor(),2)))
+    xs12.GetXaxis().SetTitle('#sigma_{r#bar{t}} (#mu_{1}) [pb]')
+    xs12.GetYaxis().SetTitle('#sigma_{r#bar{t}} (#mu_{2}) [pb]')
+    xs12.DrawNormalized('colz')
+    c.SaveAs(outdir+'/xsec_corr_12.png')
+    c.SaveAs(outdir+'/xsec_corr_12.pdf')
+    c.SaveAs(outdir+'/xsec_corr_12.root')
+    xs13.SetTitle('correlation = '+str(round(xs13.GetCorrelationFactor(),2)))
+    xs13.GetXaxis().SetTitle('#sigma_{r#bar{t}} (#mu_{1}) [pb]')
+    xs13.GetYaxis().SetTitle('#sigma_{r#bar{t}} (#mu_{3}) [pb]')
+    xs13.DrawNormalized('colz')
+    c.SaveAs(outdir+'/xsec_corr_13.png')
+    c.SaveAs(outdir+'/xsec_corr_13.pdf')
+    c.SaveAs(outdir+'/xsec_corr_13.root')
+    xs23.SetTitle('correlation = '+str(round(xs23.GetCorrelationFactor(),2)))
+    xs23.GetXaxis().SetTitle('#sigma_{r#bar{t}} (#mu_{2}) [pb]')
+    xs23.GetYaxis().SetTitle('#sigma_{r#bar{t}} (#mu_{3}) [pb]')
+    xs23.DrawNormalized('colz')
+    c.SaveAs(outdir+'/xsec_corr_23.png')
+    c.SaveAs(outdir+'/xsec_corr_23.pdf')
+    c.SaveAs(outdir+'/xsec_corr_23.root')
+
+    
     print
     if replace_corr:
         print 'new corr_1_2 =', round(m12.GetCorrelationFactor(),3)
