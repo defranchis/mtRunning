@@ -8,10 +8,7 @@ import variables as var
 import constants as cnst
 
 from ROOT import TString, TH2D, TRandom3, TF1, TGraph, TLine, TCanvas, TGraphErrors, TLegend, TLatex
-
-
-from variables import *
-
+from variables import xsec_1, xsec_2, xsec_3
 
 
 # options
@@ -212,53 +209,53 @@ def getMassAndError(mttbin, murscale, mufscale, pdfmember, extrapol, contrib):
         xsec_exp = xsec_err = 0.
         if mttbin == 1 : 
             xsec_exp = xsec_1 
-            xsec_err = ((xsec_1/100.*(err_xsec_1_up+err_xsec_1_down)/2.)**2 + err_xsec_toys_1**2)**.5
+            xsec_err = ((xsec_1/100.*(var.err_xsec_1_up+var.err_xsec_1_down)/2.)**2 + var.err_xsec_toys_1**2)**.5
             if extrapol != 0:
                 if extrapol > 0 :
-                    xsec_exp *= 1 + extr_1_up[abs(extrapol)-1]/100.
-                    xsec_err *= 1 + extr_1_up[abs(extrapol)-1]/100.
+                    xsec_exp *= 1 + var.extr_1_up[abs(extrapol)-1]/100.
+                    xsec_err *= 1 + var.extr_1_up[abs(extrapol)-1]/100.
                 else :
-                    xsec_exp *= 1 + extr_1_down[abs(extrapol)-1]/100.
-                    xsec_err *= 1 + extr_1_down[abs(extrapol)-1]/100.
+                    xsec_exp *= 1 + var.extr_1_down[abs(extrapol)-1]/100.
+                    xsec_err *= 1 + var.extr_1_down[abs(extrapol)-1]/100.
             if contrib !=0 :
-                if contrib > 0 : xsec_exp *= 1 + contribs_1[abs(contrib)-1]/100.
-                else : xsec_exp *= 1 - contribs_1[abs(contrib)-1]/100.
+                if contrib > 0 : xsec_exp *= 1 + var.contribs_1[abs(contrib)-1]/100.
+                else : xsec_exp *= 1 - var.contribs_1[abs(contrib)-1]/100.
                 
         elif mttbin == 2 : 
             xsec_exp = xsec_2 
-            xsec_err = ((xsec_2/100.*(err_xsec_2_up+err_xsec_2_down)/2.)**2 + err_xsec_toys_2**2)**.5
+            xsec_err = ((xsec_2/100.*(var.err_xsec_2_up+var.err_xsec_2_down)/2.)**2 + var.err_xsec_toys_2**2)**.5
             if extrapol != 0:
                 if extrapol > 0 :
-                    xsec_exp *= 1 + extr_2_up[abs(extrapol)-1]/100.
-                    xsec_err *= 1 + extr_2_up[abs(extrapol)-1]/100.
+                    xsec_exp *= 1 + var.extr_2_up[abs(extrapol)-1]/100.
+                    xsec_err *= 1 + var.extr_2_up[abs(extrapol)-1]/100.
                 else :
-                    xsec_exp *= 1 + extr_2_down[abs(extrapol)-1]/100.
-                    xsec_err *= 1 + extr_2_down[abs(extrapol)-1]/100.
+                    xsec_exp *= 1 + var.extr_2_down[abs(extrapol)-1]/100.
+                    xsec_err *= 1 + var.extr_2_down[abs(extrapol)-1]/100.
             if contrib !=0 :
-                if contrib > 0 : xsec_exp *= 1 + contribs_2[abs(contrib)-1]/100.
-                else : xsec_exp *= 1 - contribs_2[abs(contrib)-1]/100.
+                if contrib > 0 : xsec_exp *= 1 + var.contribs_2[abs(contrib)-1]/100.
+                else : xsec_exp *= 1 - var.contribs_2[abs(contrib)-1]/100.
 
         else : # mttbin = 3
             xsec_exp = xsec_3 
-            xsec_err = ((xsec_3/100.*(err_xsec_3_up+err_xsec_3_down)/2.)**2 + err_xsec_toys_3**2)**.5
+            xsec_err = ((xsec_3/100.*(var.err_xsec_3_up+var.err_xsec_3_down)/2.)**2 + var.err_xsec_toys_3**2)**.5
             if extrapol != 0:
                 if extrapol > 0 :
-                    xsec_exp *= 1 + extr_3_up[abs(extrapol)-1]/100.
-                    xsec_err *= 1 + extr_3_up[abs(extrapol)-1]/100.
+                    xsec_exp *= 1 + var.extr_3_up[abs(extrapol)-1]/100.
+                    xsec_err *= 1 + var.extr_3_up[abs(extrapol)-1]/100.
                 else :
-                    xsec_exp *= 1 + extr_3_down[abs(extrapol)-1]/100.
-                    xsec_err *= 1 + extr_3_down[abs(extrapol)-1]/100.
+                    xsec_exp *= 1 + var.extr_3_down[abs(extrapol)-1]/100.
+                    xsec_err *= 1 + var.extr_3_down[abs(extrapol)-1]/100.
             if contrib !=0 :
-                if contrib > 0 : xsec_exp *= 1 + contribs_3[abs(contrib)-1]/100.
-                else : xsec_exp *= 1 - contribs_3[abs(contrib)-1]/100.
+                if contrib > 0 : xsec_exp *= 1 + var.contribs_3[abs(contrib)-1]/100.
+                else : xsec_exp *= 1 - var.contribs_3[abs(contrib)-1]/100.
 
 
         # chi2 = abs(xsec_th-xsec_exp)/xsec_err
         chi2 = (xsec_th-xsec_exp)/xsec_err
         fact_A = 0
-        if mttbin == 1 : fact_A = (err_xsec_1_up-err_xsec_1_down)/(err_xsec_1_up+err_xsec_1_down)
-        elif mttbin == 2 : fact_A = (err_xsec_2_up-err_xsec_2_down)/(err_xsec_2_up+err_xsec_2_down)
-        else : fact_A = (err_xsec_3_up-err_xsec_3_down)/(err_xsec_3_up+err_xsec_3_down)
+        if mttbin == 1 : fact_A = (var.err_xsec_1_up-var.err_xsec_1_down)/(var.err_xsec_1_up+var.err_xsec_1_down)
+        elif mttbin == 2 : fact_A = (var.err_xsec_2_up-var.err_xsec_2_down)/(var.err_xsec_2_up+var.err_xsec_2_down)
+        else : fact_A = (var.err_xsec_3_up-var.err_xsec_3_down)/(var.err_xsec_3_up+var.err_xsec_3_down)
         chi2 *= (1-2*fact_A*chi2+5*fact_A*fact_A*chi2*chi2)**.5
         # graph.SetPoint(i,mass,chi2)
         if mass != mass_v[0]:
@@ -352,12 +349,12 @@ def getMassAndError(mttbin, murscale, mufscale, pdfmember, extrapol, contrib):
 def getRatios(mass_1, mass_2, mass_3, err_1, err_2, err_3):
 
     ratio_1_2 = mass_1/mass_2
-    err_ratio_1_2 = (err_1/mass_1)**2 + (err_2/mass_2)**2 - 2*corr_1_2*(err_1/mass_1)*(err_2/mass_2)
+    err_ratio_1_2 = (err_1/mass_1)**2 + (err_2/mass_2)**2 - 2*var.corr_1_2*(err_1/mass_1)*(err_2/mass_2)
     err_ratio_1_2 = err_ratio_1_2**.5
     err_ratio_1_2*= ratio_1_2
 
     ratio_3_2 = mass_3/mass_2
-    err_ratio_3_2 = (err_3/mass_3)**2 + (err_2/mass_2)**2 - 2*corr_3_2*(err_3/mass_3)*(err_2/mass_2)
+    err_ratio_3_2 = (err_3/mass_3)**2 + (err_2/mass_2)**2 - 2*var.corr_3_2*(err_3/mass_3)*(err_2/mass_2)
     err_ratio_3_2 = err_ratio_3_2**.5
     err_ratio_3_2*= ratio_3_2
 
@@ -460,7 +457,7 @@ def getExtrapolationUncertainties (central_ratio_1_2, central_ratio_3_2):
 
     print '\n'
     print 'extrapol', 'ratio_1_2', 'ratio_3_2\n'
-    for extr in range(-len(extr_1_up),len(extr_1_up)+1) :
+    for extr in range(-len(var.extr_1_up),len(var.extr_1_up)+1) :
         if extr == 0 : continue
 
         mass_and_err_1 = getMassAndError(1, 'nominal', 'nominal', 0 , extr , 0 )
@@ -476,7 +473,7 @@ def getExtrapolationUncertainties (central_ratio_1_2, central_ratio_3_2):
         err_extr_1_2 = (ratio_1_2-central_ratio_1_2)**2
         err_extr_3_2 = (ratio_3_2-central_ratio_3_2)**2
 
-        name = extr_name[abs(extr)-1]
+        name = var.extr_name[abs(extr)-1]
         if extr>0 : name+='_up'
         else : name+='_down'
         print name, round(100*(ratio_1_2/central_ratio_1_2-1),2), round(100*(ratio_3_2/central_ratio_3_2-1),2),'%'
@@ -727,7 +724,7 @@ def estimateSystContributions(central_ratio_1_2, central_ratio_3_2):
     print
     print 'contribs\n'
 
-    for contrib in range(1,len(contribs_1)+1) :
+    for contrib in range(1,len(var.contribs_1)+1) :
 
         mass_and_err_1 = getMassAndError(1, 'nominal', 'nominal', 0 , 0 , contrib )
         mass_and_err_2 = getMassAndError(2, 'nominal', 'nominal', 0 , 0 , contrib )
@@ -764,7 +761,7 @@ def estimateSystContributions(central_ratio_1_2, central_ratio_3_2):
         else : contr_3_2 = max(abs(contr_3_2_up),abs(contr_3_2_down))
 
         if contr_1_2 > 0.3 or contr_3_2 > 0.5 :
-            print syst_names[contrib-1], round(contr_1_2,2), round(contr_3_2,2)
+            print var.syst_names[contrib-1], round(contr_1_2,2), round(contr_3_2,2)
 
 
     print
@@ -784,13 +781,13 @@ def throwToyCrossSections(r):
 
     global xsec_1, xsec_2, xsec_3
 
-    err_1 = xsec_1*(err_xsec_1_up+err_xsec_1_down)/2./100.
-    err_2 = xsec_2*(err_xsec_2_up+err_xsec_2_down)/2./100.
-    err_3 = xsec_3*(err_xsec_3_up+err_xsec_3_down)/2./100.
+    err_1 = xsec_1*(var.err_xsec_1_up+var.err_xsec_1_down)/2./100.
+    err_2 = xsec_2*(var.err_xsec_2_up+var.err_xsec_2_down)/2./100.
+    err_3 = xsec_3*(var.err_xsec_3_up+var.err_xsec_3_down)/2./100.
 
-    V = [[err_1*err_1, corr_1_2*err_1*err_2, corr_1_3*err_1*err_3],
-         [corr_1_2*err_1*err_2, err_2*err_2, corr_3_2*err_2*err_3],
-         [corr_1_3*err_1*err_3, corr_3_2*err_2*err_3, err_3*err_3]]
+    V = [[err_1*err_1, var.corr_1_2*err_1*err_2, var.corr_1_3*err_1*err_3],
+         [var.corr_1_2*err_1*err_2, err_2*err_2, var.corr_3_2*err_2*err_3],
+         [var.corr_1_3*err_1*err_3, var.corr_3_2*err_2*err_3, err_3*err_3]]
 
 
 
@@ -835,12 +832,12 @@ def estimateMassCorrelations():
     m12 = TH2D('m12','m12',100,150,160,100,130,170)
     m32 = TH2D('m32','m32',100,120,180,100,130,170)
 
-    xs12 = TH2D('xs12','xs12',100,xsec_1*(1-5*err_xsec_1_down/100.),xsec_1*(1+5*err_xsec_1_up/100.),
-                100,xsec_2*(1-5*err_xsec_2_down/100.),xsec_2*(1-5*err_xsec_2_down/100.))
-    xs13 = TH2D('xs13','xs13',100,xsec_1*(1-5*err_xsec_1_down/100.),xsec_1*(1+5*err_xsec_1_up/100.),
-                100,xsec_3*(1-5*err_xsec_3_down/100.),xsec_3*(1-5*err_xsec_3_down/100.))
-    xs23 = TH2D('xs23','xs23',100,xsec_2*(1-5*err_xsec_2_down/100.),xsec_2*(1+5*err_xsec_2_up/100.),
-                100,xsec_3*(1-5*err_xsec_3_down/100.),xsec_3*(1-5*err_xsec_3_down/100.))
+    xs12 = TH2D('xs12','xs12',100,xsec_1*(1-5*var.err_xsec_1_down/100.),xsec_1*(1+5*var.err_xsec_1_up/100.),
+                100,xsec_2*(1-5*var.err_xsec_2_down/100.),xsec_2*(1-5*var.err_xsec_2_down/100.))
+    xs13 = TH2D('xs13','xs13',100,xsec_1*(1-5*var.err_xsec_1_down/100.),xsec_1*(1+5*var.err_xsec_1_up/100.),
+                100,xsec_3*(1-5*var.err_xsec_3_down/100.),xsec_3*(1-5*var.err_xsec_3_down/100.))
+    xs23 = TH2D('xs23','xs23',100,xsec_2*(1-5*var.err_xsec_2_down/100.),xsec_2*(1+5*var.err_xsec_2_up/100.),
+                100,xsec_3*(1-5*var.err_xsec_3_down/100.),xsec_3*(1-5*var.err_xsec_3_down/100.))
 
 
     
@@ -874,9 +871,8 @@ def estimateMassCorrelations():
     doingToys = False
 
     if replace_corr:
-        global corr_1_2, corr_3_2
-        corr_1_2 = m12.GetCorrelationFactor()
-        corr_3_2 = m32.GetCorrelationFactor()
+        var.corr_1_2 = m12.GetCorrelationFactor()
+        var.corr_3_2 = m32.GetCorrelationFactor()
     
     outdir = 'plots_running'
     if not os.path.exists(outdir):
