@@ -4,11 +4,13 @@ import rundec
 import numpy as np
 
 import ROOT as rt
+import variables as var
+import constants as cnst
+
 from ROOT import TString, TH2D, TRandom3, TF1, TGraph, TLine, TCanvas, TGraphErrors, TLegend, TLatex
 
 
 from variables import *
-from constants import *
 
 
 
@@ -33,10 +35,10 @@ def setMasses():
 
     global mass_v
     mass_v = []
-    i_mass = mass_max
-    while i_mass >= mass_min :
+    i_mass = cnst.mass_max
+    while i_mass >= cnst.mass_min :
         mass_v.append(i_mass)
-        if i_mass <= mass_fine_max and i_mass > mass_fine_min+.1 : i_mass-= 0.2
+        if i_mass <= cnst.mass_fine_max and i_mass > cnst.mass_fine_min+.1 : i_mass-= 0.2
         else : i_mass-= 1.0
     return
 
@@ -53,10 +55,10 @@ def mtmt2mtmu(mt, mu):
 
     crd = rundec.CRunDec()
 
-    asmt = crd.AlphasExact(asMZ, MZ, mt, nflav, nloops)
-    asmu = crd.AlphasExact(asMZ, MZ, mu, nflav, nloops)
+    asmt = crd.AlphasExact(cnst.asMZ, cnst.MZ, mt, cnst.nflav, cnst.nloops)
+    asmu = crd.AlphasExact(cnst.asMZ, cnst.MZ, mu, cnst.nflav, cnst.nloops)
     
-    mtmu = crd.mMS2mMS(mt, asmt, asmu, nflav, nloops)
+    mtmu = crd.mMS2mMS(mt, asmt, asmu, cnst.nflav, cnst.nloops)
     
     return mtmu
 
@@ -73,19 +75,19 @@ def mtmt2mtmu(mt, mu):
 def mtmu2mtmu (mtmu1, mu1, mu2, var_as):
 
     alphaS = 0
-    if var_as == 'nominal' : alphaS = asMZ
-    elif var_as == 'up' : alphaS = asMZ+err_as
-    elif var_as == 'down' : alphaS = asMZ-err_as
+    if var_as == 'nominal' : alphaS = cnst.asMZ
+    elif var_as == 'up' : alphaS = cnst.asMZ+cnst.err_as
+    elif var_as == 'down' : alphaS = cnst.asMZ-cnst.err_as
     else :
         print 'ERROR!'
         return 0
 
     crd = rundec.CRunDec()
     
-    asmu1 = crd.AlphasExact(alphaS, MZ, mu1, nflav, nloops)
-    asmu2 = crd.AlphasExact(alphaS, MZ, mu2, nflav, nloops)
+    asmu1 = crd.AlphasExact(alphaS, cnst.MZ, mu1, cnst.nflav, cnst.nloops)
+    asmu2 = crd.AlphasExact(alphaS, cnst.MZ, mu2, cnst.nflav, cnst.nloops)
     
-    mtmu2 = crd.mMS2mMS(mtmu1, asmu1, asmu2, nflav, nloops)
+    mtmu2 = crd.mMS2mMS(mtmu1, asmu1, asmu2, cnst.nflav, cnst.nloops)
     
     return mtmu2
 
@@ -168,7 +170,7 @@ def readCalculatedXsec (renscale, facscale, topmass, pdfmember, mttbin):
 
     if mttbin < 3:
         xsec = xsecs[mttbin]/1000.*bin_width
-    elif n_mttbins == 3:
+    elif cnst.n_mttbins == 3:
         # xsec=xsec_tot-(xsecs[1]+xsecs[2])/1000.*bin_width
         xsec=0
         for i in range(mttbin,mttbin+11):
@@ -285,16 +287,16 @@ def getMassAndError(mttbin, murscale, mufscale, pdfmember, extrapol, contrib):
     for i in range(0,len(chi2_v)):
         graph.SetPoint(i,mass_v_sel[i],chi2_v[i])
 
-    funct = TF1('funct','pol4(0)',mass_min,mass_max)
+    funct = TF1('funct','pol4(0)',cnst.mass_min,cnst.mass_max)
     funct.SetParameter(0,1080)
     funct.SetParameter(1,-12)
     funct.SetParameter(2,0.033)
     # graph.Fit(funct,'q','',163,166)
-    graph.Fit(funct,'q','',mass_min+0.1,mass_max-0.1)
+    graph.Fit(funct,'q','',cnst.mass_min+0.1,cnst.mass_max-0.1)
 
-    line_up = TLine(mass_min,1.,mass_max,1.)
-    line_down = TLine(mass_min,-1.,mass_max,-1.)
-    line_central = TLine(mass_min,0.,mass_max,0.)
+    line_up = TLine(cnst.mass_min,1.,cnst.mass_max,1.)
+    line_down = TLine(cnst.mass_min,-1.,cnst.mass_max,-1.)
+    line_central = TLine(cnst.mass_min,0.,cnst.mass_max,0.)
     line_up.SetLineColor(rt.kGreen+2)
     line_down.SetLineColor(rt.kGreen+2)
     line_central.SetLineColor(rt.kRed)
@@ -320,9 +322,9 @@ def getMassAndError(mttbin, murscale, mufscale, pdfmember, extrapol, contrib):
 
     #now evolve masses
     mu = 0
-    if mttbin == 1 : mu = mu_1
-    elif mttbin == 2 : mu = mu_2
-    else : mu = mu_3 # mttbin = 3
+    if mttbin == 1 : mu = cnst.mu_1
+    elif mttbin == 2 : mu = cnst.mu_2
+    else : mu = cnst.mu_3 # mttbin = 3
 
     if murscale=='nominal' and mufscale=='nominal' and pdfmember==0 and extrapol==0 and contrib==0 and not doingToys:
         print
@@ -505,10 +507,10 @@ def makeTheoryPrediction(outfile, mass_2):
     out = open(outfile+'.txt','w')
         
     for scale in range(350,670+1):
-        ratio = mtmu2mtmu(mass_2, mu_2, scale, 'nominal')/mass_2
+        ratio = mtmu2mtmu(mass_2, cnst.mu_2, scale, 'nominal')/mass_2
         out.write(str(scale)+'\t'+str(ratio)+'\n')
-        ratio_up = mtmu2mtmu(mass_2, mu_2, scale, 'up')/mass_2
-        ratio_down = mtmu2mtmu(mass_2, mu_2, scale, 'down')/mass_2
+        ratio_up = mtmu2mtmu(mass_2, cnst.mu_2, scale, 'up')/mass_2
+        ratio_down = mtmu2mtmu(mass_2, cnst.mu_2, scale, 'down')/mass_2
         r_up.append(ratio_up)
         r_down.append(ratio_down)
         scales.append(scale)
@@ -559,13 +561,13 @@ def makePlots (mass_2, ratio_12, ratio_32, err_12, err_32):
 
     graph = TGraphErrors(3)
 
-    graph.SetPoint(0,mu_1,ratio_12)
+    graph.SetPoint(0,cnst.mu_1,ratio_12)
     graph.SetPointError(0,0,err_12)
 
-    graph.SetPoint(1,mu_2,1)
+    graph.SetPoint(1,cnst.mu_2,1)
     graph.SetPointError(1,0,0)
 
-    graph.SetPoint(2,mu_3,ratio_32)
+    graph.SetPoint(2,cnst.mu_3,ratio_32)
     graph.SetPointError(2,0,err_32)
 
     theoryFileName = 'theory_prediction'
@@ -597,7 +599,7 @@ def makePlots (mass_2, ratio_12, ratio_32, err_12, err_32):
     latexLabel1.SetNDC();
     
     graph.GetXaxis().SetTitle('median m_{t#bar{t}} [GeV]')
-    graph.GetYaxis().SetTitle('m_{t}(m_{t#bar{t}}) / m_{t}('+str(int(mu_2))+' GeV)')
+    graph.GetYaxis().SetTitle('m_{t}(m_{t#bar{t}}) / m_{t}('+str(int(cnst.mu_2))+' GeV)')
     graph.SetTitle('running of m_{t}(#mu) as a function of #mu=m_{t#bar{t}}')
 
     c = TCanvas()
@@ -619,7 +621,7 @@ def makePlots (mass_2, ratio_12, ratio_32, err_12, err_32):
     mtmt = 164.02
     mtmt_err = 1.58
 
-    mtmu = mtmt2mtmu (mtmt, mu_2)
+    mtmu = mtmt2mtmu (mtmt, cnst.mu_2)
 
     gr_add = TGraphErrors()
 
@@ -642,7 +644,7 @@ def makePlots (mass_2, ratio_12, ratio_32, err_12, err_32):
     gr_band.SetFillColor(rt.kRed+1);
 
     gr_band.GetXaxis().SetTitle('#mu [GeV]')
-    gr_band.GetYaxis().SetTitle('m_{t}(#mu) / m_{t}('+str(int(mu_2))+' GeV)')
+    gr_band.GetYaxis().SetTitle('m_{t}(#mu) / m_{t}('+str(int(cnst.mu_2))+' GeV)')
     gr_band.SetTitle('running of m_{t}(#mu) as a function of #mu')
 
     gr_add.SetMarkerStyle(8)
@@ -660,7 +662,7 @@ def makePlots (mass_2, ratio_12, ratio_32, err_12, err_32):
     g = graph.Clone()
     g.RemovePoint(1)
     g1 = TGraph()
-    g1.SetPoint(0,mu_2,1)
+    g1.SetPoint(0,cnst.mu_2,1)
     g1.SetMarkerStyle(3)
     g1.SetMarkerSize(1.5)
     
@@ -691,8 +693,8 @@ def makePlots (mass_2, ratio_12, ratio_32, err_12, err_32):
 
 def makeChi2Test(mass2, ratio12, ratio32, err12, err32):
 
-    th_ratio12 = mtmu2mtmu(mass2, mu_2, mu_1, 'nominal')/mass2
-    th_ratio32 = mtmu2mtmu(mass2, mu_2, mu_3, 'nominal')/mass2
+    th_ratio12 = mtmu2mtmu(mass2, cnst.mu_2, cnst.mu_1, 'nominal')/mass2
+    th_ratio32 = mtmu2mtmu(mass2, cnst.mu_2, cnst.mu_3, 'nominal')/mass2
 
     print 
     print 'theory:', round(th_ratio12,3), round(th_ratio32,3)
@@ -882,24 +884,24 @@ def estimateMassCorrelations():
 
     c = TCanvas()
     m12.SetTitle('correlation = '+str(round(m12.GetCorrelationFactor(),2)))
-    m12.GetXaxis().SetTitle('mt ('+str(int(mu_1))+' GeV) [GeV]')
-    m12.GetYaxis().SetTitle('mt ('+str(int(mu_2))+' GeV) [GeV]')
+    m12.GetXaxis().SetTitle('mt ('+str(int(cnst.mu_1))+' GeV) [GeV]')
+    m12.GetYaxis().SetTitle('mt ('+str(int(cnst.mu_2))+' GeV) [GeV]')
     m12.DrawNormalized('colz')
     c.SaveAs(outdir+'/mass_corr_1_2.png')
     c.SaveAs(outdir+'/mass_corr_1_2.pdf')
     c.SaveAs(outdir+'/mass_corr_1_2.root')
     c.Clear()
     m32.SetTitle('correlation = '+str(round(m32.GetCorrelationFactor(),2)))
-    m32.GetXaxis().SetTitle('mt ('+str(int(mu_3))+' GeV) [GeV]')
-    m32.GetYaxis().SetTitle('mt ('+str(int(mu_2))+' GeV) [GeV]')
+    m32.GetXaxis().SetTitle('mt ('+str(int(cnst.mu_3))+' GeV) [GeV]')
+    m32.GetYaxis().SetTitle('mt ('+str(int(cnst.mu_2))+' GeV) [GeV]')
     m32.DrawNormalized('colz')
     c.SaveAs(outdir+'/mass_corr_3_2.png')
     c.SaveAs(outdir+'/mass_corr_3_2.pdf')
     c.SaveAs(outdir+'/mass_corr_3_2.root')
     c.Clear()
     r_corr.SetTitle('correlation = '+str(round(r_corr.GetCorrelationFactor(),2)))
-    r_corr.GetXaxis().SetTitle('mt ('+str(int(mu_1))+' GeV) / mt ('+str(int(mu_2))+' GeV)')
-    r_corr.GetYaxis().SetTitle('mt ('+str(int(mu_3))+' GeV) / mt ('+str(int(mu_2))+' GeV)')
+    r_corr.GetXaxis().SetTitle('mt ('+str(int(cnst.mu_1))+' GeV) / mt ('+str(int(cnst.mu_2))+' GeV)')
+    r_corr.GetYaxis().SetTitle('mt ('+str(int(cnst.mu_3))+' GeV) / mt ('+str(int(cnst.mu_2))+' GeV)')
     r_corr.DrawNormalized('colz')
     c.SaveAs(outdir+'/ratio_corr.png')
     c.SaveAs(outdir+'/ratio_corr.pdf')
