@@ -313,9 +313,9 @@ def getMassAndError(mttbin, murscale, mufscale, pdfmember, extrapol, contrib):
     if not doingToys:
         c.Print(outdir+'/test_mtt'+str(mttbin)+'_mur_'+murscale+'_muf_'+mufscale+'_extrapol'+str(extrapol)+'_pdf'+str(pdfmember)+'_contrib'+str(contrib)+'.png')
 
-    fitted_mass = funct.GetX(0)
-    fitted_mass_up = funct.GetX(-1)
-    fitted_mass_down = funct.GetX(1)
+    fitted_mass = funct.GetX(0,cnst.mass_min-30,cnst.mass_max+30)
+    fitted_mass_up = funct.GetX(-1,cnst.mass_min-30,cnst.mass_max+30)
+    fitted_mass_down = funct.GetX(1,cnst.mass_min-30,cnst.mass_max+30)
 
     #now evolve masses
     mu = 0
