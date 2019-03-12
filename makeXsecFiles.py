@@ -36,7 +36,7 @@ def setMasses():
     while i_mass >= cnst.mass_min :
         mass_v.append(i_mass)
         if i_mass <= cnst.mass_fine_max and i_mass > cnst.mass_fine_min+.1 : i_mass-= 0.2
-        else : i_mass-= 1.0
+        else : i_mass-= 0.5
     return
 
 
@@ -289,8 +289,9 @@ def getMassAndError(mttbin, murscale, mufscale, pdfmember, extrapol, contrib):
     funct.SetParameter(1,-12)
     funct.SetParameter(2,0.033)
     # graph.Fit(funct,'q','',163,166)
-    graph.Fit(funct,'q','',cnst.mass_min+0.1,cnst.mass_max-0.1)
-
+    if mttbin==3: graph.Fit(funct,'q','',cnst.mass_min+0.1,cnst.mass_max-0.1)
+    else: graph.Fit(funct,'q','',cnst.mass_fine_min+0.1,cnst.mass_max-0.1)
+    
     line_up = TLine(cnst.mass_min,1.,cnst.mass_max,1.)
     line_down = TLine(cnst.mass_min,-1.,cnst.mass_max,-1.)
     line_central = TLine(cnst.mass_min,0.,cnst.mass_max,0.)
