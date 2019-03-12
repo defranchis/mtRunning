@@ -278,6 +278,8 @@ def getMassAndError(mttbin, murscale, mufscale, pdfmember, extrapol, contrib):
                 else:
                     if chi2 < chi2_v[len(chi2_v)-1] : continue
 
+        if mttbin != 3:
+            if mass < cnst.mass_fine_min : break
         mass_v_sel.append(mass)
         chi2_v.append(chi2)
             
@@ -292,9 +294,16 @@ def getMassAndError(mttbin, murscale, mufscale, pdfmember, extrapol, contrib):
     if mttbin==3: graph.Fit(funct,'q','',cnst.mass_min+0.1,cnst.mass_max-0.1)
     else: graph.Fit(funct,'q','',cnst.mass_fine_min+0.1,cnst.mass_max-0.1)
     
-    line_up = TLine(cnst.mass_min,1.,cnst.mass_max,1.)
-    line_down = TLine(cnst.mass_min,-1.,cnst.mass_max,-1.)
-    line_central = TLine(cnst.mass_min,0.,cnst.mass_max,0.)
+    if mttbin==3:
+        line_up = TLine(cnst.mass_min,1.,cnst.mass_max,1.)
+        line_down = TLine(cnst.mass_min,-1.,cnst.mass_max,-1.)
+        line_central = TLine(cnst.mass_min,0.,cnst.mass_max,0.)
+    else :
+        line_up = TLine(cnst.mass_fine_min,1.,cnst.mass_fine_max,1.)
+        line_down = TLine(cnst.mass_fine_min,-1.,cnst.mass_fine_max,-1.)
+        line_central = TLine(cnst.mass_fine_min,0.,cnst.mass_fine_max,0.)
+
+
     line_up.SetLineColor(rt.kGreen+2)
     line_down.SetLineColor(rt.kGreen+2)
     line_central.SetLineColor(rt.kRed)
@@ -314,10 +323,18 @@ def getMassAndError(mttbin, murscale, mufscale, pdfmember, extrapol, contrib):
     if not doingToys:
         c.Print(outdir+'/test_mtt'+str(mttbin)+'_mur_'+murscale+'_muf_'+mufscale+'_extrapol'+str(extrapol)+'_pdf'+str(pdfmember)+'_contrib'+str(contrib)+'.png')
 
-    fitted_mass = funct.GetX(0,cnst.mass_min-30,cnst.mass_max+30)
-    fitted_mass_up = funct.GetX(-1,cnst.mass_min-30,cnst.mass_max+30)
-    fitted_mass_down = funct.GetX(1,cnst.mass_min-30,cnst.mass_max+30)
-
+    if mttbin==3:
+        fitted_mass = funct.GetX(0,cnst.mass_min-30,cnst.mass_max+30)
+        fitted_mass_up = funct.GetX(-1,fitted_mass-10,fitted_mass+10)
+        fitted_mass_down = funct.GetX(1,fitted_mass-10,fitted_mass+10)
+    elif mttbin==2:
+        fitted_mass = funct.GetX(0,cnst.mass_fine_min,cnst.mass_fine_max)
+        fitted_mass_up = funct.GetX(-1,fitted_mass-7,fitted_mass+7)
+        fitted_mass_down = funct.GetX(1,fitted_mass-7,fitted_mass+7)
+    else:        
+        fitted_mass = funct.GetX(0,cnst.mass_fine_min,cnst.mass_fine_max)
+        fitted_mass_up = funct.GetX(-1,fitted_mass-3,fitted_mass+3)
+        fitted_mass_down = funct.GetX(1,fitted_mass-3,fitted_mass+3)
     #now evolve masses
     mu = 0
     if mttbin == 1 : mu = cnst.mu_1
@@ -596,7 +613,7 @@ def makePlots (mass_2, ratio_12, ratio_32, err_12, err_32):
     latexLabel1.SetTextFont(42)
     latexLabel1.SetNDC();
     
-    graph.GetXaxis().SetTitle('median m_{t#bar{t}} [GeV]')
+    graph.GetXaxis().SetTitle('centre-of-gravity of m_{t#bar{t}} [GeV]')
     graph.GetYaxis().SetTitle('m_{t}(m_{t#bar{t}}) / m_{t}('+str(int(cnst.mu_2))+' GeV)')
     graph.SetTitle('running of m_{t}(#mu) as a function of #mu=m_{t#bar{t}}')
 
