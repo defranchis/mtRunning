@@ -587,9 +587,11 @@ def makePlots (mass_2, ratio_12, ratio_32, err_12, err_32):
 
     theoryFileName = 'theory_prediction'
     l = makeTheoryPrediction(theoryFileName,mass_2)
-    th = TGraph(theoryFileName+'.txt')
+    th = TGraph(theoryFileName+'.txt')    
     th.SetLineColor(rt.kRed);
     th.SetLineWidth(2);
+
+    os.remove(theoryFileName+'.txt')
 
     scales = l[0]
     r_up = l[1]
