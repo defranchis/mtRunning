@@ -635,6 +635,46 @@ def makePlots (mass_2, ratio_12, ratio_32, err_12, err_32):
     c.SaveAs(outdir+'/running.pdf')
     c.SaveAs(outdir+'/running.root')
 
+
+
+    graph.Clear()
+
+    graph.SetPoint(0,cnst.mu_1,ratio_12/(mtmu2mtmu(mass_2, cnst.mu_2, cnst.mu_1, 'nominal')/mass_2))
+    graph.SetPointError(0,0,err_12/(mtmu2mtmu(mass_2, cnst.mu_2, cnst.mu_1, 'nominal')/mass_2))
+
+    graph.SetPoint(1,cnst.mu_2,1)
+    graph.SetPointError(1,0,0)
+
+    graph.SetPoint(2,cnst.mu_3,ratio_32/(mtmu2mtmu(mass_2, cnst.mu_2, cnst.mu_3, 'nominal')/mass_2))
+    graph.SetPointError(2,0,err_32/(mtmu2mtmu(mass_2, cnst.mu_2, cnst.mu_3, 'nominal')/mass_2))
+
+    line = TLine(370,1,660,1)
+    line.SetLineColor(rt.kRed)
+    line.SetLineWidth(2)
+    
+    leg = TLegend(.15,.2,.7,.32)
+    leg.AddEntry(graph,'MCFM @NLO from diff. #sigma_{t#bar{t}}','pe')
+
+    graph.GetXaxis().SetTitle('centre-of-gravity of m_{t#bar{t}} [GeV]')
+    graph.GetYaxis().SetTitle('m_{t}^{#mu}(m_{t}) / m_{t}^{#mu_{2}}(m_{t})')
+    graph.SetTitle('extracted m_{t}(m_{t}) in bins of #mu=m_{t#bar{t}}')
+
+    c = TCanvas()
+    graph.Draw('ap')
+    leg.Draw('same')
+    line.Draw('same')
+    latexLabel1.DrawLatex(0.59, 0.8, "ABMP16_5_nlo PDF set");
+
+    outdir = 'plots_running'
+    if not os.path.exists(outdir):
+        os.makedirs(outdir)
+
+    c.SaveAs(outdir+'/mt_mt.png')
+    c.SaveAs(outdir+'/mt_mt.pdf')
+    c.SaveAs(outdir+'/mt_mt.root')
+
+
+
     mtmt = 164.02
     mtmt_err = 1.58
 
