@@ -576,7 +576,7 @@ def makeAdditionalTheoryPrediction (mtmt, err_mtmt, mtmu):
 def makePlots (mass_2, ratio_12, ratio_32, err_12, err_32, mtmt_2):
 
     graph = TGraphErrors(3)
-
+    
     graph.SetPoint(0,cnst.mu_1,ratio_12)
     graph.SetPointError(0,0,err_12)
 
@@ -619,11 +619,20 @@ def makePlots (mass_2, ratio_12, ratio_32, err_12, err_32, mtmt_2):
     graph.GetXaxis().SetTitle('centre-of-gravity of m_{t#bar{t}} [GeV]')
     graph.GetYaxis().SetTitle('m_{t}(m_{t#bar{t}}) / m_{t}('+str(int(cnst.mu_2))+' GeV)')
     graph.SetTitle('running of m_{t}(#mu) as a function of #mu=m_{t#bar{t}}')
-
-    c = TCanvas()
     graph.SetMarkerStyle(8)
-    graph.Draw('ap')
+    
+    g = graph.Clone()
+    g.RemovePoint(1)
+    g1 = TGraph()
+    g1.SetPoint(0,cnst.mu_2,1)
+    g1.SetMarkerStyle(3)
+    g1.SetMarkerSize(1.5)
+    
+    c = TCanvas()
+    g.SetMarkerStyle(8)
+    g.Draw('ap')
     th.Draw("L same");
+    g1.Draw('p same')
     leg.Draw('same')
     th_band.Draw('f same')
     latexLabel1.DrawLatex(0.59, 0.78, "ABMP16_5_nlo PDF set");
@@ -680,6 +689,7 @@ def makePlots (mass_2, ratio_12, ratio_32, err_12, err_32, mtmt_2):
 
     g = graph.Clone()
     g.RemovePoint(1)
+    g.SetMarkerStyle(8)
     g1 = TGraph()
     g1.SetPoint(0,cnst.mu_2,1)
     g1.SetMarkerStyle(3)
@@ -721,10 +731,19 @@ def makePlots (mass_2, ratio_12, ratio_32, err_12, err_32, mtmt_2):
     graph.GetYaxis().SetTitle('m_{t}^{#mu}(m_{t}) / m_{t}^{#mu_{2}}(m_{t})')
     graph.SetTitle('extracted m_{t}(m_{t}) in bins of #mu=m_{t#bar{t}}')
 
+    g = graph.Clone()
+    g.RemovePoint(1)
+    g.SetMarkerStyle(8)
+    g1 = TGraph()
+    g1.SetPoint(0,cnst.mu_2,1)
+    g1.SetMarkerStyle(3)
+    g1.SetMarkerSize(1.5)
+    
     c = TCanvas()
-    graph.Draw('ap')
+    g.Draw('ap')
     leg.Draw('same')
     line.Draw('same')
+    g1.Draw('p same')
     latexLabel1.DrawLatex(0.59, 0.8, "ABMP16_5_nlo PDF set");
 
     outdir = 'plots_running'
@@ -760,13 +779,15 @@ def makePlots (mass_2, ratio_12, ratio_32, err_12, err_32, mtmt_2):
     gr_band.SetFillColor(rt.kRed+1);
     gr_band.GetYaxis().SetRangeUser(0.94,1.04)
 
-    leg2.Clear()
-    leg2.AddEntry(graph,'MCFM @NLO from diff. #sigma_{t#bar{t}}','pe')
-    leg2.AddEntry(gr_add,'Hathor @NLO from incl. #sigma_{t#bar{t}} (same data)')
-    leg2.AddEntry(gr_band,'experimental + extrapolation + PDF uncertainties','f')
+
+    leg3 = TLegend(.15,.2,.7,.32)
+    leg3.AddEntry(graph,'MCFM @NLO from diff. #sigma_{t#bar{t}}','pe')
+    leg3.AddEntry(gr_add,'Hathor @NLO from incl. #sigma_{t#bar{t}} (same data)')
+    leg3.AddEntry(gr_band,'experimental + extrapolation + PDF uncertainties','f')
 
     g = graph.Clone()
     g.RemovePoint(1)
+    g.SetMarkerStyle(8)
     g1 = TGraph()
     g1.SetPoint(0,cnst.mu_2,1)
     g1.SetMarkerStyle(3)
@@ -778,7 +799,7 @@ def makePlots (mass_2, ratio_12, ratio_32, err_12, err_32, mtmt_2):
     g.Draw('p same')
     g1.Draw('p same')
     # th.Draw("L same");
-    leg2.Draw('same')
+    leg3.Draw('same')
     # th_band.Draw('f same')
 
     c.SaveAs(outdir+'/test_mtmt.png')
