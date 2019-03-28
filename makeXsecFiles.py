@@ -344,7 +344,8 @@ def getMassAndError(mttbin, murscale, mufscale, pdfmember, extrapol, contrib):
     if murscale=='nominal' and mufscale=='nominal' and pdfmember==0 and extrapol==0 and contrib==0 and not doingToys:
         print
         print 'mt(mt) bin', mttbin,'=', round(fitted_mass,2), round(fitted_mass_up-fitted_mass,2), round(fitted_mass-fitted_mass_down,2)
-    
+
+    fitted_mtmt = fitted_mass
     fitted_mass = mtmt2mtmu(fitted_mass, mu)
     fitted_mass_up = mtmt2mtmu(fitted_mass_up, mu)
     fitted_mass_down = mtmt2mtmu(fitted_mass_down, mu)
@@ -354,7 +355,7 @@ def getMassAndError(mttbin, murscale, mufscale, pdfmember, extrapol, contrib):
         
     fitted_mass_err = (fitted_mass_up - fitted_mass_down)/2
 
-    return [fitted_mass, fitted_mass_err]
+    return [fitted_mass, fitted_mass_err, fitted_mtmt]
 
 
 ################################
@@ -572,7 +573,7 @@ def makeAdditionalTheoryPrediction (mtmt, err_mtmt, mtmu):
 ################################
 
 
-def makePlots (mass_2, ratio_12, ratio_32, err_12, err_32):
+def makePlots (mass_2, ratio_12, ratio_32, err_12, err_32, mtmt_2):
 
     graph = TGraphErrors(3)
 
@@ -635,6 +636,67 @@ def makePlots (mass_2, ratio_12, ratio_32, err_12, err_32):
     c.SaveAs(outdir+'/running.pdf')
     c.SaveAs(outdir+'/running.root')
 
+    mtmt = 164.02
+    mtmt_err = 1.58
+
+    # mtmu = mtmt2mtmu (mtmt, cnst.mu_2)
+    mtmu = mass_2
+
+    gr_add = TGraphErrors()
+
+    gr_add.SetPoint(0,mtmt,mtmt/mtmu)
+    gr_add.SetPointError(0,0,mtmt_err/mtmu)
+
+    l = makeAdditionalTheoryPrediction(mtmt, mtmt_err, mtmu)
+    r = l[0]
+    r_up = l[1]
+    r_down = l[2]
+    scales = l[3]
+
+    gr_band = TGraph (2*gr_add.GetN())
+
+    for i in range(0, len(r)):
+        gr_band.SetPoint(i,scales[i],r_up[i])
+        gr_band.SetPoint(len(r)+i,scales[len(r)-i-1],r_down[len(r)-i-1]);
+
+    gr_band.SetFillStyle(3002);
+    gr_band.SetFillColor(rt.kRed+1);
+
+    gr_band.GetXaxis().SetTitle('#mu [GeV]')
+    gr_band.GetYaxis().SetTitle('m_{t}(#mu) / m_{t}('+str(int(cnst.mu_2))+' GeV)')
+    gr_band.SetTitle('running of m_{t}(#mu) as a function of #mu')
+
+    gr_add.SetMarkerStyle(8)
+    gr_add.SetMarkerColor(rt.kBlue)
+    gr_add.SetLineColor(rt.kBlue)
+
+    gr_band.GetYaxis().SetRangeUser(0.9,1.13)
+
+    leg2 = leg.Clone()
+    leg2.Clear()
+    leg2.AddEntry(graph,'MCFM @NLO from diff. #sigma_{t#bar{t}}','pe')
+    leg2.AddEntry(gr_add,'Hathor @NLO from incl. #sigma_{t#bar{t}} (same data)')
+    leg2.AddEntry(gr_band,'RunDec @ 2 loops (5 flav.)','f')
+
+    g = graph.Clone()
+    g.RemovePoint(1)
+    g1 = TGraph()
+    g1.SetPoint(0,cnst.mu_2,1)
+    g1.SetMarkerStyle(3)
+    g1.SetMarkerSize(1.5)
+    
+    c.Clear()
+    gr_band.Draw('af')
+    gr_add.Draw('p same')
+    g.Draw('p same')
+    g1.Draw('p same')
+    # th.Draw("L same");
+    leg2.Draw('same')
+    # th_band.Draw('f same')
+
+    c.SaveAs(outdir+'/test_incl.png')
+    c.SaveAs(outdir+'/test_incl.pdf')
+    c.SaveAs(outdir+'/test_incl.root')
 
 
     graph.Clear()
@@ -674,47 +736,34 @@ def makePlots (mass_2, ratio_12, ratio_32, err_12, err_32):
     c.SaveAs(outdir+'/mt_mt.root')
 
 
+    ##############
+    gr_add.Clear()
 
-    mtmt = 164.02
-    mtmt_err = 1.58
-
-    mtmu = mtmt2mtmu (mtmt, cnst.mu_2)
-
-    gr_add = TGraphErrors()
-
-    gr_add.SetPoint(0,mtmt,mtmt/mtmu)
-    gr_add.SetPointError(0,0,mtmt_err/mtmu)
+    gr_add.SetPoint(0,mtmt,mtmt/mtmt_2)
+    gr_add.SetPointError(0,0,mtmt_err/mtmt_2)
 
     l = makeAdditionalTheoryPrediction(mtmt, mtmt_err, mtmu)
-    r = l[0]
-    r_up = l[1]
-    r_down = l[2]
     scales = l[3]
 
+    gr_band.Clear()
     gr_band = TGraph (2*gr_add.GetN())
 
     for i in range(0, len(r)):
-        gr_band.SetPoint(i,scales[i],r_up[i])
-        gr_band.SetPoint(len(r)+i,scales[len(r)-i-1],r_down[len(r)-i-1]);
+        gr_band.SetPoint(i,scales[i],(mtmt+mtmt_err)/mtmt_2)
+        gr_band.SetPoint(len(scales)+i,scales[len(scales)-i-1],(mtmt-mtmt_err)/mtmt_2);
+
+    gr_band.GetXaxis().SetTitle('#mu [GeV]')
+    gr_band.GetYaxis().SetTitle('m_{t}(m_{t}) / m_{t}^{#mu_{2}}(m_{t})')
+    gr_band.SetTitle('m_{t}(m_{t}) measured as a function of #mu')
 
     gr_band.SetFillStyle(3002);
     gr_band.SetFillColor(rt.kRed+1);
+    gr_band.GetYaxis().SetRangeUser(0.94,1.04)
 
-    gr_band.GetXaxis().SetTitle('#mu [GeV]')
-    gr_band.GetYaxis().SetTitle('m_{t}(#mu) / m_{t}('+str(int(cnst.mu_2))+' GeV)')
-    gr_band.SetTitle('running of m_{t}(#mu) as a function of #mu')
-
-    gr_add.SetMarkerStyle(8)
-    gr_add.SetMarkerColor(rt.kBlue)
-    gr_add.SetLineColor(rt.kBlue)
-
-    gr_band.GetYaxis().SetRangeUser(0.9,1.1)
-
-    leg2 = leg.Clone()
     leg2.Clear()
     leg2.AddEntry(graph,'MCFM @NLO from diff. #sigma_{t#bar{t}}','pe')
     leg2.AddEntry(gr_add,'Hathor @NLO from incl. #sigma_{t#bar{t}} (same data)')
-    leg2.AddEntry(gr_band,'RunDec @ 2 loops (5 flav.)','f')
+    leg2.AddEntry(gr_band,'experimental + extrapolation + PDF uncertainties','f')
 
     g = graph.Clone()
     g.RemovePoint(1)
@@ -732,9 +781,12 @@ def makePlots (mass_2, ratio_12, ratio_32, err_12, err_32):
     leg2.Draw('same')
     # th_band.Draw('f same')
 
-    c.SaveAs(outdir+'/test_incl.png')
-    c.SaveAs(outdir+'/test_incl.pdf')
-    c.SaveAs(outdir+'/test_incl.root')
+    c.SaveAs(outdir+'/test_mtmt.png')
+    c.SaveAs(outdir+'/test_mtmt.pdf')
+    c.SaveAs(outdir+'/test_mtmt.root')
+
+
+
 
     return
 
@@ -1066,7 +1118,7 @@ def execute():
     print 'ratio_3_2 =', round(ratio_3_2,3), '+' , round(err_3_2_up,3), '-' , round(err_3_2_down,3) 
     print
 
-    makePlots (mass_and_err_2[0], ratio_1_2, ratio_3_2, err_ratio_1_2, err_ratio_3_2)
+    makePlots (mass_and_err_2[0], ratio_1_2, ratio_3_2, err_ratio_1_2, err_ratio_3_2, mass_and_err_2[2])
     makeChi2Test (mass_and_err_2[0], ratio_1_2, ratio_3_2, err_ratio_1_2, err_ratio_3_2)
     if estimate_contribs : estimateSystContributions (ratio_1_2,ratio_3_2)
     
