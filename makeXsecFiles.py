@@ -568,12 +568,12 @@ def makeAdditionalTheoryPrediction (mtmt, err_mtmt, mtmu):
 
 ################################
 
-# "makePlots" produces the plots for the running of mt
+# "makeRatioPlots" produces the ratio plots for the running of mt
 
 ################################
 
 
-def makePlots (mass_2, ratio_12, ratio_32, err_12, err_32, mtmt_2):
+def makeRatioPlots (mass_2, ratio_12, ratio_32, err_12, err_32, mtmt_2):
 
     graph = TGraphErrors(3)
     
@@ -645,18 +645,15 @@ def makePlots (mass_2, ratio_12, ratio_32, err_12, err_32, mtmt_2):
     c.SaveAs(outdir+'/running.pdf')
     c.SaveAs(outdir+'/running.root')
 
-    mtmt = 164.02
-    mtmt_err = 1.58
-
-    # mtmu = mtmt2mtmu (mtmt, cnst.mu_2)
+    # mtmu = mtmt2mtmu (cnst.mtmt, cnst.mu_2)
     mtmu = mass_2
 
     gr_add = TGraphErrors()
 
-    gr_add.SetPoint(0,mtmt,mtmt/mtmu)
-    gr_add.SetPointError(0,0,mtmt_err/mtmu)
+    gr_add.SetPoint(0,cnst.mtmt,cnst.mtmt/mtmu)
+    gr_add.SetPointError(0,0,cnst.mtmt_err/mtmu)
 
-    l = makeAdditionalTheoryPrediction(mtmt, mtmt_err, mtmu)
+    l = makeAdditionalTheoryPrediction(cnst.mtmt, cnst.mtmt_err, mtmu)
     r = l[0]
     r_up = l[1]
     r_down = l[2]
@@ -700,9 +697,7 @@ def makePlots (mass_2, ratio_12, ratio_32, err_12, err_32, mtmt_2):
     gr_add.Draw('p same')
     g.Draw('p same')
     g1.Draw('p same')
-    # th.Draw("L same");
     leg2.Draw('same')
-    # th_band.Draw('f same')
 
     c.SaveAs(outdir+'/test_incl.png')
     c.SaveAs(outdir+'/test_incl.pdf')
@@ -754,22 +749,21 @@ def makePlots (mass_2, ratio_12, ratio_32, err_12, err_32, mtmt_2):
     c.SaveAs(outdir+'/mt_mt.pdf')
     c.SaveAs(outdir+'/mt_mt.root')
 
-
-    ##############
+    
     gr_add.Clear()
 
-    gr_add.SetPoint(0,mtmt,mtmt/mtmt_2)
-    gr_add.SetPointError(0,0,mtmt_err/mtmt_2)
+    gr_add.SetPoint(0,cnst.mtmt,cnst.mtmt/mtmt_2)
+    gr_add.SetPointError(0,0,cnst.mtmt_err/mtmt_2)
 
-    l = makeAdditionalTheoryPrediction(mtmt, mtmt_err, mtmu)
+    l = makeAdditionalTheoryPrediction(cnst.mtmt, cnst.mtmt_err, mtmu)
     scales = l[3]
 
     gr_band.Clear()
     gr_band = TGraph (2*gr_add.GetN())
 
     for i in range(0, len(r)):
-        gr_band.SetPoint(i,scales[i],(mtmt+mtmt_err)/mtmt_2)
-        gr_band.SetPoint(len(scales)+i,scales[len(scales)-i-1],(mtmt-mtmt_err)/mtmt_2);
+        gr_band.SetPoint(i,scales[i],(cnst.mtmt+cnst.mtmt_err)/mtmt_2)
+        gr_band.SetPoint(len(scales)+i,scales[len(scales)-i-1],(cnst.mtmt-cnst.mtmt_err)/mtmt_2);
 
     gr_band.GetXaxis().SetTitle('#mu [GeV]')
     gr_band.GetYaxis().SetTitle('m_{t}(m_{t}) / m_{t}^{#mu_{2}}(m_{t})')
@@ -798,16 +792,11 @@ def makePlots (mass_2, ratio_12, ratio_32, err_12, err_32, mtmt_2):
     gr_add.Draw('p same')
     g.Draw('p same')
     g1.Draw('p same')
-    # th.Draw("L same");
     leg3.Draw('same')
-    # th_band.Draw('f same')
 
     c.SaveAs(outdir+'/test_mtmt.png')
     c.SaveAs(outdir+'/test_mtmt.pdf')
     c.SaveAs(outdir+'/test_mtmt.root')
-
-
-
 
     return
 
@@ -1139,7 +1128,7 @@ def execute():
     print 'ratio_3_2 =', round(ratio_3_2,3), '+' , round(err_3_2_up,3), '-' , round(err_3_2_down,3) 
     print
 
-    makePlots (mass_and_err_2[0], ratio_1_2, ratio_3_2, err_ratio_1_2, err_ratio_3_2, mass_and_err_2[2])
+    makeRatioPlots (mass_and_err_2[0], ratio_1_2, ratio_3_2, err_ratio_1_2, err_ratio_3_2, mass_and_err_2[2])
     makeChi2Test (mass_and_err_2[0], ratio_1_2, ratio_3_2, err_ratio_1_2, err_ratio_3_2)
     if estimate_contribs : estimateSystContributions (ratio_1_2,ratio_3_2)
     
