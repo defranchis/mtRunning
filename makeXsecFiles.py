@@ -14,7 +14,7 @@ from variables import xsec_1, xsec_2, xsec_3
 # options
 
 estimate_contribs = True
-ntoys = 100
+ntoys = 10
 
 replace_corr = False
 
@@ -544,7 +544,7 @@ def makeTheoryPrediction(outfile, mass_2):
 ################################
 
 
-def makeAdditionalTheoryPrediction (mtmt, err_mtmt, mtmu):
+def makeAdditionalTheoryPrediction (mtmt, err_mtmt, mtmu, doratio):
     r = []
     ru = []
     rd = []
@@ -561,6 +561,12 @@ def makeAdditionalTheoryPrediction (mtmt, err_mtmt, mtmu):
         ru.append(ratio_up)
         rd.append(ratio_down)
         scales.append(scale)
+
+    if not doratio:
+        for i in range(0,len(r)):
+            r[i]  *= mtmu
+            ru[i] *= mtmu
+            rd[i] *= mtmu
         
     return [r, ru, rd, scales]
 
@@ -653,7 +659,7 @@ def makeRatioPlots (mass_2, ratio_12, ratio_32, err_12, err_32, mtmt_2):
     gr_add.SetPoint(0,cnst.mtmt,cnst.mtmt/mtmu)
     gr_add.SetPointError(0,0,cnst.mtmt_err/mtmu)
 
-    l = makeAdditionalTheoryPrediction(cnst.mtmt, cnst.mtmt_err, mtmu)
+    l = makeAdditionalTheoryPrediction(cnst.mtmt, cnst.mtmt_err, mtmu, True)
     r = l[0]
     r_up = l[1]
     r_down = l[2]
@@ -755,7 +761,7 @@ def makeRatioPlots (mass_2, ratio_12, ratio_32, err_12, err_32, mtmt_2):
     gr_add.SetPoint(0,cnst.mtmt,cnst.mtmt/mtmt_2)
     gr_add.SetPointError(0,0,cnst.mtmt_err/mtmt_2)
 
-    l = makeAdditionalTheoryPrediction(cnst.mtmt, cnst.mtmt_err, mtmu)
+    l = makeAdditionalTheoryPrediction(cnst.mtmt, cnst.mtmt_err, mtmu, True)
     scales = l[3]
 
     gr_band.Clear()
@@ -800,6 +806,122 @@ def makeRatioPlots (mass_2, ratio_12, ratio_32, err_12, err_32, mtmt_2):
 
     return
 
+
+################################
+
+# "makeMassPlots" produces the absolute mass plots for the running of mt
+
+################################
+
+def makeMassPlots(mtmu_1, err_1, mtmt_1, mtmu_2, err_2, mtmt_2, mtmu_3, err_3, mtmt_3) :
+
+    graph=TGraphErrors(3)
+    graph.SetPoint(0,cnst.mu_1,mtmu_1)
+    graph.SetPointError(0,0,err_1)
+    graph.SetPoint(1,cnst.mu_2,mtmu_2)
+    graph.SetPointError(1,0,err_2)
+    graph.SetPoint(2,cnst.mu_3,mtmu_3)
+    graph.SetPointError(2,0,err_3)
+
+    gr_add=TGraphErrors()
+    gr_add.SetPoint(0,cnst.mtmt,cnst.mtmt)
+    gr_add.SetPointError(0,0,cnst.mtmt_err)
+    
+    
+    l = makeAdditionalTheoryPrediction(cnst.mtmt, cnst.mtmt_err, mtmu_2, False)
+    r = l[0]
+    r_up = l[1]
+    r_down = l[2]
+    scales = l[3]
+    
+    gr_band = TGraph (2*gr_add.GetN())
+
+    for i in range(0, len(r)):
+        gr_band.SetPoint(i,scales[i],r_up[i])
+        gr_band.SetPoint(len(r)+i,scales[len(r)-i-1],r_down[len(r)-i-1]);
+
+    gr_band.SetFillStyle(3002);
+    gr_band.SetFillColor(rt.kRed+1);
+
+    gr_band.GetXaxis().SetTitle('#mu [GeV]')
+    gr_band.GetYaxis().SetTitle('m_{t}(#mu) [GeV]')
+    gr_band.SetTitle('m_{t}(#mu) as a function of #mu')
+
+    gr_add.SetMarkerStyle(8)
+    gr_add.SetMarkerColor(rt.kBlue)
+    gr_add.SetLineColor(rt.kBlue)
+
+    gr_band.GetYaxis().SetRangeUser(140,170)
+
+    graph.SetMarkerStyle(8)
+    
+    leg = TLegend(.3,.73,.85,.85)
+    leg.AddEntry(graph,'MCFM @NLO from diff. #sigma_{t#bar{t}}','pe')
+    leg.AddEntry(gr_add,'Hathor @NLO from incl. #sigma_{t#bar{t}} (same data)')
+    leg.AddEntry(gr_band,'RunDec @ 2 loops (5 flav.)','f')
+    
+    c = TCanvas()
+    gr_band.Draw('af')
+    gr_add.Draw('p same')
+    graph.Draw('p same')
+    leg.Draw('same')
+
+    outdir = 'plots_running'
+    if not os.path.exists(outdir):
+        os.makedirs(outdir)
+
+    c.SaveAs(outdir+'/test_mtmu_abs.png')
+    c.SaveAs(outdir+'/test_mtmu_abs.pdf')
+    c.SaveAs(outdir+'/test_mtmu_abs.root')
+
+
+    graph.Clear()
+    graph.SetPoint(0,cnst.mu_1,mtmt_1)
+    graph.SetPointError(0,0,err_1)
+    graph.SetPoint(1,cnst.mu_2,mtmt_2)
+    graph.SetPointError(1,0,err_2)
+    graph.SetPoint(2,cnst.mu_3,mtmt_3)
+    graph.SetPointError(2,0,err_3)
+    
+    gr_band.Clear()
+    gr_band = TGraph (2*gr_add.GetN())
+
+    for i in range(0, len(r)):
+        gr_band.SetPoint(i,scales[i],cnst.mtmt+cnst.mtmt_err)
+        gr_band.SetPoint(len(r)+i,scales[len(r)-i-1],cnst.mtmt-cnst.mtmt_err);
+
+    gr_band.SetFillStyle(3002);
+    gr_band.SetFillColor(rt.kRed+1);
+
+    gr_band.GetXaxis().SetTitle('#mu [GeV]')
+    gr_band.GetYaxis().SetTitle('m_{t}(m_{t}) [GeV]')
+    gr_band.SetTitle('m_{t}(m_{t}) measured as a function of #mu')
+
+    gr_add.SetMarkerStyle(8)
+    gr_add.SetMarkerColor(rt.kBlue)
+    gr_add.SetLineColor(rt.kBlue)
+
+    gr_band.GetYaxis().SetRangeUser(157,170)
+
+    graph.SetMarkerStyle(8)
+    
+    leg.Clear()
+    leg = TLegend(.15,.73,.7,.85)
+    leg.AddEntry(graph,'MCFM @NLO from diff. #sigma_{t#bar{t}}','pe')
+    leg.AddEntry(gr_add,'Hathor @NLO from incl. #sigma_{t#bar{t}} (same data)')
+    leg.AddEntry(gr_band,'experimental + extrapolation + PDF uncertainties','f')
+    
+    c.Clear()
+    gr_band.Draw('af')
+    gr_add.Draw('p same')
+    graph.Draw('p same')
+    leg.Draw('same')
+
+    c.SaveAs(outdir+'/test_mtmt_abs.png')
+    c.SaveAs(outdir+'/test_mtmt_abs.pdf')
+    c.SaveAs(outdir+'/test_mtmt_abs.root')
+  
+    return
 
 
 ################################
@@ -1127,6 +1249,10 @@ def execute():
     print 'ratio_1_2 =', round(ratio_1_2,3), '+' , round(err_1_2_up,3), '-' , round(err_1_2_down,3)
     print 'ratio_3_2 =', round(ratio_3_2,3), '+' , round(err_3_2_up,3), '-' , round(err_3_2_down,3) 
     print
+
+    makeMassPlots(mass_and_err_1[0], mass_and_err_1[1], mass_and_err_1[2],
+                  mass_and_err_2[0], mass_and_err_2[1], mass_and_err_2[2],
+                  mass_and_err_3[0], mass_and_err_3[1], mass_and_err_3[2])
 
     makeRatioPlots (mass_and_err_2[0], ratio_1_2, ratio_3_2, err_ratio_1_2, err_ratio_3_2, mass_and_err_2[2])
     makeChi2Test (mass_and_err_2[0], ratio_1_2, ratio_3_2, err_ratio_1_2, err_ratio_3_2)
