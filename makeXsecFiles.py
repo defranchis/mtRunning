@@ -14,7 +14,7 @@ from variables import xsec_1, xsec_2, xsec_3
 # options
 
 estimate_contribs = True
-ntoys = 10000
+ntoys = 0
 
 replace_corr = False
 
@@ -1004,9 +1004,8 @@ def estimateSystContributions(central_ratio_1_2, central_ratio_3_2):
             contr_3_2 = abs(contr_3_2_up-contr_3_2_down)/2.
         else : contr_3_2 = max(abs(contr_3_2_up),abs(contr_3_2_down))
 
-        if contr_1_2 > 0.3 or contr_3_2 > 0.5 :
+        if contr_1_2 > 0.2 or contr_3_2 > 0.3 :
             print var.syst_names[contrib-1], round(contr_1_2,2), round(contr_3_2,2)
-
 
     print
     
