@@ -14,7 +14,7 @@ from variables import xsec_1, xsec_2, xsec_3
 # options
 
 estimate_contribs = True
-ntoys = 10
+ntoys = 10000
 
 replace_corr = False
 
@@ -615,7 +615,7 @@ def makeRatioPlots (mass_2, ratio_12, ratio_32, err_12, err_32, mtmt_2):
     
     leg = TLegend(.15,.2,.6,.32)
     leg.AddEntry(graph,'MCFM @NLO from diff. #sigma_{t#bar{t}}','pe')
-    leg.AddEntry(th,'RunDec @ 2 loops (5 flav.)','l')
+    leg.AddEntry(th,'RunDec @ 1 loop (5 flav.)','l')
 
     latexLabel1 = TLatex();
     latexLabel1.SetTextSize(0.04);
@@ -688,7 +688,7 @@ def makeRatioPlots (mass_2, ratio_12, ratio_32, err_12, err_32, mtmt_2):
     leg2.Clear()
     leg2.AddEntry(graph,'MCFM @NLO from diff. #sigma_{t#bar{t}}','pe')
     leg2.AddEntry(gr_add,'Hathor @NLO from incl. #sigma_{t#bar{t}} (same data)')
-    leg2.AddEntry(gr_band,'RunDec @ 2 loops (5 flav.)','f')
+    leg2.AddEntry(gr_band,'RunDec @ 1 loop (5 flav.)','f')
 
     g = graph.Clone()
     g.RemovePoint(1)
@@ -856,9 +856,9 @@ def makeMassPlots(mtmu_1, err_1, mtmt_1, mtmu_2, err_2, mtmt_2, mtmu_3, err_3, m
     graph.SetMarkerStyle(8)
     
     leg = TLegend(.3,.73,.85,.85)
-    leg.AddEntry(graph,'MCFM @NLO from diff. #sigma_{t#bar{t}}','pe')
+    leg.AddEntry(graph,'MCFM @NLO from diff. #sigma_{t#bar{t}} (exp. only)','pe')
     leg.AddEntry(gr_add,'Hathor @NLO from incl. #sigma_{t#bar{t}} (same data)')
-    leg.AddEntry(gr_band,'RunDec @ 2 loops (5 flav.)','f')
+    leg.AddEntry(gr_band,'RunDec @ 1 loop (5 flav.)','f')
     
     c = TCanvas()
     gr_band.Draw('af')
@@ -907,7 +907,7 @@ def makeMassPlots(mtmu_1, err_1, mtmt_1, mtmu_2, err_2, mtmt_2, mtmu_3, err_3, m
     
     leg.Clear()
     leg = TLegend(.15,.73,.7,.85)
-    leg.AddEntry(graph,'MCFM @NLO from diff. #sigma_{t#bar{t}}','pe')
+    leg.AddEntry(graph,'MCFM @NLO from diff. #sigma_{t#bar{t}} (exp. only)','pe')
     leg.AddEntry(gr_add,'Hathor @NLO from incl. #sigma_{t#bar{t}} (same data)')
     leg.AddEntry(gr_band,'experimental + extrapolation + PDF uncertainties','f')
     

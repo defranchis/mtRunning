@@ -3,7 +3,7 @@ MZ = 91.1876
 asMZ = 0.11905
 err_as = 0.0011
 nflav = 5
-nloops = 2
+nloops = 1
 
 n_mttbins = 4
 
