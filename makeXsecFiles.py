@@ -613,18 +613,22 @@ def makeRatioPlots (mass_2, ratio_12, ratio_32, err_12, err_32, mtmt_2):
     th_band.SetFillStyle(3001);
     th_band.SetFillColor(rt.kRed);
     
-    leg = TLegend(.15,.2,.6,.32)
-    leg.AddEntry(graph,'MCFM @NLO from diff. #sigma_{t#bar{t}}','pe')
-    leg.AddEntry(th,'RunDec @ 1 loop (5 flav.)','l')
+    leg = TLegend(.15,.15,.77,.3)
+    leg.AddEntry(graph,'MCFM extraction at NLO from differential #sigma_{t#bar{t}}','pe')
+    leg.AddEntry(th,'RunDec evolution at one loop (5 flavours)','l')
 
-    latexLabel1 = TLatex();
-    latexLabel1.SetTextSize(0.04);
-    latexLabel1.SetTextFont(42)
-    latexLabel1.SetNDC();
+    latexLabel1 = TLatex()
+    latexLabel1.SetTextSize(0.06)
+    latexLabel1.SetNDC()
     
-    graph.GetXaxis().SetTitle('centre-of-gravity of m_{t#bar{t}} [GeV]')
-    graph.GetYaxis().SetTitle('m_{t}(m_{t#bar{t}}) / m_{t}('+str(int(cnst.mu_2))+' GeV)')
-    graph.SetTitle('running of m_{t}(#mu) as a function of #mu=m_{t#bar{t}}')
+    latexLabel2 = TLatex();
+    latexLabel2.SetTextSize(0.04);
+    latexLabel2.SetTextFont(42)
+    latexLabel2.SetNDC();
+    
+    graph.GetXaxis().SetTitle('#mu [GeV]')
+    graph.GetYaxis().SetTitle('m_{t}(#mu) / m_{t}(#mu_{2})')
+    graph.SetTitle('')
     graph.SetMarkerStyle(8)
     
     g = graph.Clone()
@@ -641,7 +645,9 @@ def makeRatioPlots (mass_2, ratio_12, ratio_32, err_12, err_32, mtmt_2):
     g1.Draw('p same')
     leg.Draw('same')
     th_band.Draw('f same')
-    latexLabel1.DrawLatex(0.59, 0.78, "ABMP16_5_nlo PDF set");
+    latexLabel1.DrawLatex(0.11, 0.92, "CMS")
+    latexLabel2.DrawLatex(0.70, 0.92, "35.9 fb^{-1} (13 TeV)")
+    latexLabel2.DrawLatex(0.59, 0.78, "ABMP16_5_nlo PDF set");
 
     outdir = 'plots_running'
     if not os.path.exists(outdir):
@@ -675,8 +681,8 @@ def makeRatioPlots (mass_2, ratio_12, ratio_32, err_12, err_32, mtmt_2):
     gr_band.SetFillColor(rt.kRed+1);
 
     gr_band.GetXaxis().SetTitle('#mu [GeV]')
-    gr_band.GetYaxis().SetTitle('m_{t}(#mu) / m_{t}('+str(int(cnst.mu_2))+' GeV)')
-    gr_band.SetTitle('running of m_{t}(#mu) as a function of #mu')
+    gr_band.GetYaxis().SetTitle('m_{t}(#mu) / m_{t}(#mu_{2})')
+    gr_band.SetTitle('')
 
     gr_add.SetMarkerStyle(8)
     gr_add.SetMarkerColor(rt.kBlue)
@@ -686,9 +692,9 @@ def makeRatioPlots (mass_2, ratio_12, ratio_32, err_12, err_32, mtmt_2):
 
     leg2 = leg.Clone()
     leg2.Clear()
-    leg2.AddEntry(graph,'MCFM @NLO from diff. #sigma_{t#bar{t}}','pe')
-    leg2.AddEntry(gr_add,'Hathor @NLO from incl. #sigma_{t#bar{t}} (same data)')
-    leg2.AddEntry(gr_band,'RunDec @ 1 loop (5 flav.)','f')
+    leg2.AddEntry(graph,'MCFM extraction at NLO from differential #sigma_{t#bar{t}}','pe')
+    leg2.AddEntry(gr_add,'Hathor extraction at NLO from inclusive #sigma_{t#bar{t}} (same data)')
+    leg2.AddEntry(gr_band,'RunDec evolution at one loop (5 flavours)','f')
 
     g = graph.Clone()
     g.RemovePoint(1)
@@ -704,6 +710,9 @@ def makeRatioPlots (mass_2, ratio_12, ratio_32, err_12, err_32, mtmt_2):
     g.Draw('p same')
     g1.Draw('p same')
     leg2.Draw('same')
+    latexLabel1.DrawLatex(0.11, 0.92, "CMS")
+    latexLabel2.DrawLatex(0.70, 0.92, "35.9 fb^{-1} (13 TeV)")
+    latexLabel2.DrawLatex(0.59, 0.78, "ABMP16_5_nlo PDF set");
 
     c.SaveAs(outdir+'/test_incl.png')
     c.SaveAs(outdir+'/test_incl.pdf')
@@ -745,7 +754,7 @@ def makeRatioPlots (mass_2, ratio_12, ratio_32, err_12, err_32, mtmt_2):
     leg.Draw('same')
     line.Draw('same')
     g1.Draw('p same')
-    latexLabel1.DrawLatex(0.59, 0.8, "ABMP16_5_nlo PDF set");
+    latexLabel2.DrawLatex(0.59, 0.8, "ABMP16_5_nlo PDF set");
 
     outdir = 'plots_running'
     if not os.path.exists(outdir):
