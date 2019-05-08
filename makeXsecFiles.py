@@ -614,8 +614,9 @@ def makeRatioPlots (mass_2, ratio_12, ratio_32, err_12, err_32, mtmt_2):
     th_band.SetFillColor(rt.kRed);
     
     leg = TLegend(.15,.15,.77,.3)
-    leg.AddEntry(graph,'MCFM extraction at NLO from differential #sigma_{t#bar{t}}','pe')
-    leg.AddEntry(th,'RunDec evolution at one loop (5 flavours)','l')
+    leg.SetBorderSize(0)
+    leg.AddEntry(graph,'NLO extraction from differential #sigma_{t#bar{t}}','pe')
+    leg.AddEntry(th,'RGE evolution at one loop (5 flavours)','l')
 
     latexLabel1 = TLatex()
     latexLabel1.SetTextSize(0.06)
@@ -692,9 +693,9 @@ def makeRatioPlots (mass_2, ratio_12, ratio_32, err_12, err_32, mtmt_2):
 
     leg2 = leg.Clone()
     leg2.Clear()
-    leg2.AddEntry(graph,'MCFM extraction at NLO from differential #sigma_{t#bar{t}}','pe')
-    leg2.AddEntry(gr_add,'Hathor extraction at NLO from inclusive #sigma_{t#bar{t}} (same data)')
-    leg2.AddEntry(gr_band,'RunDec evolution at one loop (5 flavours)','f')
+    leg2.AddEntry(graph,'NLO extraction from differential #sigma_{t#bar{t}}','pe')
+    leg2.AddEntry(gr_add,'NLO extraction from inclusive #sigma_{t#bar{t}} (same data)')
+    leg2.AddEntry(gr_band,'RGE evolution at one loop (5 flavours)','f')
 
     g = graph.Clone()
     g.RemovePoint(1)
