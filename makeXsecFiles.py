@@ -13,7 +13,7 @@ from variables import xsec_1, xsec_2, xsec_3
 
 # options
 
-estimate_contribs = True
+estimate_contribs = False
 ntoys = 0
 
 replace_corr = False
@@ -628,6 +628,10 @@ def makeRatioPlots (mass_2, ratio_12, ratio_32, err_12_up, err_12_down, err_32_u
     latexLabel2.SetNDC();
     
     graph.GetXaxis().SetTitle('#mu [GeV]')
+    graph.GetXaxis().SetTitleSize(0.048)
+    graph.GetXaxis().SetTitleOffset(.85)
+    graph.GetYaxis().SetTitleSize(0.048)
+    graph.GetYaxis().SetTitleOffset(.85)
     graph.GetYaxis().SetTitle('m_{t}(#mu) / m_{t}(#mu_{2})')
     graph.SetTitle('')
     graph.SetMarkerStyle(8)
@@ -685,6 +689,13 @@ def makeRatioPlots (mass_2, ratio_12, ratio_32, err_12_up, err_12_down, err_32_u
     gr_band.GetYaxis().SetTitle('m_{t}(#mu) / m_{t}(#mu_{2})')
     gr_band.SetTitle('')
 
+
+    gr_band.GetXaxis().SetTitleSize(0.048)
+    gr_band.GetXaxis().SetTitleOffset(.85)
+    gr_band.GetYaxis().SetTitleSize(0.048)
+    gr_band.GetYaxis().SetTitleOffset(.9)
+
+    
     gr_add.SetMarkerStyle(8)
     gr_add.SetMarkerColor(rt.kBlue)
     gr_add.SetLineColor(rt.kBlue)
