@@ -1016,6 +1016,9 @@ def makeChi2Significance(mass2, ratio12, ratio32, err12, err32):
     graph.SetMarkerStyle(8)
     graph.SetMinimum(0)
 
+    graph.GetXaxis().SetTitle('x')
+    graph.GetYaxis().SetTitle('#chi^{2}')
+    
     outdir = 'plots_chi2'
     if not os.path.exists(outdir):
         os.makedirs(outdir)
