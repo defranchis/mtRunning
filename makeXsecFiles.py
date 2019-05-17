@@ -581,9 +581,6 @@ def makeAdditionalTheoryPrediction (mtmt, err_mtmt, mtmu, doratio):
 
 def makeRatioPlots (mass_2, ratio_12, ratio_32, err_12_up, err_12_down, err_32_up, err_32_down, mtmt_2):
 
-    err_12 = (err_12_up+err_12_down)/2.
-    err_32 = (err_32_up+err_32_down)/2.
-    
     graph = TGraphAsymmErrors(3)
     
     graph.SetPoint(0,cnst.mu_1,ratio_12)
@@ -945,13 +942,19 @@ def makeMassPlots(mtmu_1, err_1, mtmt_1, mtmu_2, err_2, mtmt_2, mtmu_3, err_3, m
 ################################
 
 
-def makeChi2Test(mass2, ratio12, ratio32, err12, err32):
+def makeChi2Test(mass2, ratio12, ratio32, err12_up, err12_down, err32_up, err32_down):
 
     th_ratio12 = mtmu2mtmu(mass2, cnst.mu_2, cnst.mu_1, 'nominal')/mass2
     th_ratio32 = mtmu2mtmu(mass2, cnst.mu_2, cnst.mu_3, 'nominal')/mass2
 
     print 
     print 'theory:', round(th_ratio12,3), round(th_ratio32,3)
+
+    if ratio12 > th_ratio12: err12 = err12_down
+    else: err12 = err12_up
+
+    if ratio32 > th_ratio32: err32 = err32_down
+    else: err32 = err32_up
     
     chi2_no_run = ((ratio12-1)/err12)**2 + ((ratio32-1)/err32)**2
     chi2_run = ((ratio12-th_ratio12)/err12)**2 + ((ratio32-th_ratio32)/err32)**2
@@ -991,7 +994,6 @@ def makeChi2Significance(mass2, ratio12, ratio32, err12, err32):
         chi2 = ((ratio12-th1)/err12)**2 + ((ratio32-th3)/err32)**2
         
         graph.SetPoint(int(x*10),x,chi2)
-        print x, th1, th3, chi2
 
     funct = TF1('funct','pol2(0)',0,3)
     graph.Fit(funct,'q','',0,3)
@@ -1009,7 +1011,12 @@ def makeChi2Significance(mass2, ratio12, ratio32, err12, err32):
     graph.Draw('ap')
     graph.SetMarkerStyle(8)
     graph.SetMinimum(0)
-    c.Print('chi2.png')
+
+    outdir = 'plots_chi2'
+    if not os.path.exists(outdir):
+        os.makedirs(outdir)
+
+    c.Print(outdir+'/chi2_significance.png')
     
     return
 
@@ -1315,7 +1322,7 @@ def execute():
                   mass_and_err_3[0], mass_and_err_3[1], mass_and_err_3[2])
 
     makeRatioPlots (mass_and_err_2[0], ratio_1_2, ratio_3_2, err_1_2_up, err_1_2_down, err_3_2_up, err_3_2_down, mass_and_err_2[2])
-    makeChi2Test (mass_and_err_2[0], ratio_1_2, ratio_3_2, err_ratio_1_2, err_ratio_3_2)
+    makeChi2Test (mass_and_err_2[0], ratio_1_2, ratio_3_2, err_1_2_up, err_1_2_down, err_3_2_up, err_3_2_down)
     if estimate_contribs : estimateSystContributions (ratio_1_2,ratio_3_2)
     makeChi2Significance (mass_and_err_2[0], ratio_1_2, ratio_3_2, err_ratio_1_2, err_ratio_3_2)
     
