@@ -967,6 +967,54 @@ def makeChi2Test(mass2, ratio12, ratio32, err12, err32):
 
 ################################
 
+# "makeChi2Significance" calculates the significance of the obseved running
+#  by fitting the data to the theory prediction
+
+################################
+
+
+def makeChi2Significance(mass2, ratio12, ratio32, err12, err32):
+
+    th_ratio12 = mtmu2mtmu(mass2, cnst.mu_2, cnst.mu_1, 'nominal')/mass2
+    th_ratio32 = mtmu2mtmu(mass2, cnst.mu_2, cnst.mu_3, 'nominal')/mass2
+
+    graph = TGraph()
+    
+    for x in range(0,31):
+        x = x/10.
+        # chi2 = ((ratio12-x*(th_ratio12-1)+1)/err12)**2 + ((ratio32-x*(th_ratio32-1)+1)/err32)**2
+        th1 = x*(th_ratio12-1)+1
+        th3 = x*(th_ratio32-1)+1
+        chi2 = ((ratio12-th1)/err12)**2 + ((ratio32-th3)/err32)**2
+        
+        graph.SetPoint(int(x*10),x,chi2)
+        print x, th1, th3, chi2
+
+    funct = TF1('funct','pol2(0)',0,3)
+    graph.Fit(funct,'q','',0,3)
+
+    xmin = funct.GetMinimumX()
+    err = xmin - funct.GetX(1,0,xmin)
+    print
+    print 'xmin =', round(xmin,2), '+/-' ,round(err,2)
+    print
+    print 'significance =', round(xmin/err,2)
+    print
+    
+    
+    c = TCanvas()
+    graph.Draw('ap')
+    graph.SetMarkerStyle(8)
+    graph.SetMinimum(0)
+    c.Print('chi2.png')
+    
+    return
+
+
+
+
+################################
+
 # "estimateSystContributions" estimates the contribution to the total uncertainty
 #  of each individual systematics source
 
@@ -1266,6 +1314,7 @@ def execute():
     makeRatioPlots (mass_and_err_2[0], ratio_1_2, ratio_3_2, err_ratio_1_2, err_ratio_3_2, mass_and_err_2[2])
     makeChi2Test (mass_and_err_2[0], ratio_1_2, ratio_3_2, err_ratio_1_2, err_ratio_3_2)
     if estimate_contribs : estimateSystContributions (ratio_1_2,ratio_3_2)
+    makeChi2Significance (mass_and_err_2[0], ratio_1_2, ratio_3_2, err_ratio_1_2, err_ratio_3_2)
     
     return
 
