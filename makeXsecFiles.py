@@ -988,7 +988,6 @@ def makeChi2Significance(mass2, ratio12, ratio32, err12, err32):
     
     for x in range(0,31):
         x = x/10.
-        # chi2 = ((ratio12-x*(th_ratio12-1)+1)/err12)**2 + ((ratio32-x*(th_ratio32-1)+1)/err32)**2
         th1 = x*(th_ratio12-1)+1
         th3 = x*(th_ratio32-1)+1
         chi2 = ((ratio12-th1)/err12)**2 + ((ratio32-th3)/err32)**2
@@ -1000,13 +999,7 @@ def makeChi2Significance(mass2, ratio12, ratio32, err12, err32):
 
     xmin = funct.GetMinimumX()
     err = xmin - funct.GetX(1,0,xmin)
-    print
-    print 'xmin =', round(xmin,2), '+/-' ,round(err,2)
-    print
-    print 'significance =', round(xmin/err,2)
-    print
-    
-    
+   
     c = TCanvas()
     graph.Draw('ap')
     graph.SetMarkerStyle(8)
@@ -1016,7 +1009,113 @@ def makeChi2Significance(mass2, ratio12, ratio32, err12, err32):
     if not os.path.exists(outdir):
         os.makedirs(outdir)
 
-    c.Print(outdir+'/chi2_significance.png')
+    c.Print(outdir+'/chi2_significance_nominal.png')
+
+
+    err_pdf_up = 0
+    err_pdf_down = 0
+    
+    for pdf in range(1,30):
+        mass_and_err_1 = getMassAndError(1, 'nominal', 'nominal', pdf , 0 , 0 )
+        mass_and_err_2 = getMassAndError(2, 'nominal', 'nominal', pdf , 0 , 0 )
+        mass_and_err_3 = getMassAndError(3, 'nominal', 'nominal', pdf , 0 , 0 )
+
+        ratios_and_errs = getRatios(mass_and_err_1[0], mass_and_err_2[0], mass_and_err_3[0],
+                                    mass_and_err_1[1], mass_and_err_2[1], mass_and_err_3[1])
+
+        ratio_1_2 = ratios_and_errs[0]
+        ratio_3_2 = ratios_and_errs[1]
+        err_ratio_1_2 = ratios_and_errs[2]
+        err_ratio_3_2 = ratios_and_errs[3]
+
+        graph.Clear()
+        
+        for x in range(0,31):
+            x = x/10.
+            th1 = x*(th_ratio12-1)+1
+            th3 = x*(th_ratio32-1)+1
+            chi2 = ((ratio_1_2-th1)/err_ratio_1_2)**2 + ((ratio_3_2-th3)/err_ratio_3_2)**2
+            graph.SetPoint(int(x*10),x,chi2)
+
+        funct = TF1('funct','pol2(0)',0,3)
+        graph.Fit(funct,'q','',0,3)
+
+        c.Clear()
+        graph.Draw('ap')
+        c.Print(outdir+'/chi2_significance_PDF'+str(pdf)+'.png')
+        
+        xmin_PDF = funct.GetMinimumX()
+        err_pdf = (xmin-xmin_PDF)**2
+        
+        if xmin_PDF > xmin : err_pdf_up += err_pdf
+        else : err_pdf_down += err_pdf
+
+    err_pdf_up = err_pdf_up**.5
+    err_pdf_down = err_pdf_up**.5
+
+    print err_pdf_up,err_pdf_down
+
+
+    err_extr_up = 0
+    err_extr_down = 0
+
+    for extr in range(-len(var.extr_1_up),len(var.extr_1_up)+1) :
+        if extr == 0 : continue
+
+        mass_and_err_1 = getMassAndError(1, 'nominal', 'nominal', 0 , extr , 0 )
+        mass_and_err_2 = getMassAndError(2, 'nominal', 'nominal', 0 , extr , 0 )
+        mass_and_err_3 = getMassAndError(3, 'nominal', 'nominal', 0 , extr , 0 )
+
+        ratios_and_errs = getRatios(mass_and_err_1[0], mass_and_err_2[0], mass_and_err_3[0],
+                                    mass_and_err_1[1], mass_and_err_2[1], mass_and_err_3[1])
+
+        ratio_1_2 = ratios_and_errs[0]
+        ratio_3_2 = ratios_and_errs[1]
+        err_ratio_1_2 = ratios_and_errs[2]
+        err_ratio_3_2 = ratios_and_errs[3]
+
+
+        graph.Clear()
+        
+        for x in range(0,31):
+            x = x/10.
+            th1 = x*(th_ratio12-1)+1
+            th3 = x*(th_ratio32-1)+1
+            chi2 = ((ratio_1_2-th1)/err_ratio_1_2)**2 + ((ratio_3_2-th3)/err_ratio_3_2)**2
+            graph.SetPoint(int(x*10),x,chi2)
+
+        funct = TF1('funct','pol2(0)',0,3)
+        graph.Fit(funct,'q','',0,3)
+
+        c.Clear()
+        graph.Draw('ap')
+        c.Print(outdir+'/chi2_significance_EXTR'+str(extr)+'.png')
+        
+        xmin_EXTR = funct.GetMinimumX()
+        err_extr = (xmin-xmin_EXTR)**2
+        
+        if xmin_EXTR > xmin : err_extr_up += err_extr
+        else : err_extr_down += err_extr
+
+    err_extr_up = err_extr_up**.5
+    err_extr_down = err_extr_up**.5
+
+    print err_extr_up,err_extr_down
+
+    err_up = (err**2 + err_pdf_up**2 + err_extr_up**2)**.5
+    err_down = (err**2 + err_pdf_down**2 + err_extr_down**2)**.5
+        
+    print
+    print 'xmin =', round(xmin,2), '+/-' ,round(err,2), '(exp)', '+' ,round(err_pdf_up,2), '-', round(err_pdf_down,2), '(PDF)', '+' ,round(err_extr_up,2), '-', round(err_extr_down,2), '(extr)'
+    print
+    print 'xmin =', round(xmin,2), '+' ,round(err_up,2), '-', round(err_down,2), '(tot)'
+    print
+    print 'significance =', round(xmin/err_down,2)
+    print
+
+
+
+
     
     return
 
