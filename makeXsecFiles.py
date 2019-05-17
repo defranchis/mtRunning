@@ -7,7 +7,7 @@ import ROOT as rt
 import variables as var
 import constants as cnst
 
-from ROOT import TString, TH2D, TRandom3, TF1, TGraph, TLine, TCanvas, TGraphErrors, TLegend, TLatex
+from ROOT import TString, TH2D, TRandom3, TF1, TGraph, TLine, TCanvas, TGraphErrors, TGraphAsymmErrors, TLegend, TLatex
 from variables import xsec_1, xsec_2, xsec_3
 
 
@@ -579,18 +579,21 @@ def makeAdditionalTheoryPrediction (mtmt, err_mtmt, mtmu, doratio):
 ################################
 
 
-def makeRatioPlots (mass_2, ratio_12, ratio_32, err_12, err_32, mtmt_2):
+def makeRatioPlots (mass_2, ratio_12, ratio_32, err_12_up, err_12_down, err_32_up, err_32_down, mtmt_2):
 
-    graph = TGraphErrors(3)
+    err_12 = (err_12_up+err_12_down)/2.
+    err_32 = (err_32_up+err_32_down)/2.
+    
+    graph = TGraphAsymmErrors(3)
     
     graph.SetPoint(0,cnst.mu_1,ratio_12)
-    graph.SetPointError(0,0,err_12)
+    graph.SetPointError(0,0,0,err_12_down,err_12_up)
 
     graph.SetPoint(1,cnst.mu_2,1)
-    graph.SetPointError(1,0,0)
+    graph.SetPointError(1,0,0,0,0)
 
     graph.SetPoint(2,cnst.mu_3,ratio_32)
-    graph.SetPointError(2,0,err_32)
+    graph.SetPointError(2,0,0,err_32_down,err_32_up)
 
     theoryFileName = 'theory_prediction'
     l = makeTheoryPrediction(theoryFileName,mass_2)
@@ -723,13 +726,13 @@ def makeRatioPlots (mass_2, ratio_12, ratio_32, err_12, err_32, mtmt_2):
     graph.Clear()
 
     graph.SetPoint(0,cnst.mu_1,ratio_12/(mtmu2mtmu(mass_2, cnst.mu_2, cnst.mu_1, 'nominal')/mass_2))
-    graph.SetPointError(0,0,err_12/(mtmu2mtmu(mass_2, cnst.mu_2, cnst.mu_1, 'nominal')/mass_2))
+    graph.SetPointError(0,0,0,err_12_down/(mtmu2mtmu(mass_2, cnst.mu_2, cnst.mu_1, 'nominal')/mass_2),err_12_up/(mtmu2mtmu(mass_2, cnst.mu_2, cnst.mu_1, 'nominal')/mass_2))
 
     graph.SetPoint(1,cnst.mu_2,1)
-    graph.SetPointError(1,0,0)
+    graph.SetPointError(1,0,0,0,0)
 
     graph.SetPoint(2,cnst.mu_3,ratio_32/(mtmu2mtmu(mass_2, cnst.mu_2, cnst.mu_3, 'nominal')/mass_2))
-    graph.SetPointError(2,0,err_32/(mtmu2mtmu(mass_2, cnst.mu_2, cnst.mu_3, 'nominal')/mass_2))
+    graph.SetPointError(2,0,0,err_32_down/(mtmu2mtmu(mass_2, cnst.mu_2, cnst.mu_3, 'nominal')/mass_2),err_32_up/(mtmu2mtmu(mass_2, cnst.mu_2, cnst.mu_3, 'nominal')/mass_2))
 
     line = TLine(370,1,660,1)
     line.SetLineColor(rt.kRed)
@@ -1311,7 +1314,7 @@ def execute():
                   mass_and_err_2[0], mass_and_err_2[1], mass_and_err_2[2],
                   mass_and_err_3[0], mass_and_err_3[1], mass_and_err_3[2])
 
-    makeRatioPlots (mass_and_err_2[0], ratio_1_2, ratio_3_2, err_ratio_1_2, err_ratio_3_2, mass_and_err_2[2])
+    makeRatioPlots (mass_and_err_2[0], ratio_1_2, ratio_3_2, err_1_2_up, err_1_2_down, err_3_2_up, err_3_2_down, mass_and_err_2[2])
     makeChi2Test (mass_and_err_2[0], ratio_1_2, ratio_3_2, err_ratio_1_2, err_ratio_3_2)
     if estimate_contribs : estimateSystContributions (ratio_1_2,ratio_3_2)
     makeChi2Significance (mass_and_err_2[0], ratio_1_2, ratio_3_2, err_ratio_1_2, err_ratio_3_2)
