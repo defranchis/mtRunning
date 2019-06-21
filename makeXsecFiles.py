@@ -13,7 +13,7 @@ from variables import xsec_1, xsec_2, xsec_3
 
 # options
 
-estimate_contribs = False
+estimate_contribs = True
 ntoys = 0
 
 replace_corr = False
@@ -613,10 +613,6 @@ def makeRatioPlots (mass_2, ratio_12, ratio_32, err_12_up, err_12_down, err_32_u
     th_band.SetFillStyle(3001);
     th_band.SetFillColor(rt.kRed);
     
-    leg = TLegend(.15,.15,.77,.3)
-    leg.SetBorderSize(0)
-    leg.AddEntry(graph,'NLO extraction from differential #sigma_{t#bar{t}}','pe')
-    leg.AddEntry(th,'RGE evolution at one loop (5 flavours)','l')
 
     latexLabel1 = TLatex()
     latexLabel1.SetTextSize(0.06)
@@ -640,8 +636,15 @@ def makeRatioPlots (mass_2, ratio_12, ratio_32, err_12_up, err_12_down, err_32_u
     g.RemovePoint(1)
     g1 = TGraph()
     g1.SetPoint(0,cnst.mu_2,1)
-    g1.SetMarkerStyle(3)
-    g1.SetMarkerSize(1.5)
+    # g1.SetMarkerStyle(8)
+    g1.SetMarkerStyle(4)
+    # g1.SetMarkerSize(1.5)
+
+    leg = TLegend(.15,.15,.77,.3)
+    leg.SetBorderSize(0)
+    leg.AddEntry(graph,'NLO extraction from differential #sigma_{t#bar{t}}','pe')
+    leg.AddEntry(g1,'Reference value (#mu = #mu_{2})','p')
+    leg.AddEntry(th,'RGE evolution at one loop (5 flavours)','l')
     
     c = TCanvas()
     g.SetMarkerStyle(8)
@@ -696,7 +699,7 @@ def makeRatioPlots (mass_2, ratio_12, ratio_32, err_12_up, err_12_down, err_32_u
     gr_band.GetYaxis().SetTitleOffset(.9)
 
     
-    gr_add.SetMarkerStyle(8)
+    gr_add.SetMarkerStyle(21)
     gr_add.SetMarkerColor(rt.kBlue)
     gr_add.SetLineColor(rt.kBlue)
 
@@ -705,22 +708,22 @@ def makeRatioPlots (mass_2, ratio_12, ratio_32, err_12_up, err_12_down, err_32_u
     leg2 = leg.Clone()
     leg2.Clear()
     leg2.AddEntry(graph,'NLO extraction from differential #sigma_{t#bar{t}}','pe')
-    leg2.AddEntry(gr_add,'NLO extraction from inclusive #sigma_{t#bar{t}} (same data)')
-    leg2.AddEntry(gr_band,'RGE evolution at one loop (5 flavours)','f')
+    leg2.AddEntry(gr_add,'NLO extraction from inclusive #sigma_{t#bar{t}} (same data)','pe')
+    leg2.AddEntry(gr_band,'Evolved uncertainty, RGE one loop (5 flavours)','f')
 
     g = graph.Clone()
     g.RemovePoint(1)
-    g.SetMarkerStyle(8)
-    g1 = TGraph()
-    g1.SetPoint(0,cnst.mu_2,1)
-    g1.SetMarkerStyle(3)
-    g1.SetMarkerSize(1.5)
+    # g.SetMarkerStyle(8)
+    # g1 = TGraph()
+    # g1.SetPoint(0,cnst.mu_2,1)
+    # g1.SetMarkerStyle(3)
+    # g1.SetMarkerSize(1.5)
     
     c.Clear()
     gr_band.Draw('af')
     gr_add.Draw('p same')
     g.Draw('p same')
-    g1.Draw('p same')
+    # g1.Draw('p same')
     leg2.Draw('same')
     latexLabel1.DrawLatex(0.11, 0.92, "CMS")
     latexLabel2.DrawLatex(0.70, 0.92, "35.9 fb^{-1} (13 TeV)")
