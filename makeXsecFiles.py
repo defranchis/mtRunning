@@ -13,7 +13,7 @@ from variables import xsec_1, xsec_2, xsec_3, xsec_4
 
 # options
 
-estimate_contribs = True
+estimate_contribs = False
 ntoys = 0
 
 replace_corr = False
@@ -426,11 +426,6 @@ def getPDFUncertainties (central_ratio_1_2, central_ratio_3_2, central_ratio_4_2
         mass_and_err_2 = getMassAndError(2, 'nominal', 'nominal', pdf , 0 , 0 )
         mass_and_err_3 = getMassAndError(3, 'nominal', 'nominal', pdf , 0 , 0 )
         mass_and_err_4 = getMassAndError(4, 'nominal', 'nominal', pdf , 0 , 0 )
-
-        # print 'TESTMD', pdf , mass_and_err_1[0], 1
-        # print 'TESTMD', pdf , mass_and_err_2[0], 2
-        # print 'TESTMD', pdf , mass_and_err_3[0], 3
-        print 'TESTMD', pdf , mass_and_err_4[0], 4
         
         ratios_and_errs = getRatios(mass_and_err_1[0], mass_and_err_2[0], mass_and_err_3[0], mass_and_err_4[0],
                                     mass_and_err_1[1], mass_and_err_2[1], mass_and_err_3[1], mass_and_err_4[1])
@@ -556,7 +551,7 @@ def makeAdditionalTheoryPrediction (mtmt, err_mtmt, mtmu, doratio):
     ru.append((mtmt+err_mtmt)/mtmu)
     rd.append((mtmt-err_mtmt)/mtmu)
     scales.append(mtmt)
-    for scale in range(int(mtmt)+1,1030+1):
+    for scale in range(int(mtmt)+1,1050+1):
         ratio = mtmt2mtmu(mtmt,scale)/mtmu
         ratio_up = mtmt2mtmu(mtmt+err_mtmt,scale)/mtmu
         ratio_down = mtmt2mtmu(mtmt-err_mtmt,scale)/mtmu
@@ -594,6 +589,9 @@ def makeRatioPlots (mass_2, ratio_12, ratio_32, ratio_42, err_12_up, err_12_down
 
     graph.SetPoint(2,cnst.mu_3,ratio_32)
     graph.SetPointError(2,0,0,err_32_down,err_32_up)
+
+    graph.SetPoint(3,cnst.mu_4,ratio_42)
+    graph.SetPointError(3,0,0,err_42_down,err_42_up)
 
     theoryFileName = 'theory_prediction'
     l = makeTheoryPrediction(theoryFileName,mass_2)
@@ -723,6 +721,7 @@ def makeRatioPlots (mass_2, ratio_12, ratio_32, ratio_42, err_12_up, err_12_down
     # g1.SetMarkerSize(1.5)
     
     c.Clear()
+    gr_band.SetMinimum(0.85)
     gr_band.Draw('af')
     gr_add.Draw('p same')
     g.Draw('p same')
@@ -747,6 +746,9 @@ def makeRatioPlots (mass_2, ratio_12, ratio_32, ratio_42, err_12_up, err_12_down
 
     graph.SetPoint(2,cnst.mu_3,ratio_32/(mtmu2mtmu(mass_2, cnst.mu_2, cnst.mu_3, 'nominal')/mass_2))
     graph.SetPointError(2,0,0,err_32_down/(mtmu2mtmu(mass_2, cnst.mu_2, cnst.mu_3, 'nominal')/mass_2),err_32_up/(mtmu2mtmu(mass_2, cnst.mu_2, cnst.mu_3, 'nominal')/mass_2))
+
+    graph.SetPoint(3,cnst.mu_4,ratio_42/(mtmu2mtmu(mass_2, cnst.mu_2, cnst.mu_4, 'nominal')/mass_2))
+    graph.SetPointError(3,0,0,err_42_down/(mtmu2mtmu(mass_2, cnst.mu_2, cnst.mu_4, 'nominal')/mass_2),err_42_up/(mtmu2mtmu(mass_2, cnst.mu_2, cnst.mu_4, 'nominal')/mass_2))
 
     line = TLine(370,1,660,1)
     line.SetLineColor(rt.kRed)
@@ -849,6 +851,8 @@ def makeMassPlots(mtmu_1, err_1, mtmt_1, mtmu_2, err_2, mtmt_2, mtmu_3, err_3, m
     graph.SetPointError(1,0,err_2)
     graph.SetPoint(2,cnst.mu_3,mtmu_3)
     graph.SetPointError(2,0,err_3)
+    graph.SetPoint(3,cnst.mu_4,mtmu_4)
+    graph.SetPointError(3,0,err_4)
 
     gr_add=TGraphErrors()
     gr_add.SetPoint(0,cnst.mtmt,cnst.mtmt)
@@ -909,6 +913,8 @@ def makeMassPlots(mtmu_1, err_1, mtmt_1, mtmu_2, err_2, mtmt_2, mtmu_3, err_3, m
     graph.SetPointError(1,0,err_2)
     graph.SetPoint(2,cnst.mu_3,mtmt_3)
     graph.SetPointError(2,0,err_3)
+    graph.SetPoint(3,cnst.mu_4,mtmt_4)
+    graph.SetPointError(3,0,err_4)
     
     gr_band.Clear()
     gr_band = TGraph (2*gr_add.GetN())
@@ -963,18 +969,22 @@ def makeChi2Test(mass2, ratio12, ratio32, ratio42, err12_up, err12_down, err32_u
 
     th_ratio12 = mtmu2mtmu(mass2, cnst.mu_2, cnst.mu_1, 'nominal')/mass2
     th_ratio32 = mtmu2mtmu(mass2, cnst.mu_2, cnst.mu_3, 'nominal')/mass2
+    th_ratio42 = mtmu2mtmu(mass2, cnst.mu_2, cnst.mu_4, 'nominal')/mass2
 
     print 
-    print 'theory:', round(th_ratio12,3), round(th_ratio32,3)
+    print 'theory:', round(th_ratio12,3), round(th_ratio32,3), round(th_ratio42,3)
 
     if ratio12 > th_ratio12: err12 = err12_down
     else: err12 = err12_up
 
     if ratio32 > th_ratio32: err32 = err32_down
     else: err32 = err32_up
-    
-    chi2_no_run = ((ratio12-1)/err12)**2 + ((ratio32-1)/err32)**2
-    chi2_run = ((ratio12-th_ratio12)/err12)**2 + ((ratio32-th_ratio32)/err32)**2
+
+    if ratio42 > th_ratio42: err42 = err42_down
+    else: err42 = err42_up
+
+    chi2_no_run = ((ratio12-1)/err12)**2 + ((ratio32-1)/err32)**2 + ((ratio42-1)/err42)**2
+    chi2_run = ((ratio12-th_ratio12)/err12)**2 + ((ratio32-th_ratio32)/err32)**2 + ((ratio42-th_ratio42)/err42)**2
 
     print 
     print 'chi2: running hp', round(chi2_run,2)
@@ -1000,6 +1010,7 @@ def makeChi2Significance(mass2, ratio12, ratio32, ratio42, err12, err32, err42):
 
     th_ratio12 = mtmu2mtmu(mass2, cnst.mu_2, cnst.mu_1, 'nominal')/mass2
     th_ratio32 = mtmu2mtmu(mass2, cnst.mu_2, cnst.mu_3, 'nominal')/mass2
+    th_ratio42 = mtmu2mtmu(mass2, cnst.mu_2, cnst.mu_4, 'nominal')/mass2
 
     graph = TGraph()
     
@@ -1007,7 +1018,8 @@ def makeChi2Significance(mass2, ratio12, ratio32, ratio42, err12, err32, err42):
         x = x/10.
         th1 = x*(th_ratio12-1)+1
         th3 = x*(th_ratio32-1)+1
-        chi2 = ((ratio12-th1)/err12)**2 + ((ratio32-th3)/err32)**2
+        th4 = x*(th_ratio42-1)+1
+        chi2 = ((ratio12-th1)/err12)**2 + ((ratio32-th3)/err32)**2 + ((ratio42-th4)/err42)**2
         
         graph.SetPoint(int(x*10),x,chi2)
 
@@ -1039,14 +1051,17 @@ def makeChi2Significance(mass2, ratio12, ratio32, ratio42, err12, err32, err42):
         mass_and_err_1 = getMassAndError(1, 'nominal', 'nominal', pdf , 0 , 0 )
         mass_and_err_2 = getMassAndError(2, 'nominal', 'nominal', pdf , 0 , 0 )
         mass_and_err_3 = getMassAndError(3, 'nominal', 'nominal', pdf , 0 , 0 )
+        mass_and_err_4 = getMassAndError(4, 'nominal', 'nominal', pdf , 0 , 0 )
 
-        ratios_and_errs = getRatios(mass_and_err_1[0], mass_and_err_2[0], mass_and_err_3[0],
-                                    mass_and_err_1[1], mass_and_err_2[1], mass_and_err_3[1])
+        ratios_and_errs = getRatios(mass_and_err_1[0], mass_and_err_2[0], mass_and_err_3[0], mass_and_err_4[0],
+                                    mass_and_err_1[1], mass_and_err_2[1], mass_and_err_3[1], mass_and_err_4[1])
 
         ratio_1_2 = ratios_and_errs[0]
         ratio_3_2 = ratios_and_errs[1]
-        err_ratio_1_2 = ratios_and_errs[2]
-        err_ratio_3_2 = ratios_and_errs[3]
+        ratio_4_2 = ratios_and_errs[2]
+        err_ratio_1_2 = ratios_and_errs[3]
+        err_ratio_3_2 = ratios_and_errs[4]
+        err_ratio_4_2 = ratios_and_errs[5]
 
         graph.Clear()
         
@@ -1054,7 +1069,8 @@ def makeChi2Significance(mass2, ratio12, ratio32, ratio42, err12, err32, err42):
             x = x/10.
             th1 = x*(th_ratio12-1)+1
             th3 = x*(th_ratio32-1)+1
-            chi2 = ((ratio_1_2-th1)/err_ratio_1_2)**2 + ((ratio_3_2-th3)/err_ratio_3_2)**2
+            th4 = x*(th_ratio42-1)+1
+            chi2 = ((ratio_1_2-th1)/err_ratio_1_2)**2 + ((ratio_3_2-th3)/err_ratio_3_2)**2 + ((ratio_4_2-th4)/err_ratio_4_2)**2
             graph.SetPoint(int(x*10),x,chi2)
 
         funct = TF1('funct','pol2(0)',0,3)
@@ -1085,14 +1101,17 @@ def makeChi2Significance(mass2, ratio12, ratio32, ratio42, err12, err32, err42):
         mass_and_err_1 = getMassAndError(1, 'nominal', 'nominal', 0 , extr , 0 )
         mass_and_err_2 = getMassAndError(2, 'nominal', 'nominal', 0 , extr , 0 )
         mass_and_err_3 = getMassAndError(3, 'nominal', 'nominal', 0 , extr , 0 )
+        mass_and_err_4 = getMassAndError(4, 'nominal', 'nominal', 0 , extr , 0 )
 
-        ratios_and_errs = getRatios(mass_and_err_1[0], mass_and_err_2[0], mass_and_err_3[0],
-                                    mass_and_err_1[1], mass_and_err_2[1], mass_and_err_3[1])
+        ratios_and_errs = getRatios(mass_and_err_1[0], mass_and_err_2[0], mass_and_err_3[0], mass_and_err_4[0],
+                                    mass_and_err_1[1], mass_and_err_2[1], mass_and_err_3[1], mass_and_err_4[1])
 
         ratio_1_2 = ratios_and_errs[0]
         ratio_3_2 = ratios_and_errs[1]
-        err_ratio_1_2 = ratios_and_errs[2]
-        err_ratio_3_2 = ratios_and_errs[3]
+        ratio_4_2 = ratios_and_errs[2]
+        err_ratio_1_2 = ratios_and_errs[3]
+        err_ratio_3_2 = ratios_and_errs[4]
+        err_ratio_4_2 = ratios_and_errs[5]
 
 
         graph.Clear()
@@ -1101,7 +1120,8 @@ def makeChi2Significance(mass2, ratio12, ratio32, ratio42, err12, err32, err42):
             x = x/10.
             th1 = x*(th_ratio12-1)+1
             th3 = x*(th_ratio32-1)+1
-            chi2 = ((ratio_1_2-th1)/err_ratio_1_2)**2 + ((ratio_3_2-th3)/err_ratio_3_2)**2
+            th4 = x*(th_ratio42-1)+1
+            chi2 = ((ratio_1_2-th1)/err_ratio_1_2)**2 + ((ratio_3_2-th3)/err_ratio_3_2)**2 + ((ratio_4_2-th4)/err_ratio_4_2)**2
             graph.SetPoint(int(x*10),x,chi2)
 
         funct = TF1('funct','pol2(0)',0,3)
@@ -1220,22 +1240,24 @@ def estimateSystContributions(central_ratio_1_2, central_ratio_3_2, central_rati
 
 def throwToyCrossSections(r):
 
-    global xsec_1, xsec_2, xsec_3
+    global xsec_1, xsec_2, xsec_3, xsec_4
 
     err_1 = xsec_1*(var.err_xsec_1_up+var.err_xsec_1_down)/2./100.
     err_2 = xsec_2*(var.err_xsec_2_up+var.err_xsec_2_down)/2./100.
     err_3 = xsec_3*(var.err_xsec_3_up+var.err_xsec_3_down)/2./100.
+    err_4 = xsec_4*(var.err_xsec_4_up+var.err_xsec_4_down)/2./100.
 
-    V = [[err_1*err_1, var.corr_1_2*err_1*err_2, var.corr_1_3*err_1*err_3],
-         [var.corr_1_2*err_1*err_2, err_2*err_2, var.corr_3_2*err_2*err_3],
-         [var.corr_1_3*err_1*err_3, var.corr_3_2*err_2*err_3, err_3*err_3]]
+    V = [[err_1*err_1, var.corr_1_2*err_1*err_2, var.corr_1_3*err_1*err_3, var.corr_4_1*err_1*err_4],
+         [var.corr_1_2*err_1*err_2, err_2*err_2, var.corr_3_2*err_2*err_3, var.corr_4_2*err_2*err_4],
+         [var.corr_1_3*err_1*err_3, var.corr_3_2*err_2*err_3, err_3*err_3, var.corr_4_3*err_3*err_4],
+         [var.corr_4_1*err_1*err_4, var.corr_4_2*err_2*err_4, var.corr_4_3*err_3*err_4, err_4*err_4]]
 
 
 
     L = np.linalg.cholesky(V) # Cholesky decomposition 
 
-    mu = [xsec_1, xsec_2, xsec_3]
-    z = [r.Gaus(0,1),r.Gaus(0,1),r.Gaus(0,1)]
+    mu = [xsec_1, xsec_2, xsec_3, xsec_4]
+    z = [r.Gaus(0,1),r.Gaus(0,1),r.Gaus(0,1),r.Gaus(0,1)]
 
     y = L.dot(z)
     y += mu
@@ -1243,6 +1265,7 @@ def throwToyCrossSections(r):
     xsec_1 = y[0]
     xsec_2 = y[1]
     xsec_3 = y[2]
+    xsec_4 = y[3]
         
     return
 
@@ -1260,11 +1283,12 @@ def throwToyCrossSections(r):
 def estimateMassCorrelations():
 
     global doingToys
-    global xsec_1, xsec_2, xsec_3
+    global xsec_1, xsec_2, xsec_3, xsec_4
     
     orig_xsec_1 = xsec_1
     orig_xsec_2 = xsec_2
     orig_xsec_3 = xsec_3
+    orig_xsec_4 = xsec_4
     
     doingToys = True
     
@@ -1272,6 +1296,7 @@ def estimateMassCorrelations():
 
     m12 = TH2D('m12','m12',100,150,160,100,130,170)
     m32 = TH2D('m32','m32',100,120,180,100,130,170)
+    m42 = TH2D('m42','m42',100,110,170,100,130,170)
 
     xs12 = TH2D('xs12','xs12',100,xsec_1*(1-5*var.err_xsec_1_down/100.),xsec_1*(1+5*var.err_xsec_1_up/100.),
                 100,xsec_2*(1-5*var.err_xsec_2_down/100.),xsec_2*(1-5*var.err_xsec_2_down/100.))
@@ -1279,11 +1304,18 @@ def estimateMassCorrelations():
                 100,xsec_3*(1-5*var.err_xsec_3_down/100.),xsec_3*(1-5*var.err_xsec_3_down/100.))
     xs23 = TH2D('xs23','xs23',100,xsec_2*(1-5*var.err_xsec_2_down/100.),xsec_2*(1+5*var.err_xsec_2_up/100.),
                 100,xsec_3*(1-5*var.err_xsec_3_down/100.),xsec_3*(1-5*var.err_xsec_3_down/100.))
+    xs24 = TH2D('xs24','xs24',100,xsec_2*(1-5*var.err_xsec_2_down/100.),xsec_2*(1+5*var.err_xsec_2_up/100.),
+                100,xsec_4*(1-5*var.err_xsec_4_down/100.),xsec_4*(1-5*var.err_xsec_4_down/100.))
+    xs14 = TH2D('xs14','xs14',100,xsec_1*(1-5*var.err_xsec_1_down/100.),xsec_1*(1+5*var.err_xsec_1_up/100.),
+                100,xsec_4*(1-5*var.err_xsec_4_down/100.),xsec_4*(1-5*var.err_xsec_4_down/100.))
+    xs34 = TH2D('xs34','xs34',100,xsec_3*(1-5*var.err_xsec_3_down/100.),xsec_3*(1+5*var.err_xsec_3_up/100.),
+                100,xsec_4*(1-5*var.err_xsec_4_down/100.),xsec_4*(1-5*var.err_xsec_4_down/100.))
 
 
     
-    r_corr = TH2D('r_corr','r_corr',100,0.9,1.15,100,0.75,1.15)
-    
+    r_corr_12 = TH2D('r_corr_12','r_corr_12',100,0.9,1.15,100,0.75,1.15)
+    r_corr_13 = TH2D('r_corr_13','r_corr_13',100,0.9,1.15,100,0.75,1.15)
+    r_corr_23 = TH2D('r_corr_23','r_corr_23',100,0.9,1.15,100,0.75,1.15)
     
     for i in range(1,ntoys+1):
         if i%1000==0 or i==1: print 'toy n.', i
@@ -1292,28 +1324,38 @@ def estimateMassCorrelations():
         xs12.Fill(xsec_1,xsec_2)
         xs13.Fill(xsec_1,xsec_3)
         xs23.Fill(xsec_2,xsec_3)
+        xs14.Fill(xsec_1,xsec_4)
+        xs24.Fill(xsec_2,xsec_4)
+        xs34.Fill(xsec_3,xsec_4)
         
         mass_and_err_1 = getMassAndError(1, 'nominal', 'nominal', 0 , 0 , 0)
         mass_and_err_2 = getMassAndError(2, 'nominal', 'nominal', 0 , 0 , 0)
         mass_and_err_3 = getMassAndError(3, 'nominal', 'nominal', 0 , 0 , 0)
+        mass_and_err_4 = getMassAndError(4, 'nominal', 'nominal', 0 , 0 , 0)
+        
         m12.Fill(mass_and_err_1[0],mass_and_err_2[0])
         m32.Fill(mass_and_err_3[0],mass_and_err_2[0])
+        m42.Fill(mass_and_err_4[0],mass_and_err_2[0])
 
-        ratios_and_errs = getRatios(mass_and_err_1[0], mass_and_err_2[0], mass_and_err_3[0],
-                                    mass_and_err_1[1], mass_and_err_2[1], mass_and_err_3[1])
+        ratios_and_errs = getRatios(mass_and_err_1[0], mass_and_err_2[0], mass_and_err_3[0], mass_and_err_4[0],
+                                    mass_and_err_1[1], mass_and_err_2[1], mass_and_err_3[1], mass_and_err_4[1])
 
-        r_corr.Fill(ratios_and_errs[0],ratios_and_errs[1])
+        r_corr_12.Fill(ratios_and_errs[0],ratios_and_errs[1])
+        r_corr_13.Fill(ratios_and_errs[0],ratios_and_errs[2])
+        r_corr_23.Fill(ratios_and_errs[1],ratios_and_errs[2])
         
         #extremely important
         xsec_1 = orig_xsec_1
         xsec_2 = orig_xsec_2
         xsec_3 = orig_xsec_3
+        xsec_4 = orig_xsec_4
     
     doingToys = False
 
     if replace_corr:
         var.corr_1_2 = m12.GetCorrelationFactor()
         var.corr_3_2 = m32.GetCorrelationFactor()
+        var.corr_4_2 = m42.GetCorrelationFactor()
     
     outdir = 'plots_running'
     if not os.path.exists(outdir):
@@ -1336,13 +1378,36 @@ def estimateMassCorrelations():
     c.SaveAs(outdir+'/mass_corr_3_2.pdf')
     c.SaveAs(outdir+'/mass_corr_3_2.root')
     c.Clear()
-    r_corr.SetTitle('correlation = '+str(round(r_corr.GetCorrelationFactor(),2)))
-    r_corr.GetXaxis().SetTitle('mt ('+str(int(cnst.mu_1))+' GeV) / mt ('+str(int(cnst.mu_2))+' GeV)')
-    r_corr.GetYaxis().SetTitle('mt ('+str(int(cnst.mu_3))+' GeV) / mt ('+str(int(cnst.mu_2))+' GeV)')
-    r_corr.DrawNormalized('colz')
-    c.SaveAs(outdir+'/ratio_corr.png')
-    c.SaveAs(outdir+'/ratio_corr.pdf')
-    c.SaveAs(outdir+'/ratio_corr.root')
+    m42.SetTitle('correlation = '+str(round(m42.GetCorrelationFactor(),2)))
+    m42.GetXaxis().SetTitle('mt ('+str(int(cnst.mu_4))+' GeV) [GeV]')
+    m42.GetYaxis().SetTitle('mt ('+str(int(cnst.mu_2))+' GeV) [GeV]')
+    m42.DrawNormalized('colz')
+    c.SaveAs(outdir+'/mass_corr_4_2.png')
+    c.SaveAs(outdir+'/mass_corr_4_2.pdf')
+    c.SaveAs(outdir+'/mass_corr_4_2.root')
+    c.Clear()
+    r_corr_12.SetTitle('correlation = '+str(round(r_corr_12.GetCorrelationFactor(),2)))
+    r_corr_12.GetXaxis().SetTitle('mt ('+str(int(cnst.mu_1))+' GeV) / mt ('+str(int(cnst.mu_2))+' GeV)')
+    r_corr_12.GetYaxis().SetTitle('mt ('+str(int(cnst.mu_3))+' GeV) / mt ('+str(int(cnst.mu_2))+' GeV)')
+    r_corr_12.DrawNormalized('colz')
+    c.SaveAs(outdir+'/ratio_corr_12.png')
+    c.SaveAs(outdir+'/ratio_corr_12.pdf')
+    c.SaveAs(outdir+'/ratio_corr_12.root')
+    r_corr_13.SetTitle('correlation = '+str(round(r_corr_13.GetCorrelationFactor(),2)))
+    r_corr_13.GetXaxis().SetTitle('mt ('+str(int(cnst.mu_1))+' GeV) / mt ('+str(int(cnst.mu_2))+' GeV)')
+    r_corr_13.GetYaxis().SetTitle('mt ('+str(int(cnst.mu_4))+' GeV) / mt ('+str(int(cnst.mu_2))+' GeV)')
+    r_corr_13.DrawNormalized('colz')
+    c.SaveAs(outdir+'/ratio_corr_13.png')
+    c.SaveAs(outdir+'/ratio_corr_13.pdf')
+    c.SaveAs(outdir+'/ratio_corr_13.root')
+    r_corr_23.SetTitle('correlation = '+str(round(r_corr_23.GetCorrelationFactor(),2)))
+    r_corr_23.GetXaxis().SetTitle('mt ('+str(int(cnst.mu_3))+' GeV) / mt ('+str(int(cnst.mu_2))+' GeV)')
+    r_corr_23.GetYaxis().SetTitle('mt ('+str(int(cnst.mu_4))+' GeV) / mt ('+str(int(cnst.mu_2))+' GeV)')
+    r_corr_23.DrawNormalized('colz')
+    c.SaveAs(outdir+'/ratio_corr_23.png')
+    c.SaveAs(outdir+'/ratio_corr_23.pdf')
+    c.SaveAs(outdir+'/ratio_corr_23.root')
+
 
     xs12.SetTitle('correlation = '+str(round(xs12.GetCorrelationFactor(),2)))
     xs12.GetXaxis().SetTitle('#sigma_{r#bar{t}} (#mu_{1}) [pb]')
@@ -1358,6 +1423,13 @@ def estimateMassCorrelations():
     c.SaveAs(outdir+'/xsec_corr_13.png')
     c.SaveAs(outdir+'/xsec_corr_13.pdf')
     c.SaveAs(outdir+'/xsec_corr_13.root')
+    xs14.SetTitle('correlation = '+str(round(xs14.GetCorrelationFactor(),2)))
+    xs14.GetXaxis().SetTitle('#sigma_{r#bar{t}} (#mu_{1}) [pb]')
+    xs14.GetYaxis().SetTitle('#sigma_{r#bar{t}} (#mu_{4}) [pb]')
+    xs14.DrawNormalized('colz')
+    c.SaveAs(outdir+'/xsec_corr_14.png')
+    c.SaveAs(outdir+'/xsec_corr_14.pdf')
+    c.SaveAs(outdir+'/xsec_corr_14.root')
     xs23.SetTitle('correlation = '+str(round(xs23.GetCorrelationFactor(),2)))
     xs23.GetXaxis().SetTitle('#sigma_{r#bar{t}} (#mu_{2}) [pb]')
     xs23.GetYaxis().SetTitle('#sigma_{r#bar{t}} (#mu_{3}) [pb]')
@@ -1365,16 +1437,35 @@ def estimateMassCorrelations():
     c.SaveAs(outdir+'/xsec_corr_23.png')
     c.SaveAs(outdir+'/xsec_corr_23.pdf')
     c.SaveAs(outdir+'/xsec_corr_23.root')
+    xs24.SetTitle('correlation = '+str(round(xs24.GetCorrelationFactor(),2)))
+    xs24.GetXaxis().SetTitle('#sigma_{r#bar{t}} (#mu_{2}) [pb]')
+    xs24.GetYaxis().SetTitle('#sigma_{r#bar{t}} (#mu_{4}) [pb]')
+    xs24.DrawNormalized('colz')
+    c.SaveAs(outdir+'/xsec_corr_24.png')
+    c.SaveAs(outdir+'/xsec_corr_24.pdf')
+    c.SaveAs(outdir+'/xsec_corr_24.root')
+    xs34.SetTitle('correlation = '+str(round(xs34.GetCorrelationFactor(),2)))
+    xs34.GetXaxis().SetTitle('#sigma_{r#bar{t}} (#mu_{3}) [pb]')
+    xs34.GetYaxis().SetTitle('#sigma_{r#bar{t}} (#mu_{4}) [pb]')
+    xs34.DrawNormalized('colz')
+    c.SaveAs(outdir+'/xsec_corr_34.png')
+    c.SaveAs(outdir+'/xsec_corr_34.pdf')
+    c.SaveAs(outdir+'/xsec_corr_34.root')
+
 
     
     print
     if replace_corr:
         print 'new corr_1_2 =', round(var.corr_1_2,3)
         print 'new corr_3_2 =', round(var.corr_3_2,3)
+        print 'new corr_4_2 =', round(var.corr_4_2,3)
     else:    
         print 'estimated corr_1_2 =', round(m12.GetCorrelationFactor(),3)
         print 'estimated corr_3_2 =', round(m32.GetCorrelationFactor(),3)
-    print 'estimated corr ratios  =', round(r_corr.GetCorrelationFactor(),3)
+        print 'estimated corr_4_2 =', round(m42.GetCorrelationFactor(),3)
+    print 'estimated corr ratios 1_2  =', round(r_corr_12.GetCorrelationFactor(),3)
+    print 'estimated corr ratios 1_3  =', round(r_corr_13.GetCorrelationFactor(),3)
+    print 'estimated corr ratios 2_3  =', round(r_corr_23.GetCorrelationFactor(),3)
     print
     
     return
