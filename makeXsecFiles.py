@@ -167,6 +167,7 @@ def readCalculatedXsec (renscale, facscale, topmass, pdfmember, mttbin):
 
     if mttbin < 3:
         xsec = xsecs[mttbin]/1000.*bin_width
+        if mttbin == 1: xsec += xsecs[0]/1000.*bin_width
     elif cnst.n_mttbins == 3:
         # xsec=xsec_tot-(xsecs[1]+xsecs[2])/1000.*bin_width
         xsec=0
