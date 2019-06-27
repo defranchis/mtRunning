@@ -176,9 +176,9 @@ def readCalculatedXsec (renscale, facscale, topmass, pdfmember, mttbin):
     elif mttbin==3: # n_mttbins = 4
         xsec = (xsecs[3]+xsecs[4])/1000.*bin_width
     else:
-        xsec=0
-        for i in range(mttbin+1,mttbin+16):
-            xsec += xsecs[i]/1000.*bin_width
+        xsec=xsec_tot
+        for i in range(0,5):
+            xsec -= xsecs[i]/1000.*bin_width
             
         
     return xsec 
@@ -285,10 +285,13 @@ def getMassAndError(mttbin, murscale, mufscale, pdfmember, extrapol, contrib):
             elif mttbin == 2 :
                 slope_low = -1.0
                 slope_high = 0.5
-            else:
+            elif mttbin == 3 :
                 slope_low = -1.0
                 slope_high = 0.05
-
+            elif mttbin == 4 :
+                slope_low = -0.4
+                slope_high = 0.2
+                
             if chi2_slope < slope_low or chi2_slope > slope_high :
                 if mass!= mass_v[1]: continue
                 else:
@@ -318,7 +321,6 @@ def getMassAndError(mttbin, murscale, mufscale, pdfmember, extrapol, contrib):
         line_up = TLine(cnst.mass_fine_min,1.,cnst.mass_fine_max,1.)
         line_down = TLine(cnst.mass_fine_min,-1.,cnst.mass_fine_max,-1.)
         line_central = TLine(cnst.mass_fine_min,0.,cnst.mass_fine_max,0.)
-
 
     line_up.SetLineColor(rt.kGreen+2)
     line_down.SetLineColor(rt.kGreen+2)
@@ -467,7 +469,7 @@ def getExtrapolationUncertainties (central_ratio_1_2, central_ratio_3_2, central
     err_extr_down_4_2 = 0
 
     print '\n'
-    print 'extrapol', 'ratio_1_2', 'ratio_3_2\n'
+    print 'extrapol', 'ratio_1_2', 'ratio_3_2', 'ratio_4_2\n'
     for extr in range(-len(var.extr_1_up),len(var.extr_1_up)+1) :
         if extr == 0 : continue
 
@@ -721,7 +723,7 @@ def makeRatioPlots (mass_2, ratio_12, ratio_32, ratio_42, err_12_up, err_12_down
     # g1.SetMarkerSize(1.5)
     
     c.Clear()
-    gr_band.SetMinimum(0.85)
+    gr_band.SetMinimum(0.8)
     gr_band.Draw('af')
     gr_add.Draw('p same')
     g.Draw('p same')
@@ -1041,11 +1043,12 @@ def makeChi2Significance(mass2, ratio12, ratio32, ratio42, err12, err32, err42):
     th_ratio42 = mtmu2mtmu(mass2, cnst.mu_2, cnst.mu_4, 'nominal')/mass2
 
     global ntoys
-    if ntoys < 1000 :
-        ntoys = 1000
-        estimateMassCorrelations()
-        ntoys = 0
-    
+    if ntoys < 10000 :
+        if ntoys < 1000: ntoys = 1000
+        print '\nWARNING: running only', ntoys ,'toys for estimate of correlations.'
+        print '         It is recommended to run at least 10.000'
+    estimateMassCorrelations()
+        
     graph = TGraph()
     
     for x in range(0,31):
@@ -1123,9 +1126,6 @@ def makeChi2Significance(mass2, ratio12, ratio32, ratio42, err12, err32, err42):
     err_pdf_up = err_pdf_up**.5
     err_pdf_down = err_pdf_up**.5
 
-    print err_pdf_up,err_pdf_down
-
-
     err_extr_up = 0
     err_extr_down = 0
 
@@ -1174,8 +1174,6 @@ def makeChi2Significance(mass2, ratio12, ratio32, ratio42, err12, err32, err42):
     err_extr_up = err_extr_up**.5
     err_extr_down = err_extr_up**.5
 
-    print err_extr_up,err_extr_down
-
     err_up = (err**2 + err_pdf_up**2 + err_extr_up**2)**.5
     err_down = (err**2 + err_pdf_down**2 + err_extr_down**2)**.5
         
@@ -1184,7 +1182,8 @@ def makeChi2Significance(mass2, ratio12, ratio32, ratio42, err12, err32, err42):
     print
     print 'xmin =', round(xmin,2), '+' ,round(err_up,2), '-', round(err_down,2), '(tot)'
     print
-    print 'significance =', round(xmin/err_down,2)
+    print 'significance wrt no running =', round(xmin/err_down,2)
+    print 'significance wrt RGE =', round((xmin-1)/err_down,2)
     print
 
 
@@ -1351,6 +1350,8 @@ def estimateMassCorrelations():
     r_corr_13 = TH2D('r_corr_13','r_corr_13',100,0.9,1.15,100,0.75,1.15)
     r_corr_23 = TH2D('r_corr_23','r_corr_23',100,0.9,1.15,100,0.75,1.15)
     
+    print '\nexecuting', ntoys, 'toys\n'
+
     for i in range(1,ntoys+1):
         if i%1000==0 or i==1: print 'toy n.', i
         throwToyCrossSections(r)
@@ -1500,6 +1501,8 @@ def estimateMassCorrelations():
         print 'estimated corr_1_2 =', round(m12.GetCorrelationFactor(),3)
         print 'estimated corr_3_2 =', round(m32.GetCorrelationFactor(),3)
         print 'estimated corr_4_2 =', round(m42.GetCorrelationFactor(),3)
+        print
+        
     print 'estimated corr ratios 1_2  =', round(r_corr_12.GetCorrelationFactor(),3)
     print 'estimated corr ratios 1_3  =', round(r_corr_13.GetCorrelationFactor(),3)
     print 'estimated corr ratios 2_3  =', round(r_corr_23.GetCorrelationFactor(),3)
@@ -1520,7 +1523,7 @@ def execute():
     doingToys = False
 
     setMasses()
-    if ntoys>0 : estimateMassCorrelations()
+    if ntoys>0 and replace_corr: estimateMassCorrelations()
 
     mass_and_err_1 = getMassAndError(1, 'nominal', 'nominal', 0 , 0 , 0)
     mass_and_err_2 = getMassAndError(2, 'nominal', 'nominal', 0 , 0 , 0)
@@ -1608,7 +1611,7 @@ def execute():
     )
 
     makeRatioPlots (mass_and_err_2[0], ratio_1_2, ratio_3_2, ratio_4_2, err_1_2_up, err_1_2_down, err_3_2_up, err_3_2_down, err_4_2_up, err_4_2_down, mass_and_err_2[2])
-    makeChi2Test (mass_and_err_2[0], ratio_1_2, ratio_3_2, ratio_4_2, err_1_2_up, err_1_2_down, err_3_2_up, err_3_2_down, err_4_2_up, err_4_2_down)
+    # makeChi2Test (mass_and_err_2[0], ratio_1_2, ratio_3_2, ratio_4_2, err_1_2_up, err_1_2_down, err_3_2_up, err_3_2_down, err_4_2_up, err_4_2_down)
     if estimate_contribs : estimateSystContributions (ratio_1_2,ratio_3_2,ratio_4_2)
     makeChi2Significance (mass_and_err_2[0], ratio_1_2, ratio_3_2, ratio_4_2, err_ratio_1_2, err_ratio_3_2, err_ratio_4_2)
     
