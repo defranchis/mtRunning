@@ -14,7 +14,7 @@ from variables import xsec_1, xsec_2, xsec_3, xsec_4
 # options
 
 estimate_contribs = False
-estimate_significance = True
+estimate_significance = False
 
 ntoys = 0
 replace_corr = False  #recommended: False
@@ -524,7 +524,7 @@ def makeTheoryPrediction(outfile, mass_2):
     r_down = []
     out = open(outfile+'.txt','w')
         
-    for scale in range(350,1030+1):
+    for scale in range(350,1050+1):
         ratio = mtmu2mtmu(mass_2, cnst.mu_2, scale, 'nominal')/mass_2
         out.write(str(scale)+'\t'+str(ratio)+'\n')
         ratio_up = mtmu2mtmu(mass_2, cnst.mu_2, scale, 'up')/mass_2
@@ -754,7 +754,7 @@ def makeRatioPlots (mass_2, ratio_12, ratio_32, ratio_42, err_12_up, err_12_down
     graph.SetPoint(3,cnst.mu_4,ratio_42/(mtmu2mtmu(mass_2, cnst.mu_2, cnst.mu_4, 'nominal')/mass_2))
     graph.SetPointError(3,0,0,err_42_down/(mtmu2mtmu(mass_2, cnst.mu_2, cnst.mu_4, 'nominal')/mass_2),err_42_up/(mtmu2mtmu(mass_2, cnst.mu_2, cnst.mu_4, 'nominal')/mass_2))
 
-    line = TLine(370,1,660,1)
+    line = TLine(370,1,1030,1)
     line.SetLineColor(rt.kRed)
     line.SetLineWidth(2)
     
@@ -827,6 +827,7 @@ def makeRatioPlots (mass_2, ratio_12, ratio_32, ratio_42, err_12_up, err_12_down
     g1.SetMarkerSize(1.5)
     
     c.Clear()
+    gr_band.SetMinimum(0.88)
     gr_band.Draw('af')
     gr_add.Draw('p same')
     g.Draw('p same')
@@ -890,12 +891,13 @@ def makeMassPlots(mtmu_1, err_1, mtmt_1, mtmu_2, err_2, mtmt_2, mtmu_3, err_3, m
 
     graph.SetMarkerStyle(8)
     
-    leg = TLegend(.3,.73,.85,.85)
+    leg = TLegend(.15,.23,.7,.35)
     leg.AddEntry(graph,'MCFM @NLO from diff. #sigma_{t#bar{t}} (exp. only)','pe')
     leg.AddEntry(gr_add,'Hathor @NLO from incl. #sigma_{t#bar{t}} (same data)')
     leg.AddEntry(gr_band,'RunDec @ 1 loop (5 flav.)','f')
     
     c = TCanvas()
+    gr_band.SetMinimum(125)
     gr_band.Draw('af')
     gr_add.Draw('p same')
     graph.Draw('p same')
@@ -943,12 +945,14 @@ def makeMassPlots(mtmu_1, err_1, mtmt_1, mtmu_2, err_2, mtmt_2, mtmu_3, err_3, m
     graph.SetMarkerStyle(8)
     
     leg.Clear()
-    leg = TLegend(.15,.73,.7,.85)
+    leg = TLegend(.15,.23,.7,.35)
     leg.AddEntry(graph,'MCFM @NLO from diff. #sigma_{t#bar{t}} (exp. only)','pe')
     leg.AddEntry(gr_add,'Hathor @NLO from incl. #sigma_{t#bar{t}} (same data)')
     leg.AddEntry(gr_band,'experimental + extrapolation + PDF uncertainties','f')
     
     c.Clear()
+    gr_band.SetMinimum(142)
+    gr_band.SetMaximum(170)
     gr_band.Draw('af')
     gr_add.Draw('p same')
     graph.Draw('p same')
