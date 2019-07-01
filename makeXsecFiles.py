@@ -14,9 +14,11 @@ from variables import xsec_1, xsec_2, xsec_3, xsec_4
 # options
 
 estimate_contribs = False
-ntoys = 0
+estimate_significance = True
 
-replace_corr = False
+ntoys = 0
+replace_corr = False  #recommended: False
+
 
 # end options
 
@@ -1613,7 +1615,7 @@ def execute():
     makeRatioPlots (mass_and_err_2[0], ratio_1_2, ratio_3_2, ratio_4_2, err_1_2_up, err_1_2_down, err_3_2_up, err_3_2_down, err_4_2_up, err_4_2_down, mass_and_err_2[2])
     # makeChi2Test (mass_and_err_2[0], ratio_1_2, ratio_3_2, ratio_4_2, err_1_2_up, err_1_2_down, err_3_2_up, err_3_2_down, err_4_2_up, err_4_2_down)
     if estimate_contribs : estimateSystContributions (ratio_1_2,ratio_3_2,ratio_4_2)
-    makeChi2Significance (mass_and_err_2[0], ratio_1_2, ratio_3_2, ratio_4_2, err_ratio_1_2, err_ratio_3_2, err_ratio_4_2)
+    if estimate_significance : makeChi2Significance (mass_and_err_2[0], ratio_1_2, ratio_3_2, ratio_4_2, err_ratio_1_2, err_ratio_3_2, err_ratio_4_2)
     
     return
 
