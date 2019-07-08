@@ -789,11 +789,11 @@ def makeRatioPlots (mass_2, ratio_12, ratio_32, ratio_42, err_12_up, err_12_down
     g1.SetMarkerStyle(4)
 
 
-    # leg2 = TLegend(.15,.15,.77,.33)
-    leg2 = TLegend(.13,.15,.75,.32)
+    leg2 = TLegend(.15,.15,.77,.33)
+    # leg2 = TLegend(.13,.15,.75,.32)
     leg2.SetBorderSize(0)
     leg2.AddEntry(graph,'NLO extraction from differential #sigma_{t#bar{t}}','pe')
-    # leg2.AddEntry(g1,'Reference value (#mu = #mu_{ref})','p')
+    leg2.AddEntry(g1,'Reference value (#mu = #mu_{ref})','p')
     leg2.AddEntry(gr_add,'NLO extraction from inclusive #sigma_{t#bar{t}} (same data)','pe')
     leg2.AddEntry(gr_band,'Evolved uncertainty, one loop RGE (5 flavours)','f')
 
@@ -804,7 +804,7 @@ def makeRatioPlots (mass_2, ratio_12, ratio_32, ratio_42, err_12_up, err_12_down
     gr_band.Draw('af')
     gr_add.Draw('p same')
     g.Draw('p same')
-    # g1.Draw('p same')
+    g1.Draw('p same')
     leg2.Draw('same')
     latexLabel1.DrawLatex(0.11, 0.92, "CMS")
     latexLabel2.DrawLatex(0.70, 0.92, "35.9 fb^{-1} (13 TeV)")
@@ -1261,10 +1261,10 @@ def makeChi2Significance(mass2, ratio12, ratio32, ratio42, err12, err32, err42):
 
     if do_scale_variations:
         for facscale in ['up','down']:
-            mass_and_err_1 = getMassAndError(1, 'nominal', facscale, 0 , extr , 0 )
-            mass_and_err_2 = getMassAndError(2, 'nominal', facscale, 0 , extr , 0 )
-            mass_and_err_3 = getMassAndError(3, 'nominal', facscale, 0 , extr , 0 )
-            mass_and_err_4 = getMassAndError(4, 'nominal', facscale, 0 , extr , 0 )
+            mass_and_err_1 = getMassAndError(1, 'nominal', facscale, 0 , 0 , 0 )
+            mass_and_err_2 = getMassAndError(2, 'nominal', facscale, 0 , 0 , 0 )
+            mass_and_err_3 = getMassAndError(3, 'nominal', facscale, 0 , 0 , 0 )
+            mass_and_err_4 = getMassAndError(4, 'nominal', facscale, 0 , 0 , 0 )
 
             ratios_and_errs = getRatios(mass_and_err_1[0], mass_and_err_2[0], mass_and_err_3[0], mass_and_err_4[0],
                                         mass_and_err_1[1], mass_and_err_2[1], mass_and_err_3[1], mass_and_err_4[1])
