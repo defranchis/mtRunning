@@ -448,6 +448,8 @@ def getScaleUncertainties (central_ratio_1_2, central_ratio_3_2, central_ratio_4
             if renscale == 'up' and facscale == 'down': continue
             if facscale == 'up' and renscale == 'down': continue
             if facscale == 'nominal' and renscale == 'nominal': continue
+
+            if renscale != 'nominal': continue # only factorization scale
             
             mass_and_err_1 = getMassAndError(1, renscale, facscale, 0 , 0 , 0 )
             mass_and_err_2 = getMassAndError(2, renscale, facscale, 0 , 0 , 0 )
@@ -702,7 +704,7 @@ def makeRatioPlots (mass_2, ratio_12, ratio_32, ratio_42, err_12_up, err_12_down
     graph.GetXaxis().SetTitleOffset(.85)
     graph.GetYaxis().SetTitleSize(0.048)
     graph.GetYaxis().SetTitleOffset(.85)
-    graph.GetYaxis().SetTitle('m_{t}(#mu) / m_{t}(#mu_{2})')
+    graph.GetYaxis().SetTitle('m_{t}(#mu) / m_{t}(#mu_{ref})')
     graph.SetTitle('')
     graph.SetMarkerStyle(8)
     
@@ -717,7 +719,7 @@ def makeRatioPlots (mass_2, ratio_12, ratio_32, ratio_42, err_12_up, err_12_down
     leg = TLegend(.15,.15,.77,.3)
     leg.SetBorderSize(0)
     leg.AddEntry(graph,'NLO extraction from differential #sigma_{t#bar{t}}','pe')
-    leg.AddEntry(g1,'Reference value (#mu = #mu_{2})','p')
+    leg.AddEntry(g1,'Reference value (#mu = #mu_{ref})','p')
     leg.AddEntry(th,'RGE evolution at one loop (5 flavours)','l')
     
     c = TCanvas()
@@ -730,6 +732,7 @@ def makeRatioPlots (mass_2, ratio_12, ratio_32, ratio_42, err_12_up, err_12_down
     latexLabel1.DrawLatex(0.11, 0.92, "CMS")
     latexLabel2.DrawLatex(0.70, 0.92, "35.9 fb^{-1} (13 TeV)")
     latexLabel2.DrawLatex(0.59, 0.78, "ABMP16_5_nlo PDF set");
+    latexLabel2.DrawLatex(0.59, 0.73, "#mu_{ref} = "+str(round(cnst.mu_2,1))+" GeV");
 
     outdir = 'plots_running'
     if not os.path.exists(outdir):
@@ -763,7 +766,7 @@ def makeRatioPlots (mass_2, ratio_12, ratio_32, ratio_42, err_12_up, err_12_down
     gr_band.SetFillColor(rt.kRed+1);
 
     gr_band.GetXaxis().SetTitle('#mu [GeV]')
-    gr_band.GetYaxis().SetTitle('m_{t}(#mu) / m_{t}(#mu_{2})')
+    gr_band.GetYaxis().SetTitle('m_{t}(#mu) / m_{t}(#mu_{ref})')
     gr_band.SetTitle('')
 
 
@@ -779,19 +782,22 @@ def makeRatioPlots (mass_2, ratio_12, ratio_32, ratio_42, err_12_up, err_12_down
 
     gr_band.GetYaxis().SetRangeUser(0.9,1.13)
 
-    leg2 = leg.Clone()
-    leg2.Clear()
-    leg2.AddEntry(graph,'NLO extraction from differential #sigma_{t#bar{t}}','pe')
-    leg2.AddEntry(gr_add,'NLO extraction from inclusive #sigma_{t#bar{t}} (same data)','pe')
-    leg2.AddEntry(gr_band,'Evolved uncertainty, RGE one loop (5 flavours)','f')
-
     g = graph.Clone()
     g.RemovePoint(1)
-    # g.SetMarkerStyle(8)
-    # g1 = TGraph()
-    # g1.SetPoint(0,cnst.mu_2,1)
-    # g1.SetMarkerStyle(3)
-    # g1.SetMarkerSize(1.5)
+    g1 = TGraph()
+    g1.SetPoint(0,cnst.mu_2,1)
+    g1.SetMarkerStyle(4)
+
+
+    # leg2 = TLegend(.15,.15,.77,.33)
+    leg2 = TLegend(.13,.15,.75,.32)
+    leg2.SetBorderSize(0)
+    leg2.AddEntry(graph,'NLO extraction from differential #sigma_{t#bar{t}}','pe')
+    # leg2.AddEntry(g1,'Reference value (#mu = #mu_{ref})','p')
+    leg2.AddEntry(gr_add,'NLO extraction from inclusive #sigma_{t#bar{t}} (same data)','pe')
+    leg2.AddEntry(gr_band,'Evolved uncertainty, one loop RGE (5 flavours)','f')
+
+
     
     c.Clear()
     gr_band.SetMinimum(0.8)
@@ -803,6 +809,7 @@ def makeRatioPlots (mass_2, ratio_12, ratio_32, ratio_42, err_12_up, err_12_down
     latexLabel1.DrawLatex(0.11, 0.92, "CMS")
     latexLabel2.DrawLatex(0.70, 0.92, "35.9 fb^{-1} (13 TeV)")
     latexLabel2.DrawLatex(0.59, 0.78, "ABMP16_5_nlo PDF set");
+    latexLabel2.DrawLatex(0.59, 0.73, "#mu_{ref} = "+str(round(cnst.mu_2,1))+" GeV");
 
     c.SaveAs(outdir+'/test_incl.png')
     c.SaveAs(outdir+'/test_incl.pdf')
@@ -1249,11 +1256,66 @@ def makeChi2Significance(mass2, ratio12, ratio32, ratio42, err12, err32, err42):
     err_extr_up = err_extr_up**.5
     err_extr_down = err_extr_up**.5
 
-    err_up = (err**2 + err_pdf_up**2 + err_extr_up**2)**.5
-    err_down = (err**2 + err_pdf_down**2 + err_extr_down**2)**.5
+    err_scale_up = 0
+    err_scale_down = 0
+
+    if do_scale_variations:
+        for facscale in ['up','down']:
+            mass_and_err_1 = getMassAndError(1, 'nominal', facscale, 0 , extr , 0 )
+            mass_and_err_2 = getMassAndError(2, 'nominal', facscale, 0 , extr , 0 )
+            mass_and_err_3 = getMassAndError(3, 'nominal', facscale, 0 , extr , 0 )
+            mass_and_err_4 = getMassAndError(4, 'nominal', facscale, 0 , extr , 0 )
+
+            ratios_and_errs = getRatios(mass_and_err_1[0], mass_and_err_2[0], mass_and_err_3[0], mass_and_err_4[0],
+                                        mass_and_err_1[1], mass_and_err_2[1], mass_and_err_3[1], mass_and_err_4[1])
+            
+            ratio_1_2 = ratios_and_errs[0]
+            ratio_3_2 = ratios_and_errs[1]
+            ratio_4_2 = ratios_and_errs[2]
+            err_ratio_1_2 = ratios_and_errs[3]
+            err_ratio_3_2 = ratios_and_errs[4]
+            err_ratio_4_2 = ratios_and_errs[5]
+
+            graph.Clear()
+        
+            for x in range(0,31):
+                x = x/10.
+                th1 = x*(th_ratio12-1)+1
+                th3 = x*(th_ratio32-1)+1
+                th4 = x*(th_ratio42-1)+1
+                chi2 = getChi2Uncorrelated(ratio_1_2, th1, err_ratio_1_2, ratio_3_2, th3, err_ratio_3_2, ratio_4_2, th4, err_ratio_4_2)
+                graph.SetPoint(int(x*10),x,chi2)
+
+            funct = TF1('funct','pol2(0)',0,3)
+            graph.Fit(funct,'q','',0,3)
+
+            c.Clear()
+            graph.Draw('ap')
+            c.Print(outdir+'/chi2_significance_facscale_'+facscale+'.png')
+            
+            xmin_SCALE = funct.GetMinimumX()
+            err_scale = (xmin-xmin_SCALE)**2
+        
+            if xmin_SCALE > xmin : err_scale_up += err_scale
+            else : err_scale_down += err_scale
+
+        err_scale_up = err_scale_up**.5
+        err_scale_down = err_scale_up**.5
+        
+        err_up = (err**2 + err_pdf_up**2 + err_extr_up**2 + err_scale_up**2)**.5
+        err_down = (err**2 + err_pdf_down**2 + err_extr_down**2 + err_scale_down**2)**.5
+
+    else:
+        err_up = (err**2 + err_pdf_up**2 + err_extr_up**2)**.5
+        err_down = (err**2 + err_pdf_down**2 + err_extr_down**2)**.5
+
+
+
         
     print
-    print 'xmin =', round(xmin,2), '+/-' ,round(err,2), '(exp)', '+' ,round(err_pdf_up,2), '-', round(err_pdf_down,2), '(PDF)', '+' ,round(err_extr_up,2), '-', round(err_extr_down,2), '(extr)'
+    if do_scale_variations:
+        print 'xmin =', round(xmin,2), '+/-' ,round(err,2), '(exp)', '+' ,round(err_pdf_up,2), '-', round(err_pdf_down,2), '(PDF)', '+' ,round(err_extr_up,2), '-', round(err_extr_down,2), '(extr)' , '+' ,round(err_scale_up,2), '-', round(err_scale_down,2), '(scale)'
+    else : print 'xmin =', round(xmin,2), '+/-' ,round(err,2), '(exp)', '+' ,round(err_pdf_up,2), '-', round(err_pdf_down,2), '(PDF)', '+' ,round(err_extr_up,2), '-', round(err_extr_down,2), '(extr)'
     print
     print 'xmin =', round(xmin,2), '+' ,round(err_up,2), '-', round(err_down,2), '(tot)'
     print
