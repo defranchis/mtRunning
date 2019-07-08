@@ -917,6 +917,92 @@ def makeRatioPlots (mass_2, ratio_12, ratio_32, ratio_42, err_12_up, err_12_down
     return
 
 
+
+################################
+
+# "getTotalMassError" calculates the total error in the extracted masses
+
+################################       
+
+def getTotalMassError(mtmu_1, err_1, mtmu_2, err_2, mtmu_3, err_3, mtmu_4, err_4):
+
+    pdf_error_1_up = pdf_error_1_down = 0
+    extr_error_1_up = extr_error_1_down = 0
+    pdf_error_2_up = pdf_error_2_down = 0
+    extr_error_2_up = extr_error_2_down = 0
+    pdf_error_3_up = pdf_error_3_down = 0
+    extr_error_3_up = extr_error_3_down = 0
+    pdf_error_4_up = pdf_error_4_down = 0
+    extr_error_4_up = extr_error_4_down = 0
+
+    for pdf in range(1,30):
+        mass_and_err_1 = getMassAndError(1, 'nominal', 'nominal', pdf , 0 , 0 )
+        mass_and_err_2 = getMassAndError(2, 'nominal', 'nominal', pdf , 0 , 0 )
+        mass_and_err_3 = getMassAndError(3, 'nominal', 'nominal', pdf , 0 , 0 )
+        mass_and_err_4 = getMassAndError(4, 'nominal', 'nominal', pdf , 0 , 0 )
+
+        if mass_and_err_1[0] > mtmu_1 : pdf_error_1_up += (mass_and_err_1[0]-mtmu_1)**2
+        else: pdf_error_1_down += (mass_and_err_1[0]-mtmu_1)**2
+        if mass_and_err_2[0] > mtmu_2 : pdf_error_2_up += (mass_and_err_2[0]-mtmu_2)**2
+        else: pdf_error_2_down += (mass_and_err_2[0]-mtmu_2)**2
+        if mass_and_err_3[0] > mtmu_3 : pdf_error_3_up += (mass_and_err_3[0]-mtmu_3)**2
+        else: pdf_error_3_down += (mass_and_err_3[0]-mtmu_3)**2
+        if mass_and_err_4[0] > mtmu_4 : pdf_error_4_up += (mass_and_err_4[0]-mtmu_4)**2
+        else: pdf_error_4_down += (mass_and_err_4[0]-mtmu_4)**2
+        
+    pdf_error_1_up = pdf_error_1_up**.5
+    pdf_error_1_down = pdf_error_1_down**.5
+    pdf_error_2_up = pdf_error_2_up**.5
+    pdf_error_2_down = pdf_error_2_down**.5
+    pdf_error_3_up = pdf_error_3_up**.5
+    pdf_error_3_down = pdf_error_3_down**.5
+    pdf_error_4_up = pdf_error_4_up**.5
+    pdf_error_4_down = pdf_error_4_down**.5
+
+    for extr in range(-len(var.extr_1_up),len(var.extr_1_up)+1) :
+        if extr == 0 : continue        
+        mass_and_err_1 = getMassAndError(1, 'nominal', 'nominal', 0 , extr , 0 )
+        mass_and_err_2 = getMassAndError(2, 'nominal', 'nominal', 0 , extr , 0 )
+        mass_and_err_3 = getMassAndError(3, 'nominal', 'nominal', 0 , extr , 0 )
+        mass_and_err_4 = getMassAndError(4, 'nominal', 'nominal', 0 , extr , 0 )
+
+        if mass_and_err_1[0] > mtmu_1 : extr_error_1_up += (mass_and_err_1[0]-mtmu_1)**2
+        else: extr_error_1_down += (mass_and_err_1[0]-mtmu_1)**2
+        if mass_and_err_2[0] > mtmu_2 : extr_error_2_up += (mass_and_err_2[0]-mtmu_2)**2
+        else: extr_error_2_down += (mass_and_err_2[0]-mtmu_2)**2
+        if mass_and_err_3[0] > mtmu_3 : extr_error_3_up += (mass_and_err_3[0]-mtmu_3)**2
+        else: extr_error_3_down += (mass_and_err_3[0]-mtmu_3)**2
+        if mass_and_err_4[0] > mtmu_4 : extr_error_4_up += (mass_and_err_4[0]-mtmu_4)**2
+        else: extr_error_4_down += (mass_and_err_4[0]-mtmu_4)**2
+
+    extr_error_1_up = extr_error_1_up**.5
+    extr_error_1_down = extr_error_1_down**.5
+    extr_error_2_up = extr_error_2_up**.5
+    extr_error_2_down = extr_error_2_down**.5
+    extr_error_3_up = extr_error_3_up**.5
+    extr_error_3_down = extr_error_3_down**.5
+    extr_error_4_up = extr_error_4_up**.5
+    extr_error_4_down = extr_error_4_down**.5
+
+    tot_error_1_up = (pdf_error_1_up**2 + extr_error_1_up**2 + err_1**2)**.5
+    tot_error_1_down = (pdf_error_1_down**2 + extr_error_1_down**2 + err_1**2)**.5
+    tot_error_2_up = (pdf_error_2_up**2 + extr_error_2_up**2 + err_2**2)**.5
+    tot_error_2_down = (pdf_error_2_down**2 + extr_error_2_down**2 + err_2**2)**.5
+    tot_error_3_up = (pdf_error_3_up**2 + extr_error_3_up**2 + err_3**2)**.5
+    tot_error_3_down = (pdf_error_3_down**2 + extr_error_3_down**2 + err_3**2)**.5
+    tot_error_4_up = (pdf_error_4_up**2 + extr_error_4_up**2 + err_4**2)**.5
+    tot_error_4_down = (pdf_error_4_down**2 + extr_error_4_down**2 + err_4**2)**.5
+
+
+    print
+    print 'mt_mu1 =', round(mtmu_1,1), '+/-', round(err_1,1), '(fit) +', round(pdf_error_1_up,1), '-', round(pdf_error_1_down,1), '(pdf) +', round(extr_error_1_up,1), '-', round(extr_error_1_down,1), '(extr) =', round(mtmu_1,1), '+', round(tot_error_1_up,1), '-', round(tot_error_1_down,1), '(tot)' 
+    print 'mt_mu1 =', round(mtmu_2,1), '+/-', round(err_2,1), '(fit) +', round(pdf_error_2_up,1), '-', round(pdf_error_2_down,1), '(pdf) +', round(extr_error_2_up,1), '-', round(extr_error_2_down,1), '(extr) =', round(mtmu_2,1), '+', round(tot_error_2_up,1), '-', round(tot_error_2_down,1), '(tot)' 
+    print 'mt_mu1 =', round(mtmu_3,1), '+/-', round(err_3,1), '(fit) +', round(pdf_error_3_up,1), '-', round(pdf_error_3_down,1), '(pdf) +', round(extr_error_3_up,1), '-', round(extr_error_3_down,1), '(extr) =', round(mtmu_3,1), '+', round(tot_error_3_up,1), '-', round(tot_error_3_down,1), '(tot)' 
+    print 'mt_mu1 =', round(mtmu_4,1), '+/-', round(err_4,1), '(fit) +', round(pdf_error_4_up,1), '-', round(pdf_error_4_down,1), '(pdf) +', round(extr_error_4_up,1), '-', round(extr_error_4_down,1), '(extr) =', round(mtmu_4,1), '+', round(tot_error_4_up,1), '-', round(tot_error_4_down,1), '(tot)' 
+    print
+    
+    return [tot_error_1_up, tot_error_1_down, tot_error_2_up, tot_error_2_down, tot_error_3_up, tot_error_3_down, tot_error_4_up, tot_error_4_down]
+
 ################################
 
 # "makeMassPlots" produces the absolute mass plots for the running of mt
@@ -925,15 +1011,17 @@ def makeRatioPlots (mass_2, ratio_12, ratio_32, ratio_42, err_12_up, err_12_down
 
 def makeMassPlots(mtmu_1, err_1, mtmt_1, mtmu_2, err_2, mtmt_2, mtmu_3, err_3, mtmt_3, mtmu_4, err_4, mtmt_4) :
 
-    graph=TGraphErrors(3)
+    errors = getTotalMassError(mtmu_1, err_1, mtmu_2, err_2, mtmu_3, err_3, mtmu_4, err_4)
+
+    graph=TGraphAsymmErrors(3)
     graph.SetPoint(0,cnst.mu_1,mtmu_1)
-    graph.SetPointError(0,0,err_1)
+    graph.SetPointError(0,0,0,errors[0],errors[1])
     graph.SetPoint(1,cnst.mu_2,mtmu_2)
-    graph.SetPointError(1,0,err_2)
+    graph.SetPointError(1,0,0,errors[2],errors[3])
     graph.SetPoint(2,cnst.mu_3,mtmu_3)
-    graph.SetPointError(2,0,err_3)
+    graph.SetPointError(2,0,0,errors[4],errors[5])
     graph.SetPoint(3,cnst.mu_4,mtmu_4)
-    graph.SetPointError(3,0,err_4)
+    graph.SetPointError(3,0,0,errors[6],errors[7])
 
     gr_add=TGraphErrors()
     gr_add.SetPoint(0,cnst.mtmt,cnst.mtmt)
@@ -957,7 +1045,7 @@ def makeMassPlots(mtmu_1, err_1, mtmt_1, mtmu_2, err_2, mtmt_2, mtmu_3, err_3, m
 
     gr_band.GetXaxis().SetTitle('#mu [GeV]')
     gr_band.GetYaxis().SetTitle('m_{t}(#mu) [GeV]')
-    gr_band.SetTitle('m_{t}(#mu) as a function of #mu')
+    gr_band.SetTitle('')
 
     gr_add.SetMarkerStyle(8)
     gr_add.SetMarkerColor(rt.kBlue)
@@ -966,11 +1054,14 @@ def makeMassPlots(mtmu_1, err_1, mtmt_1, mtmu_2, err_2, mtmt_2, mtmu_3, err_3, m
     gr_band.GetYaxis().SetRangeUser(140,170)
 
     graph.SetMarkerStyle(8)
+    graph.SetTitle('')
     
-    leg = TLegend(.15,.23,.7,.35)
-    leg.AddEntry(graph,'MCFM @NLO from diff. #sigma_{t#bar{t}} (exp. only)','pe')
-    leg.AddEntry(gr_add,'Hathor @NLO from incl. #sigma_{t#bar{t}} (same data)')
-    leg.AddEntry(gr_band,'RunDec @ 1 loop (5 flav.)','f')
+    # leg = TLegend(.15,.23,.7,.35)
+    leg = TLegend(.15,.15,.77,.3)
+    leg.SetBorderSize(0)
+    leg.AddEntry(graph,'NLO extraction from differential #sigma_{t#bar{t}}','pe')
+    leg.AddEntry(gr_add,'NLO extraction from inclusive #sigma_{t#bar{t}} (same data)','pe')
+    leg.AddEntry(gr_band,'Evolved uncertainty, one loop RGE (5 flavours)','f')
     
     c = TCanvas()
     gr_band.SetMinimum(125)
@@ -979,6 +1070,22 @@ def makeMassPlots(mtmu_1, err_1, mtmt_1, mtmu_2, err_2, mtmt_2, mtmu_3, err_3, m
     graph.Draw('p same')
     leg.Draw('same')
 
+    #fromhere
+    latexLabel1 = TLatex()
+    latexLabel1.SetTextSize(0.06)
+    latexLabel1.SetNDC()
+    
+    latexLabel2 = TLatex();
+    latexLabel2.SetTextSize(0.04);
+    latexLabel2.SetTextFont(42)
+    latexLabel2.SetNDC();
+
+    latexLabel1.DrawLatex(0.11, 0.92, "CMS")
+    latexLabel2.DrawLatex(0.70, 0.92, "35.9 fb^{-1} (13 TeV)")
+    latexLabel2.DrawLatex(0.59, 0.78, "ABMP16_5_nlo PDF set");
+    # latexLabel2.DrawLatex(0.59, 0.73, "#mu_{ref} = "+str(round(cnst.mu_2,1))+" GeV");
+
+    
     outdir = 'plots_running'
     if not os.path.exists(outdir):
         os.makedirs(outdir)
@@ -989,6 +1096,7 @@ def makeMassPlots(mtmu_1, err_1, mtmt_1, mtmu_2, err_2, mtmt_2, mtmu_3, err_3, m
 
 
     graph.Clear()
+    graph=TGraphErrors(3)
     graph.SetPoint(0,cnst.mu_1,mtmt_1)
     graph.SetPointError(0,0,err_1)
     graph.SetPoint(1,cnst.mu_2,mtmt_2)
