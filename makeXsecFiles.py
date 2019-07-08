@@ -928,12 +928,16 @@ def getTotalMassError(mtmu_1, err_1, mtmu_2, err_2, mtmu_3, err_3, mtmu_4, err_4
 
     pdf_error_1_up = pdf_error_1_down = 0
     extr_error_1_up = extr_error_1_down = 0
+    scale_error_1_up = scale_error_1_down = mtmu_1
     pdf_error_2_up = pdf_error_2_down = 0
     extr_error_2_up = extr_error_2_down = 0
+    scale_error_2_up = scale_error_2_down = mtmu_2
     pdf_error_3_up = pdf_error_3_down = 0
     extr_error_3_up = extr_error_3_down = 0
+    scale_error_3_up = scale_error_3_down = mtmu_3
     pdf_error_4_up = pdf_error_4_down = 0
     extr_error_4_up = extr_error_4_down = 0
+    scale_error_4_up = scale_error_4_down = mtmu_4
 
     for pdf in range(1,30):
         mass_and_err_1 = getMassAndError(1, 'nominal', 'nominal', pdf , 0 , 0 )
@@ -984,21 +988,56 @@ def getTotalMassError(mtmu_1, err_1, mtmu_2, err_2, mtmu_3, err_3, mtmu_4, err_4
     extr_error_4_up = extr_error_4_up**.5
     extr_error_4_down = extr_error_4_down**.5
 
-    tot_error_1_up = (pdf_error_1_up**2 + extr_error_1_up**2 + err_1**2)**.5
-    tot_error_1_down = (pdf_error_1_down**2 + extr_error_1_down**2 + err_1**2)**.5
-    tot_error_2_up = (pdf_error_2_up**2 + extr_error_2_up**2 + err_2**2)**.5
-    tot_error_2_down = (pdf_error_2_down**2 + extr_error_2_down**2 + err_2**2)**.5
-    tot_error_3_up = (pdf_error_3_up**2 + extr_error_3_up**2 + err_3**2)**.5
-    tot_error_3_down = (pdf_error_3_down**2 + extr_error_3_down**2 + err_3**2)**.5
-    tot_error_4_up = (pdf_error_4_up**2 + extr_error_4_up**2 + err_4**2)**.5
-    tot_error_4_down = (pdf_error_4_down**2 + extr_error_4_down**2 + err_4**2)**.5
+    if do_scale_variations:
+        for renscale in 'nominal', 'up','down':
+            for facscale in 'nominal', 'up','down':
+
+                if renscale == 'up' and facscale == 'down': continue
+                if facscale == 'up' and renscale == 'down': continue
+                if facscale == 'nominal' and renscale == 'nominal': continue
+
+                if renscale != 'nominal': continue # only factorization scale
+            
+                mass_and_err_1 = getMassAndError(1, renscale, facscale, 0 , 0 , 0 )
+                mass_and_err_2 = getMassAndError(2, renscale, facscale, 0 , 0 , 0 )
+                mass_and_err_3 = getMassAndError(3, renscale, facscale, 0 , 0 , 0 )
+                mass_and_err_4 = getMassAndError(4, renscale, facscale, 0 , 0 , 0 )
+
+
+                if mass_and_err_1[0] > scale_error_1_up : scale_error_1_up = mass_and_err_1[0]
+                elif mass_and_err_1[0] < scale_error_1_down : scale_error_1_down = mass_and_err_1[0]
+                if mass_and_err_2[0] > scale_error_2_up : scale_error_2_up = mass_and_err_2[0]
+                elif mass_and_err_2[0] < scale_error_2_down : scale_error_2_down = mass_and_err_2[0]
+                if mass_and_err_3[0] > scale_error_3_up : scale_error_3_up = mass_and_err_3[0]
+                elif mass_and_err_3[0] < scale_error_3_down : scale_error_3_down = mass_and_err_3[0]
+                if mass_and_err_4[0] > scale_error_4_up : scale_error_4_up = mass_and_err_4[0]
+                elif mass_and_err_4[0] < scale_error_4_down : scale_error_4_down = mass_and_err_4[0]
+                
+    # automatically zero if no scale variations
+    scale_error_1_up = scale_error_1_up - mtmu_1
+    scale_error_1_down = mtmu_1 - scale_error_1_down
+    scale_error_2_up = scale_error_2_up - mtmu_2
+    scale_error_2_down = mtmu_2 - scale_error_2_down
+    scale_error_3_up = scale_error_3_up - mtmu_3
+    scale_error_3_down = mtmu_3 - scale_error_3_down
+    scale_error_4_up = scale_error_4_up - mtmu_4
+    scale_error_4_down = mtmu_4 - scale_error_4_down
+    
+    tot_error_1_up = (pdf_error_1_up**2 + extr_error_1_up**2 + scale_error_1_up**2 + err_1**2)**.5
+    tot_error_1_down = (pdf_error_1_down**2 + extr_error_1_down**2 + scale_error_1_down**2 + err_1**2)**.5
+    tot_error_2_up = (pdf_error_2_up**2 + extr_error_2_up**2 + scale_error_2_up**2 + err_2**2)**.5
+    tot_error_2_down = (pdf_error_2_down**2 + extr_error_2_down**2 + scale_error_2_down**2 + err_2**2)**.5
+    tot_error_3_up = (pdf_error_3_up**2 + extr_error_3_up**2 + scale_error_3_up**2 + err_3**2)**.5
+    tot_error_3_down = (pdf_error_3_down**2 + extr_error_3_down**2 + scale_error_3_down**2 + err_3**2)**.5
+    tot_error_4_up = (pdf_error_4_up**2 + extr_error_4_up**2 + scale_error_4_up**2 + err_4**2)**.5
+    tot_error_4_down = (pdf_error_4_down**2 + extr_error_4_down**2 + scale_error_4_down**2 + err_4**2)**.5
 
 
     print
-    print 'mt_mu1 =', round(mtmu_1,1), '+/-', round(err_1,1), '(fit) +', round(pdf_error_1_up,1), '-', round(pdf_error_1_down,1), '(pdf) +', round(extr_error_1_up,1), '-', round(extr_error_1_down,1), '(extr) =', round(mtmu_1,1), '+', round(tot_error_1_up,1), '-', round(tot_error_1_down,1), '(tot)' 
-    print 'mt_mu1 =', round(mtmu_2,1), '+/-', round(err_2,1), '(fit) +', round(pdf_error_2_up,1), '-', round(pdf_error_2_down,1), '(pdf) +', round(extr_error_2_up,1), '-', round(extr_error_2_down,1), '(extr) =', round(mtmu_2,1), '+', round(tot_error_2_up,1), '-', round(tot_error_2_down,1), '(tot)' 
-    print 'mt_mu1 =', round(mtmu_3,1), '+/-', round(err_3,1), '(fit) +', round(pdf_error_3_up,1), '-', round(pdf_error_3_down,1), '(pdf) +', round(extr_error_3_up,1), '-', round(extr_error_3_down,1), '(extr) =', round(mtmu_3,1), '+', round(tot_error_3_up,1), '-', round(tot_error_3_down,1), '(tot)' 
-    print 'mt_mu1 =', round(mtmu_4,1), '+/-', round(err_4,1), '(fit) +', round(pdf_error_4_up,1), '-', round(pdf_error_4_down,1), '(pdf) +', round(extr_error_4_up,1), '-', round(extr_error_4_down,1), '(extr) =', round(mtmu_4,1), '+', round(tot_error_4_up,1), '-', round(tot_error_4_down,1), '(tot)' 
+    print 'mt_mu1 =', round(mtmu_1,1), '+/-', round(err_1,1), '(fit) +', round(pdf_error_1_up,1), '-', round(pdf_error_1_down,1), '(pdf) +', round(extr_error_1_up,1), '-', round(extr_error_1_down,1), '(extr) +', round(scale_error_1_up,1), '-', round(scale_error_1_down,1), '(scale) =', round(mtmu_1,1), '+', round(tot_error_1_up,1), '-', round(tot_error_1_down,1), '(tot)' 
+    print 'mt_mu1 =', round(mtmu_2,1), '+/-', round(err_2,1), '(fit) +', round(pdf_error_2_up,1), '-', round(pdf_error_2_down,1), '(pdf) +', round(extr_error_2_up,1), '-', round(extr_error_2_down,1), '(extr) +', round(scale_error_2_up,1), '-', round(scale_error_2_down,1), '(scale) =', round(mtmu_2,1), '+', round(tot_error_2_up,1), '-', round(tot_error_2_down,1), '(tot)' 
+    print 'mt_mu3 =', round(mtmu_3,1), '+/-', round(err_3,1), '(fit) +', round(pdf_error_3_up,1), '-', round(pdf_error_3_down,1), '(pdf) +', round(extr_error_3_up,1), '-', round(extr_error_3_down,1), '(extr) +', round(scale_error_3_up,1), '-', round(scale_error_3_down,1), '(scale) =', round(mtmu_3,1), '+', round(tot_error_3_up,1), '-', round(tot_error_3_down,1), '(tot)' 
+    print 'mt_mu4 =', round(mtmu_4,1), '+/-', round(err_4,1), '(fit) +', round(pdf_error_4_up,1), '-', round(pdf_error_4_down,1), '(pdf) +', round(extr_error_4_up,1), '-', round(extr_error_4_down,1), '(extr) +', round(scale_error_4_up,1), '-', round(scale_error_4_down,1), '(scale) =', round(mtmu_4,1), '+', round(tot_error_4_up,1), '-', round(tot_error_4_down,1), '(tot)' 
     print
     
     return [tot_error_1_up, tot_error_1_down, tot_error_2_up, tot_error_2_down, tot_error_3_up, tot_error_3_down, tot_error_4_up, tot_error_4_down]
