@@ -15,7 +15,9 @@ from variables import xsec_1, xsec_2, xsec_3, xsec_4
 
 estimate_contribs = False
 estimate_significance = False
+
 do_scale_variations = False # not yet well tested
+facscale_only = True # only factorization scale
 
 ntoys = 0
 replace_corr = False  #recommended: False
@@ -449,7 +451,8 @@ def getScaleUncertainties (central_ratio_1_2, central_ratio_3_2, central_ratio_4
             if facscale == 'up' and renscale == 'down': continue
             if facscale == 'nominal' and renscale == 'nominal': continue
 
-            if renscale != 'nominal': continue # only factorization scale
+            if facscale_only:
+                if renscale != 'nominal': continue # only factorization scale
             
             mass_and_err_1 = getMassAndError(1, renscale, facscale, 0 , 0 , 0 )
             mass_and_err_2 = getMassAndError(2, renscale, facscale, 0 , 0 , 0 )
@@ -996,7 +999,8 @@ def getTotalMassError(mtmu_1, err_1, mtmu_2, err_2, mtmu_3, err_3, mtmu_4, err_4
                 if facscale == 'up' and renscale == 'down': continue
                 if facscale == 'nominal' and renscale == 'nominal': continue
 
-                if renscale != 'nominal': continue # only factorization scale
+                if facscale_only:
+                    if renscale != 'nominal': continue # only factorization scale
             
                 mass_and_err_1 = getMassAndError(1, renscale, facscale, 0 , 0 , 0 )
                 mass_and_err_2 = getMassAndError(2, renscale, facscale, 0 , 0 , 0 )
