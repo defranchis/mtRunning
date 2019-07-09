@@ -1058,18 +1058,18 @@ def makeMassPlots(mtmu_1, err_1, mtmt_1, mtmu_2, err_2, mtmt_2, mtmu_3, err_3, m
 
     graph=TGraphAsymmErrors(3)
     graph.SetPoint(0,cnst.mu_1,mtmu_1)
-    graph.SetPointError(0,0,0,errors[0],errors[1])
+    graph.SetPointError(0,0,0,err_1,err_1)
     graph.SetPoint(1,cnst.mu_2,mtmu_2)
-    graph.SetPointError(1,0,0,errors[2],errors[3])
+    graph.SetPointError(1,0,0,err_2,err_2)
     graph.SetPoint(2,cnst.mu_3,mtmu_3)
-    graph.SetPointError(2,0,0,errors[4],errors[5])
+    graph.SetPointError(2,0,0,err_3,err_3)
     graph.SetPoint(3,cnst.mu_4,mtmu_4)
-    graph.SetPointError(3,0,0,errors[6],errors[7])
+    graph.SetPointError(3,0,0,err_4,err_4)
 
     gr_add=TGraphErrors()
     gr_add.SetPoint(0,cnst.mtmt,cnst.mtmt)
     gr_add.SetPointError(0,0,cnst.mtmt_err)
-    
+
     
     l = makeAdditionalTheoryPrediction(cnst.mtmt, cnst.mtmt_err, mtmu_2, False)
     r = l[0]
@@ -1137,6 +1137,17 @@ def makeMassPlots(mtmu_1, err_1, mtmt_1, mtmu_2, err_2, mtmt_2, mtmu_3, err_3, m
     c.SaveAs(outdir+'/test_mtmu_abs.pdf')
     c.SaveAs(outdir+'/test_mtmu_abs.root')
 
+    graph.SetPointError(0,0,0,errors[0],errors[1])
+    graph.SetPointError(1,0,0,errors[2],errors[3])
+    graph.SetPointError(2,0,0,errors[4],errors[5])
+    graph.SetPointError(3,0,0,errors[6],errors[7])
+
+    c.Update()
+    c.SaveAs(outdir+'/test_mtmu_abs_uncert.png')
+    c.SaveAs(outdir+'/test_mtmu_abs_uncert.pdf')
+    c.SaveAs(outdir+'/test_mtmu_abs_uncert.root')
+    
+    
 
     graph.Clear()
     graph=TGraphErrors(3)
