@@ -620,19 +620,19 @@ def makeTheoryPrediction(outfile, mass_2):
 ################################
 
 
-def makeAdditionalTheoryPrediction (mtmt, err_mtmt, mtmu, doratio):
+def makeAdditionalTheoryPrediction (mtmt, err_mtmt_up, err_mtmt_down, mtmu, doratio):
     r = []
     ru = []
     rd = []
     scales = []
     r.append(mtmt/mtmu)
-    ru.append((mtmt+err_mtmt)/mtmu)
-    rd.append((mtmt-err_mtmt)/mtmu)
+    ru.append((mtmt+err_mtmt_up)/mtmu)
+    rd.append((mtmt-err_mtmt_down)/mtmu)
     scales.append(mtmt)
     for scale in range(int(mtmt)+1,1050+1):
         ratio = mtmt2mtmu(mtmt,scale)/mtmu
-        ratio_up = mtmt2mtmu(mtmt+err_mtmt,scale)/mtmu
-        ratio_down = mtmt2mtmu(mtmt-err_mtmt,scale)/mtmu
+        ratio_up = mtmt2mtmu(mtmt+err_mtmt_up,scale)/mtmu
+        ratio_down = mtmt2mtmu(mtmt-err_mtmt_down,scale)/mtmu
         r.append(ratio)
         ru.append(ratio_up)
         rd.append(ratio_down)
@@ -674,8 +674,8 @@ def makeRatioPlots (mass_2, ratio_12, ratio_32, ratio_42, err_12_up, err_12_down
     theoryFileName = 'theory_prediction'
     l = makeTheoryPrediction(theoryFileName,mass_2)
     th = TGraph(theoryFileName+'.txt')    
-    th.SetLineColor(rt.kRed);
-    th.SetLineWidth(2);
+    th.SetLineColor(rt.kRed)
+    th.SetLineWidth(2)
 
     os.remove(theoryFileName+'.txt')
 
@@ -687,20 +687,20 @@ def makeRatioPlots (mass_2, ratio_12, ratio_32, ratio_42, err_12_up, err_12_down
 
     for i in range(0, th.GetN()):
         th_band.SetPoint(i,scales[i],max(r_up[i],r_down[i]))
-        th_band.SetPoint(th.GetN()+i,scales[th.GetN()-i-1],min(r_up[th.GetN()-i-1],r_down[th.GetN()-i-1]));
+        th_band.SetPoint(th.GetN()+i,scales[th.GetN()-i-1],min(r_up[th.GetN()-i-1],r_down[th.GetN()-i-1]))
 
-    th_band.SetFillStyle(3001);
-    th_band.SetFillColor(rt.kRed);
+    th_band.SetFillStyle(3001)
+    th_band.SetFillColor(rt.kRed)
     
 
     latexLabel1 = TLatex()
     latexLabel1.SetTextSize(0.06)
     latexLabel1.SetNDC()
     
-    latexLabel2 = TLatex();
-    latexLabel2.SetTextSize(0.04);
+    latexLabel2 = TLatex()
+    latexLabel2.SetTextSize(0.04)
     latexLabel2.SetTextFont(42)
-    latexLabel2.SetNDC();
+    latexLabel2.SetNDC()
     
     graph.GetXaxis().SetTitle('#mu [GeV]')
     graph.GetXaxis().SetTitleSize(0.048)
@@ -728,14 +728,14 @@ def makeRatioPlots (mass_2, ratio_12, ratio_32, ratio_42, err_12_up, err_12_down
     c = TCanvas()
     g.SetMarkerStyle(8)
     g.Draw('ap')
-    th.Draw("L same");
+    th.Draw("L same")
     g1.Draw('p same')
     leg.Draw('same')
     th_band.Draw('f same')
     latexLabel1.DrawLatex(0.11, 0.92, "CMS")
     latexLabel2.DrawLatex(0.70, 0.92, "35.9 fb^{-1} (13 TeV)")
-    latexLabel2.DrawLatex(0.59, 0.78, "ABMP16_5_nlo PDF set");
-    latexLabel2.DrawLatex(0.59, 0.73, "#mu_{ref} = "+str(round(cnst.mu_2,1))+" GeV");
+    latexLabel2.DrawLatex(0.59, 0.78, "ABMP16_5_nlo PDF set")
+    latexLabel2.DrawLatex(0.59, 0.73, "#mu_{ref} = "+str(round(cnst.mu_2,1))+" GeV")
 
     outdir = 'plots_running'
     if not os.path.exists(outdir):
@@ -753,7 +753,7 @@ def makeRatioPlots (mass_2, ratio_12, ratio_32, ratio_42, err_12_up, err_12_down
     gr_add.SetPoint(0,cnst.mtmt,cnst.mtmt/mtmu)
     gr_add.SetPointError(0,0,cnst.mtmt_err/mtmu)
 
-    l = makeAdditionalTheoryPrediction(cnst.mtmt, cnst.mtmt_err, mtmu, True)
+    l = makeAdditionalTheoryPrediction(cnst.mtmt, cnst.mtmt_err, cnst.mtmt_err, mtmu, True)
     r = l[0]
     r_up = l[1]
     r_down = l[2]
@@ -763,10 +763,10 @@ def makeRatioPlots (mass_2, ratio_12, ratio_32, ratio_42, err_12_up, err_12_down
 
     for i in range(0, len(r)):
         gr_band.SetPoint(i,scales[i],r_up[i])
-        gr_band.SetPoint(len(r)+i,scales[len(r)-i-1],r_down[len(r)-i-1]);
+        gr_band.SetPoint(len(r)+i,scales[len(r)-i-1],r_down[len(r)-i-1])
 
-    gr_band.SetFillStyle(3002);
-    gr_band.SetFillColor(rt.kRed+1);
+    gr_band.SetFillStyle(3002)
+    gr_band.SetFillColor(rt.kRed+1)
 
     gr_band.GetXaxis().SetTitle('#mu [GeV]')
     gr_band.GetYaxis().SetTitle('m_{t}(#mu) / m_{t}(#mu_{ref})')
@@ -811,8 +811,8 @@ def makeRatioPlots (mass_2, ratio_12, ratio_32, ratio_42, err_12_up, err_12_down
     leg2.Draw('same')
     latexLabel1.DrawLatex(0.11, 0.92, "CMS")
     latexLabel2.DrawLatex(0.70, 0.92, "35.9 fb^{-1} (13 TeV)")
-    latexLabel2.DrawLatex(0.59, 0.78, "ABMP16_5_nlo PDF set");
-    latexLabel2.DrawLatex(0.59, 0.73, "#mu_{ref} = "+str(round(cnst.mu_2,1))+" GeV");
+    latexLabel2.DrawLatex(0.59, 0.78, "ABMP16_5_nlo PDF set")
+    latexLabel2.DrawLatex(0.59, 0.73, "#mu_{ref} = "+str(round(cnst.mu_2,1))+" GeV")
 
     c.SaveAs(outdir+'/test_incl.png')
     c.SaveAs(outdir+'/test_incl.pdf')
@@ -857,7 +857,7 @@ def makeRatioPlots (mass_2, ratio_12, ratio_32, ratio_42, err_12_up, err_12_down
     leg.Draw('same')
     line.Draw('same')
     g1.Draw('p same')
-    latexLabel2.DrawLatex(0.59, 0.8, "ABMP16_5_nlo PDF set");
+    latexLabel2.DrawLatex(0.59, 0.8, "ABMP16_5_nlo PDF set")
 
     outdir = 'plots_running'
     if not os.path.exists(outdir):
@@ -873,7 +873,7 @@ def makeRatioPlots (mass_2, ratio_12, ratio_32, ratio_42, err_12_up, err_12_down
     gr_add.SetPoint(0,cnst.mtmt,cnst.mtmt/mtmt_2)
     gr_add.SetPointError(0,0,cnst.mtmt_err/mtmt_2)
 
-    l = makeAdditionalTheoryPrediction(cnst.mtmt, cnst.mtmt_err, mtmu, True)
+    l = makeAdditionalTheoryPrediction(cnst.mtmt, cnst.mtmt_err, cnst.mtmt_err, mtmu, True)
     scales = l[3]
 
     gr_band.Clear()
@@ -881,14 +881,14 @@ def makeRatioPlots (mass_2, ratio_12, ratio_32, ratio_42, err_12_up, err_12_down
 
     for i in range(0, len(r)):
         gr_band.SetPoint(i,scales[i],(cnst.mtmt+cnst.mtmt_err)/mtmt_2)
-        gr_band.SetPoint(len(scales)+i,scales[len(scales)-i-1],(cnst.mtmt-cnst.mtmt_err)/mtmt_2);
+        gr_band.SetPoint(len(scales)+i,scales[len(scales)-i-1],(cnst.mtmt-cnst.mtmt_err)/mtmt_2)
 
     gr_band.GetXaxis().SetTitle('#mu [GeV]')
     gr_band.GetYaxis().SetTitle('m_{t}(m_{t}) / m_{t}^{#mu_{2}}(m_{t})')
     gr_band.SetTitle('m_{t}(m_{t}) measured as a function of #mu')
 
-    gr_band.SetFillStyle(3002);
-    gr_band.SetFillColor(rt.kRed+1);
+    gr_band.SetFillStyle(3002)
+    gr_band.SetFillColor(rt.kRed+1)
     gr_band.GetYaxis().SetRangeUser(0.94,1.04)
 
 
@@ -991,31 +991,30 @@ def getTotalMassError(mtmu_1, err_1, mtmu_2, err_2, mtmu_3, err_3, mtmu_4, err_4
     extr_error_4_up = extr_error_4_up**.5
     extr_error_4_down = extr_error_4_down**.5
 
-    if do_scale_variations:
-        for renscale in 'nominal', 'up','down':
-            for facscale in 'nominal', 'up','down':
+    for renscale in 'nominal', 'up','down':
+        for facscale in 'nominal', 'up','down':
 
-                if renscale == 'up' and facscale == 'down': continue
-                if facscale == 'up' and renscale == 'down': continue
-                if facscale == 'nominal' and renscale == 'nominal': continue
+            if renscale == 'up' and facscale == 'down': continue
+            if facscale == 'up' and renscale == 'down': continue
+            if facscale == 'nominal' and renscale == 'nominal': continue
 
-                if facscale_only:
-                    if renscale != 'nominal': continue # only factorization scale
+            # if facscale_only:
+            #     if renscale != 'nominal': continue # only factorization scale
             
-                mass_and_err_1 = getMassAndError(1, renscale, facscale, 0 , 0 , 0 )
-                mass_and_err_2 = getMassAndError(2, renscale, facscale, 0 , 0 , 0 )
-                mass_and_err_3 = getMassAndError(3, renscale, facscale, 0 , 0 , 0 )
-                mass_and_err_4 = getMassAndError(4, renscale, facscale, 0 , 0 , 0 )
+            mass_and_err_1 = getMassAndError(1, renscale, facscale, 0 , 0 , 0 )
+            mass_and_err_2 = getMassAndError(2, renscale, facscale, 0 , 0 , 0 )
+            mass_and_err_3 = getMassAndError(3, renscale, facscale, 0 , 0 , 0 )
+            mass_and_err_4 = getMassAndError(4, renscale, facscale, 0 , 0 , 0 )
 
 
-                if mass_and_err_1[0] > scale_error_1_up : scale_error_1_up = mass_and_err_1[0]
-                elif mass_and_err_1[0] < scale_error_1_down : scale_error_1_down = mass_and_err_1[0]
-                if mass_and_err_2[0] > scale_error_2_up : scale_error_2_up = mass_and_err_2[0]
-                elif mass_and_err_2[0] < scale_error_2_down : scale_error_2_down = mass_and_err_2[0]
-                if mass_and_err_3[0] > scale_error_3_up : scale_error_3_up = mass_and_err_3[0]
-                elif mass_and_err_3[0] < scale_error_3_down : scale_error_3_down = mass_and_err_3[0]
-                if mass_and_err_4[0] > scale_error_4_up : scale_error_4_up = mass_and_err_4[0]
-                elif mass_and_err_4[0] < scale_error_4_down : scale_error_4_down = mass_and_err_4[0]
+            if mass_and_err_1[0] > scale_error_1_up : scale_error_1_up = mass_and_err_1[0]
+            elif mass_and_err_1[0] < scale_error_1_down : scale_error_1_down = mass_and_err_1[0]
+            if mass_and_err_2[0] > scale_error_2_up : scale_error_2_up = mass_and_err_2[0]
+            elif mass_and_err_2[0] < scale_error_2_down : scale_error_2_down = mass_and_err_2[0]
+            if mass_and_err_3[0] > scale_error_3_up : scale_error_3_up = mass_and_err_3[0]
+            elif mass_and_err_3[0] < scale_error_3_down : scale_error_3_down = mass_and_err_3[0]
+            if mass_and_err_4[0] > scale_error_4_up : scale_error_4_up = mass_and_err_4[0]
+            elif mass_and_err_4[0] < scale_error_4_down : scale_error_4_down = mass_and_err_4[0]
                 
     # automatically zero if no scale variations
     scale_error_1_up = scale_error_1_up - mtmu_1
@@ -1027,6 +1026,15 @@ def getTotalMassError(mtmu_1, err_1, mtmu_2, err_2, mtmu_3, err_3, mtmu_4, err_4
     scale_error_4_up = scale_error_4_up - mtmu_4
     scale_error_4_down = mtmu_4 - scale_error_4_down
     
+    fit_error_1_up = (pdf_error_1_up**2 + extr_error_1_up**2 + err_1**2)**.5
+    fit_error_1_down = (pdf_error_1_down**2 + extr_error_1_down**2 + err_1**2)**.5
+    fit_error_2_up = (pdf_error_2_up**2 + extr_error_2_up**2 + err_2**2)**.5
+    fit_error_2_down = (pdf_error_2_down**2 + extr_error_2_down**2 + err_2**2)**.5
+    fit_error_3_up = (pdf_error_3_up**2 + extr_error_3_up**2 + err_3**2)**.5
+    fit_error_3_down = (pdf_error_3_down**2 + extr_error_3_down**2 + err_3**2)**.5
+    fit_error_4_up = (pdf_error_4_up**2 + extr_error_4_up**2 + err_4**2)**.5
+    fit_error_4_down = (pdf_error_4_down**2 + extr_error_4_down**2 + err_4**2)**.5
+
     tot_error_1_up = (pdf_error_1_up**2 + extr_error_1_up**2 + scale_error_1_up**2 + err_1**2)**.5
     tot_error_1_down = (pdf_error_1_down**2 + extr_error_1_down**2 + scale_error_1_down**2 + err_1**2)**.5
     tot_error_2_up = (pdf_error_2_up**2 + extr_error_2_up**2 + scale_error_2_up**2 + err_2**2)**.5
@@ -1044,7 +1052,8 @@ def getTotalMassError(mtmu_1, err_1, mtmu_2, err_2, mtmu_3, err_3, mtmu_4, err_4
     print 'mt_mu4 =', round(mtmu_4,1), '+/-', round(err_4,1), '(fit) +', round(pdf_error_4_up,1), '-', round(pdf_error_4_down,1), '(pdf) +', round(extr_error_4_up,1), '-', round(extr_error_4_down,1), '(extr) +', round(scale_error_4_up,1), '-', round(scale_error_4_down,1), '(scale) =', round(mtmu_4,1), '+', round(tot_error_4_up,1), '-', round(tot_error_4_down,1), '(tot)' 
     print
     
-    return [tot_error_1_up, tot_error_1_down, tot_error_2_up, tot_error_2_down, tot_error_3_up, tot_error_3_down, tot_error_4_up, tot_error_4_down]
+    return [fit_error_1_up, fit_error_1_down, fit_error_2_up, fit_error_2_down, fit_error_3_up, fit_error_3_down, fit_error_4_up, fit_error_4_down,
+            tot_error_1_up, tot_error_1_down, tot_error_2_up, tot_error_2_down, tot_error_3_up, tot_error_3_down, tot_error_4_up, tot_error_4_down]
 
 ################################
 
@@ -1071,7 +1080,7 @@ def makeMassPlots(mtmu_1, err_1, mtmt_1, mtmu_2, err_2, mtmt_2, mtmu_3, err_3, m
     gr_add.SetPointError(0,0,cnst.mtmt_err)
 
     
-    l = makeAdditionalTheoryPrediction(cnst.mtmt, cnst.mtmt_err, mtmu_2, False)
+    l = makeAdditionalTheoryPrediction(cnst.mtmt, cnst.mtmt_err, cnst.mtmt_err, mtmu_2, False)
     r = l[0]
     r_up = l[1]
     r_down = l[2]
@@ -1081,16 +1090,16 @@ def makeMassPlots(mtmu_1, err_1, mtmt_1, mtmu_2, err_2, mtmt_2, mtmu_3, err_3, m
 
     for i in range(0, len(r)):
         gr_band.SetPoint(i,scales[i],r_up[i])
-        gr_band.SetPoint(len(r)+i,scales[len(r)-i-1],r_down[len(r)-i-1]);
+        gr_band.SetPoint(len(r)+i,scales[len(r)-i-1],r_down[len(r)-i-1])
 
-    gr_band.SetFillStyle(3002);
-    gr_band.SetFillColor(rt.kRed+1);
+    gr_band.SetFillStyle(3002)
+    gr_band.SetFillColor(rt.kRed+1)
 
     gr_band.GetXaxis().SetTitle('#mu [GeV]')
     gr_band.GetYaxis().SetTitle('m_{t}(#mu) [GeV]')
     gr_band.SetTitle('')
 
-    gr_add.SetMarkerStyle(8)
+    gr_add.SetMarkerStyle(21)
     gr_add.SetMarkerColor(rt.kBlue)
     gr_add.SetLineColor(rt.kBlue)
 
@@ -1118,15 +1127,15 @@ def makeMassPlots(mtmu_1, err_1, mtmt_1, mtmu_2, err_2, mtmt_2, mtmu_3, err_3, m
     latexLabel1.SetTextSize(0.06)
     latexLabel1.SetNDC()
     
-    latexLabel2 = TLatex();
-    latexLabel2.SetTextSize(0.04);
+    latexLabel2 = TLatex()
+    latexLabel2.SetTextSize(0.04)
     latexLabel2.SetTextFont(42)
-    latexLabel2.SetNDC();
+    latexLabel2.SetNDC()
 
     latexLabel1.DrawLatex(0.11, 0.92, "CMS")
     latexLabel2.DrawLatex(0.70, 0.92, "35.9 fb^{-1} (13 TeV)")
-    latexLabel2.DrawLatex(0.59, 0.78, "ABMP16_5_nlo PDF set");
-    # latexLabel2.DrawLatex(0.59, 0.73, "#mu_{ref} = "+str(round(cnst.mu_2,1))+" GeV");
+    latexLabel2.DrawLatex(0.59, 0.78, "ABMP16_5_nlo PDF set")
+    # latexLabel2.DrawLatex(0.59, 0.73, "#mu_{ref} = "+str(round(cnst.mu_2,1))+" GeV")
 
     
     outdir = 'plots_running'
@@ -1137,15 +1146,58 @@ def makeMassPlots(mtmu_1, err_1, mtmt_1, mtmu_2, err_2, mtmt_2, mtmu_3, err_3, m
     c.SaveAs(outdir+'/test_mtmu_abs.pdf')
     c.SaveAs(outdir+'/test_mtmu_abs.root')
 
-    graph.SetPointError(0,0,0,errors[0],errors[1])
-    graph.SetPointError(1,0,0,errors[2],errors[3])
-    graph.SetPointError(2,0,0,errors[4],errors[5])
-    graph.SetPointError(3,0,0,errors[6],errors[7])
+    graph.SetPointError(0,0,0,errors[1],errors[0])
+    graph.SetPointError(1,0,0,errors[3],errors[2])
+    graph.SetPointError(2,0,0,errors[5],errors[4])
+    graph.SetPointError(3,0,0,errors[7],errors[6])
 
     c.Update()
     c.SaveAs(outdir+'/test_mtmu_abs_uncert.png')
     c.SaveAs(outdir+'/test_mtmu_abs_uncert.pdf')
     c.SaveAs(outdir+'/test_mtmu_abs_uncert.root')
+    
+    l = makeAdditionalTheoryPrediction(cnst.mtmt, (cnst.mtmt_err**2 + cnst.mtmt_scale_up**2)**.5, (cnst.mtmt_err**2 + cnst.mtmt_scale_down**2)**.5, mtmu_2, False)
+    r = l[0]
+    r_up = l[1]
+    r_down = l[2]
+    scales = l[3]
+    
+    gr_band_fit = gr_band.Clone()
+    gr_band_fit.SetFillColor(rt.kBlue-1)
+    gr_band.Clear()
+
+    for i in range(0, len(r)):
+        gr_band.SetPoint(i,scales[i],r_up[i])
+        gr_band.SetPoint(len(r)+i,scales[len(r)-i-1],r_down[len(r)-i-1])
+
+    # gr_band.SetFillStyle(3002)
+    # gr_band.SetFillColor(rt.kRed+1)
+
+    graph_scale = graph.Clone()
+    graph_scale.SetPointError(0,0,0,errors[9],errors[8])
+    graph_scale.SetPointError(1,0,0,errors[11],errors[10])
+    graph_scale.SetPointError(2,0,0,errors[13],errors[12])
+    graph_scale.SetPointError(3,0,0,errors[15],errors[14])
+    graph.SetLineWidth(2)
+    gr_add.SetLineWidth(2)
+    
+    gr_add_scale=TGraphAsymmErrors()
+    gr_add_scale.SetPoint(0,cnst.mtmt,cnst.mtmt)
+    gr_add_scale.SetPointError(0,0,0,(cnst.mtmt_err**2+cnst.mtmt_scale_down**2)**.5,(cnst.mtmt_err**2+cnst.mtmt_scale_up**2)**.5)
+    gr_add_scale.SetMarkerStyle(7)
+    gr_add_scale.SetMarkerColor(rt.kBlue)
+    gr_add_scale.SetLineColor(rt.kBlue)
+
+    
+    gr_band.SetMinimum(110)
+    gr_band.SetMaximum(175)
+    graph_scale.Draw('p same')
+    gr_add_scale.Draw('p same')
+    gr_band_fit.Draw('f same')
+    c.Update()
+    c.SaveAs(outdir+'/test_mtmu_abs_scale.png')
+    c.SaveAs(outdir+'/test_mtmu_abs_scale.pdf')
+    c.SaveAs(outdir+'/test_mtmu_abs_scale.root')
     
     
 
@@ -1165,16 +1217,16 @@ def makeMassPlots(mtmu_1, err_1, mtmt_1, mtmu_2, err_2, mtmt_2, mtmu_3, err_3, m
 
     for i in range(0, len(r)):
         gr_band.SetPoint(i,scales[i],cnst.mtmt+cnst.mtmt_err)
-        gr_band.SetPoint(len(r)+i,scales[len(r)-i-1],cnst.mtmt-cnst.mtmt_err);
+        gr_band.SetPoint(len(r)+i,scales[len(r)-i-1],cnst.mtmt-cnst.mtmt_err)
 
-    gr_band.SetFillStyle(3002);
-    gr_band.SetFillColor(rt.kRed+1);
+    gr_band.SetFillStyle(3002)
+    gr_band.SetFillColor(rt.kRed+1)
 
     gr_band.GetXaxis().SetTitle('#mu [GeV]')
     gr_band.GetYaxis().SetTitle('m_{t}(m_{t}) [GeV]')
     gr_band.SetTitle('m_{t}(m_{t}) measured as a function of #mu')
 
-    gr_add.SetMarkerStyle(8)
+    gr_add.SetMarkerStyle(21)
     gr_add.SetMarkerColor(rt.kBlue)
     gr_add.SetLineColor(rt.kBlue)
 
