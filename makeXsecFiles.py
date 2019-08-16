@@ -721,11 +721,11 @@ def makeRatioPlots (mass_2, ratio_12, ratio_32, ratio_42, err_12_up, err_12_down
     g1.SetMarkerStyle(4)
     # g1.SetMarkerSize(1.5)
 
-    leg = TLegend(.15,.15,.77,.3)
+    leg = TLegend(.15,.15,.76,.31)
     leg.SetBorderSize(0)
     leg.AddEntry(graph,'NLO extraction from differential #sigma_{t#bar{t}}','pe')
-    leg.AddEntry(g1,'Reference value (#mu = #mu_{ref})','p')
-    leg.AddEntry(th,'RGE evolution at one loop (5 flavours)','l')
+    leg.AddEntry(g1,'Reference scale (#mu = #mu_{ref})','p')
+    leg.AddEntry(th,'one-loop RGE, n_{f} = 5, #alpha_{s}(m_{Z}) = 0.1191','l')
     
     c = TCanvas()
     g.SetMarkerStyle(8)
@@ -734,6 +734,7 @@ def makeRatioPlots (mass_2, ratio_12, ratio_32, ratio_42, err_12_up, err_12_down
     g1.Draw('p same')
     leg.Draw('same')
     th_band.Draw('f same')
+    g.Draw('psame')
     latexLabel1.DrawLatex(0.11, 0.92, "CMS")
     latexLabel2.DrawLatex(0.70, 0.92, "35.9 fb^{-1} (13 TeV)")
     latexLabel2.DrawLatex(0.59, 0.79, "ABMP16_5_nlo PDF set")
@@ -796,18 +797,18 @@ def makeRatioPlots (mass_2, ratio_12, ratio_32, ratio_42, err_12_up, err_12_down
     g1.SetMarkerStyle(4)
 
 
-    leg2 = TLegend(.12,.15,.80,.37)
+    leg2 = TLegend(.11,.15,.81,.36)
     # leg2 = TLegend(.13,.15,.75,.32)
     leg2.SetBorderSize(0)
     leg2.AddEntry(graph,'NLO extraction from differential #sigma_{t#bar{t}}','pe')
     leg2.AddEntry(g1,'Reference value (#mu = #mu_{ref})','p')
     leg2.AddEntry(gr_add,'NLO extraction from inclusive #sigma_{t#bar{t}} (same data)','pe')
-    leg2.AddEntry(gr_band,'Evolved uncertainty, RGE at one loop (5 flavours)','f')
+    leg2.AddEntry(gr_band,'Evolved uncert. One-loop RGE, n_{f} = 5, #alpha_{s}(m_{Z}) = 0.1191','f')
 
 
     
     c.Clear()
-    gr_band.SetMinimum(0.8)
+    gr_band.SetMinimum(0.79)
     gr_band.Draw('af')
     gr_add.Draw('p same')
     g.Draw('p same')
