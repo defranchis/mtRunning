@@ -22,6 +22,8 @@ facscale_only = True # only factorization scale
 ntoys = 0
 replace_corr = False  #recommended: False
 
+preliminary = False
+
 # end options
 
 
@@ -706,7 +708,7 @@ def makeRatioPlots (mass_2, ratio_12, ratio_32, ratio_42, err_12_up, err_12_down
     graph.GetXaxis().SetTitleSize(0.048)
     graph.GetXaxis().SetTitleOffset(.85)
     graph.GetYaxis().SetTitleSize(0.048)
-    graph.GetYaxis().SetTitleOffset(.85)
+    graph.GetYaxis().SetTitleOffset(.9)
     graph.GetYaxis().SetTitle('m_{t}(#mu) / m_{t}(#mu_{ref})')
     graph.SetTitle('')
     graph.SetMarkerStyle(8)
@@ -734,9 +736,11 @@ def makeRatioPlots (mass_2, ratio_12, ratio_32, ratio_42, err_12_up, err_12_down
     th_band.Draw('f same')
     latexLabel1.DrawLatex(0.11, 0.92, "CMS")
     latexLabel2.DrawLatex(0.70, 0.92, "35.9 fb^{-1} (13 TeV)")
-    latexLabel2.DrawLatex(0.59, 0.78, "ABMP16_5_nlo PDF set")
-    latexLabel2.DrawLatex(0.59, 0.73, "#mu_{ref} = "+str(round(cnst.mu_2,1))+" GeV")
-
+    latexLabel2.DrawLatex(0.59, 0.79, "ABMP16_5_nlo PDF set")
+    latexLabel2.DrawLatex(0.59, 0.74, "#mu_{ref} = "+str(int(cnst.mu_2))+" GeV")
+    latexLabel2.DrawLatex(0.59, 0.69, "#mu_{0} = #mu_{ref}")
+    if preliminary: latexLabel2.DrawLatex(0.205, 0.92 , "#it{Preliminary}")
+    
     outdir = 'plots_running'
     if not os.path.exists(outdir):
         os.makedirs(outdir)
@@ -792,13 +796,13 @@ def makeRatioPlots (mass_2, ratio_12, ratio_32, ratio_42, err_12_up, err_12_down
     g1.SetMarkerStyle(4)
 
 
-    leg2 = TLegend(.15,.15,.77,.33)
+    leg2 = TLegend(.12,.15,.80,.37)
     # leg2 = TLegend(.13,.15,.75,.32)
     leg2.SetBorderSize(0)
     leg2.AddEntry(graph,'NLO extraction from differential #sigma_{t#bar{t}}','pe')
     leg2.AddEntry(g1,'Reference value (#mu = #mu_{ref})','p')
     leg2.AddEntry(gr_add,'NLO extraction from inclusive #sigma_{t#bar{t}} (same data)','pe')
-    leg2.AddEntry(gr_band,'Evolved uncertainty, one loop RGE (5 flavours)','f')
+    leg2.AddEntry(gr_band,'Evolved uncertainty, RGE at one loop (5 flavours)','f')
 
 
     
@@ -811,9 +815,11 @@ def makeRatioPlots (mass_2, ratio_12, ratio_32, ratio_42, err_12_up, err_12_down
     leg2.Draw('same')
     latexLabel1.DrawLatex(0.11, 0.92, "CMS")
     latexLabel2.DrawLatex(0.70, 0.92, "35.9 fb^{-1} (13 TeV)")
-    latexLabel2.DrawLatex(0.59, 0.78, "ABMP16_5_nlo PDF set")
-    latexLabel2.DrawLatex(0.59, 0.73, "#mu_{ref} = "+str(round(cnst.mu_2,1))+" GeV")
-
+    latexLabel2.DrawLatex(0.59, 0.79, "ABMP16_5_nlo PDF set")
+    latexLabel2.DrawLatex(0.59, 0.74, "#mu_{ref} = "+str(int(cnst.mu_2))+" GeV")
+    latexLabel2.DrawLatex(0.59, 0.69, "#mu_{0} = m_{t}")
+    if preliminary: latexLabel2.DrawLatex(0.205, 0.92 , "#it{Preliminary}")
+    
     c.SaveAs(outdir+'/test_incl.png')
     c.SaveAs(outdir+'/test_incl.pdf')
     c.SaveAs(outdir+'/test_incl.root')
@@ -1360,7 +1366,8 @@ def makeChi2Significance(mass2, ratio12, ratio32, ratio42, err12, err32, err42):
     graph.Fit(funct,'q','',0,3)
 
     xmin = funct.GetMinimumX()
-    err = xmin - funct.GetX(1,0,xmin)
+    ymin = funct.GetMinimum(0,3)
+    err = xmin - funct.GetX(ymin+1,0,xmin)
    
     c = TCanvas()
     graph.Draw('ap')
