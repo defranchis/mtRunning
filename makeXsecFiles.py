@@ -705,10 +705,12 @@ def makeRatioPlots (mass_2, ratio_12, ratio_32, ratio_42, err_12_up, err_12_down
     latexLabel2.SetNDC()
     
     graph.GetXaxis().SetTitle('#mu [GeV]')
-    graph.GetXaxis().SetTitleSize(0.048)
-    graph.GetXaxis().SetTitleOffset(.85)
-    graph.GetYaxis().SetTitleSize(0.048)
-    graph.GetYaxis().SetTitleOffset(.9)
+    graph.GetXaxis().SetTitleSize(0.06)
+    graph.GetXaxis().SetTitleOffset(.8)
+    graph.GetYaxis().SetTitleSize(0.05)
+    graph.GetYaxis().SetTitleOffset(1.2)
+    graph.GetYaxis().SetLabelSize(0.05)
+    graph.GetXaxis().SetLabelSize(0.05)
     graph.GetYaxis().SetTitle('m_{t}(#mu) / m_{t}(#mu_{ref})')
     graph.SetTitle('')
     graph.SetMarkerStyle(8)
@@ -721,13 +723,17 @@ def makeRatioPlots (mass_2, ratio_12, ratio_32, ratio_42, err_12_up, err_12_down
     g1.SetMarkerStyle(4)
     # g1.SetMarkerSize(1.5)
 
-    leg = TLegend(.15,.15,.76,.31)
+    leg = TLegend(.17,.2,.78,.36)
     leg.SetBorderSize(0)
     leg.AddEntry(graph,'NLO extraction from differential #sigma_{t#bar{t}}','pe')
     leg.AddEntry(g1,'Reference scale (#mu = #mu_{ref})','p')
     leg.AddEntry(th,'one-loop RGE, n_{f} = 5, #alpha_{s}(m_{Z}) = 0.1191','l')
     
     c = TCanvas()
+    c.SetLeftMargin(0.13)
+    c.SetBottomMargin(0.12)
+    c.SetRightMargin(0.05)
+    c.SetTopMargin(0.08)
     g.SetMarkerStyle(8)
     g.Draw('ap')
     th.Draw("L same")
@@ -735,11 +741,11 @@ def makeRatioPlots (mass_2, ratio_12, ratio_32, ratio_42, err_12_up, err_12_down
     leg.Draw('same')
     th_band.Draw('f same')
     g.Draw('psame')
-    latexLabel1.DrawLatex(0.11, 0.92, "CMS")
-    latexLabel2.DrawLatex(0.70, 0.92, "35.9 fb^{-1} (13 TeV)")
-    latexLabel2.DrawLatex(0.59, 0.79, "ABMP16_5_nlo PDF set")
-    latexLabel2.DrawLatex(0.59, 0.74, "#mu_{ref} = "+str(int(cnst.mu_2))+" GeV")
-    latexLabel2.DrawLatex(0.59, 0.69, "#mu_{0} = #mu_{ref}")
+    latexLabel1.DrawLatex(0.16, 0.94, "CMS")
+    latexLabel2.DrawLatex(0.76, 0.94, "35.9 fb^{-1} (13 TeV)")
+    latexLabel2.DrawLatex(0.63, 0.81, "ABMP16_5_nlo PDF set")
+    latexLabel2.DrawLatex(0.63, 0.76, "#mu_{ref} = "+str(int(cnst.mu_2))+" GeV")
+    latexLabel2.DrawLatex(0.63, 0.71, "#mu_{0} = #mu_{ref}")
     if preliminary: latexLabel2.DrawLatex(0.205, 0.92 , "#it{Preliminary}")
     
     outdir = 'plots_running'
@@ -749,6 +755,7 @@ def makeRatioPlots (mass_2, ratio_12, ratio_32, ratio_42, err_12_up, err_12_down
     c.SaveAs(outdir+'/running.png')
     c.SaveAs(outdir+'/running.pdf')
     c.SaveAs(outdir+'/running.root')
+    c.SaveAs(outdir+'/running.C')
 
     # mtmu = mtmt2mtmu (cnst.mtmt, cnst.mu_2)
     mtmu = mass_2
@@ -778,10 +785,12 @@ def makeRatioPlots (mass_2, ratio_12, ratio_32, ratio_42, err_12_up, err_12_down
     gr_band.SetTitle('')
 
 
-    gr_band.GetXaxis().SetTitleSize(0.048)
-    gr_band.GetXaxis().SetTitleOffset(.85)
-    gr_band.GetYaxis().SetTitleSize(0.048)
-    gr_band.GetYaxis().SetTitleOffset(.9)
+    gr_band.GetXaxis().SetTitleSize(0.06)
+    gr_band.GetXaxis().SetTitleOffset(.8)
+    gr_band.GetYaxis().SetTitleSize(0.05)
+    gr_band.GetYaxis().SetTitleOffset(1.1)
+    gr_band.GetYaxis().SetLabelSize(0.05)
+    gr_band.GetXaxis().SetLabelSize(0.05)
 
     
     gr_add.SetMarkerStyle(21)
@@ -797,7 +806,7 @@ def makeRatioPlots (mass_2, ratio_12, ratio_32, ratio_42, err_12_up, err_12_down
     g1.SetMarkerStyle(4)
 
 
-    leg2 = TLegend(.11,.15,.81,.36)
+    leg2 = TLegend(.14,.18,.86,.39)
     # leg2 = TLegend(.13,.15,.75,.32)
     leg2.SetBorderSize(0)
     leg2.AddEntry(graph,'NLO extraction from differential #sigma_{t#bar{t}}','pe')
@@ -814,16 +823,17 @@ def makeRatioPlots (mass_2, ratio_12, ratio_32, ratio_42, err_12_up, err_12_down
     g.Draw('p same')
     g1.Draw('p same')
     leg2.Draw('same')
-    latexLabel1.DrawLatex(0.11, 0.92, "CMS")
-    latexLabel2.DrawLatex(0.70, 0.92, "35.9 fb^{-1} (13 TeV)")
-    latexLabel2.DrawLatex(0.59, 0.79, "ABMP16_5_nlo PDF set")
-    latexLabel2.DrawLatex(0.59, 0.74, "#mu_{ref} = "+str(int(cnst.mu_2))+" GeV")
-    latexLabel2.DrawLatex(0.59, 0.69, "#mu_{0} = m_{t}")
+    latexLabel1.DrawLatex(0.16, 0.94, "CMS")
+    latexLabel2.DrawLatex(0.76, 0.94, "35.9 fb^{-1} (13 TeV)")
+    latexLabel2.DrawLatex(0.63, 0.81, "ABMP16_5_nlo PDF set")
+    latexLabel2.DrawLatex(0.63, 0.76, "#mu_{ref} = "+str(int(cnst.mu_2))+" GeV")
+    latexLabel2.DrawLatex(0.63, 0.71, "#mu_{0} = m_{t}")
     if preliminary: latexLabel2.DrawLatex(0.205, 0.92 , "#it{Preliminary}")
     
     c.SaveAs(outdir+'/test_incl.png')
     c.SaveAs(outdir+'/test_incl.pdf')
     c.SaveAs(outdir+'/test_incl.root')
+    c.SaveAs(outdir+'/test_incl.C')
 
 
     graph.Clear()
