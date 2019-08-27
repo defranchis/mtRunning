@@ -109,6 +109,13 @@ def formInputFileName ( renscale, facscale, topmass, pdfmember ):
     infileName+=str(pdfmember)+'_'
     if pdfmember<10 : infileName+='_'
 
+    topmassevolved=topmass
+    if renscale != topmass:
+        topmassevolved = float(int(mtmt2mtmu(topmass, renscale)*10))/10.
+
+    origrenscale = renscale
+    origfacscale = facscale
+    
     if renscale != topmass or facscale != topmass:
         if TString(str(topmass)).EndsWith('.6') or TString(str(topmass)).EndsWith('.2'):
             renscale = round(renscale-.1,1)
@@ -131,8 +138,8 @@ def formInputFileName ( renscale, facscale, topmass, pdfmember ):
         facstr.ReplaceAll('.','_.')
         infileName+=str(facstr)+'_'
 
-    addtoname = str(topmass)+'_MSbar.dat'
-    infileName+=str(topmass)+'_MSbar.dat'
+    tempname = infileName
+    infileName+=str(topmassevolved)+'_MSbar.dat'
 
     #because of some problem with MCFM outputs...
     if renscale == facscale == topmass:
@@ -140,12 +147,16 @@ def formInputFileName ( renscale, facscale, topmass, pdfmember ):
             infileName=str(TString(infileName).ReplaceAll('.2','.1'))
         if TString(infileName).Contains('.6') :
             infileName=str(TString(infileName).ReplaceAll('.6','.5'))
-    else:
+    elif origrenscale == topmass:
         if TString(infileName).Contains('.2_MS') :
             infileName=str(TString(infileName).ReplaceAll('.2_MS','.1_MS'))
         if TString(infileName).Contains('.6_MS') :
             infileName=str(TString(infileName).ReplaceAll('.6_MS','.5_MS'))
-        
+    else:
+        if not os.path.isfile('out_scales/'+infileName):
+            infileName=tempname+str(topmassevolved+.1)+'_MSbar.dat'
+        if not os.path.isfile('out_scales/'+infileName):
+            infileName=tempname+str(topmassevolved-.1)+'_MSbar.dat'
     return infileName
 
 
@@ -1023,7 +1034,9 @@ def getTotalMassError(mtmu_1, err_1, mtmu_2, err_2, mtmu_3, err_3, mtmu_4, err_4
             mass_and_err_3 = getMassAndError(3, renscale, facscale, 0 , 0 , 0 )
             mass_and_err_4 = getMassAndError(4, renscale, facscale, 0 , 0 , 0 )
 
-
+            # print
+            # print 'scales', renscale, facscale, mass_and_err_1[0] - mtmu_1,  mass_and_err_2[0] - mtmu_2, mass_and_err_3[0] - mtmu_3, mass_and_err_4[0] - mtmu_4
+            
             if mass_and_err_1[0] > scale_error_1_up : scale_error_1_up = mass_and_err_1[0]
             elif mass_and_err_1[0] < scale_error_1_down : scale_error_1_down = mass_and_err_1[0]
             if mass_and_err_2[0] > scale_error_2_up : scale_error_2_up = mass_and_err_2[0]
