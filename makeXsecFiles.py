@@ -24,6 +24,8 @@ replace_corr = False  #recommended: False
 
 preliminary = False
 
+newscales = True
+
 # end options
 
 
@@ -38,10 +40,11 @@ def setMasses():
 
     global mass_v
     mass_v = []
-    i_mass = cnst.mass_max
+    if not newscales: i_mass = cnst.mass_max
+    else: i_mass = cnst.mass_max_scales
     while i_mass >= cnst.mass_min :
         mass_v.append(i_mass)
-        if i_mass <= cnst.mass_fine_max and i_mass > cnst.mass_fine_min+.1 : i_mass-= 0.2
+        if i_mass <= cnst.mass_fine_max and i_mass > cnst.mass_fine_min+.1 and not newscales: i_mass-= 0.2
         else : i_mass-= 0.5
     return
 
@@ -162,6 +165,55 @@ def formInputFileName ( renscale, facscale, topmass, pdfmember ):
 
 ################################
 
+# "newInputFileName" provides the correct name of the .dat input file from where
+# the calculated cross section is read out
+
+################################
+
+
+def newInputFileName ( renscale, facscale, topmass, pdfmember ):
+
+    infileName='tt_tot_tot_ABMP16_'
+    infileName+=str(pdfmember)+'_'
+    if pdfmember<10 : infileName+='_'
+
+    topmassevolved=topmass
+    if renscale != topmass:
+        topmassevolved = float(int(mtmt2mtmu(topmass, renscale)*10))/10.
+
+    renscale = round(renscale,0)
+    facscale = round(facscale,0)
+
+    # REMOVE THESE LINES!!! #
+    if renscale == 644.0 : renscale = 664.0
+    if facscale == 644.0 : facscale = 664.0
+    
+    if renscale>=1000 : infileName+='_'
+    if renscale>=100 : infileName+=str(renscale)+'_'
+    else : 
+        renstr = TString(str(renscale))
+        renstr.ReplaceAll('.','_.')
+        infileName+=str(renstr)+'_'
+
+    if facscale>=1000 : infileName+='_'
+    if facscale>=100 : infileName+=str(facscale)+'_'
+    else : 
+        facstr = TString(str(facscale))
+        facstr.ReplaceAll('.','_.')
+        infileName+=str(facstr)+'_'
+
+    tempname = infileName
+    infileName+=str(topmassevolved)+'_MSbar.dat'
+
+    if not os.path.isfile('scales_new/'+infileName):
+        infileName=tempname+str(topmassevolved+.1)+'_MSbar.dat'
+    if not os.path.isfile('scales_new/'+infileName):
+        infileName=tempname+str(topmassevolved-.1)+'_MSbar.dat'
+
+    return infileName
+
+################################
+
 # "readCalculatedXsec" reads the calculated cross section in a given mtt bin
 # for any value of mu_r, mu_f, mt and PDF member
 # calls the function "formInputFileName"
@@ -171,9 +223,12 @@ def formInputFileName ( renscale, facscale, topmass, pdfmember ):
 
 def readCalculatedXsec (renscale, facscale, topmass, pdfmember, mttbin):
 
-    fileName = formInputFileName ( renscale, facscale, topmass, pdfmember )
-    if renscale == topmass and facscale == topmass: indir = 'out_hists/'
-    else : indir = 'out_scales/'
+    if not newscales: fileName = formInputFileName ( renscale, facscale, topmass, pdfmember )
+    else: fileName = newInputFileName ( renscale, facscale, topmass, pdfmember )
+    if not newscales:
+        if renscale == topmass and facscale == topmass: indir = 'out_hists/'
+        else : indir = 'out_scales/'
+    else: indir = 'scales_new/'
     if not os.path.isfile(indir+fileName):
         print 'WARNING: missing file', fileName
         return 0
@@ -232,8 +287,22 @@ def getMassAndError(mttbin, murscale, mufscale, pdfmember, extrapol, contrib):
     mass_v_sel = []
     for mass in mass_v:
         i+=1
-        mur = mass
-        muf = mass
+        if not newscales:
+            mur = mass
+            muf = mass
+        else :
+            if mttbin == 1:
+                mur = cnst.mu_1
+                muf = cnst.mu_1
+            if mttbin == 2:
+                mur = cnst.mu_2
+                muf = cnst.mu_2
+            if mttbin == 3:
+                mur = cnst.mu_3
+                muf = cnst.mu_3
+            if mttbin == 4:
+                mur = cnst.mu_4
+                muf = cnst.mu_4
         if (murscale == 'up')   : mur*=2
         if (mufscale == 'up')   : muf*=2
         if (murscale == 'down') : mur*=.5
@@ -343,9 +412,11 @@ def getMassAndError(mttbin, murscale, mufscale, pdfmember, extrapol, contrib):
     funct.SetParameter(1,-12)
     funct.SetParameter(2,0.033)
     # graph.Fit(funct,'q','',163,166)
-    if mttbin>=3: graph.Fit(funct,'q','',cnst.mass_min+0.1,cnst.mass_max-0.1)
-    else: graph.Fit(funct,'q','',cnst.mass_fine_min+0.1,cnst.mass_max-0.1)
-    
+    if not newscales:
+        if mttbin>=3: graph.Fit(funct,'q','',cnst.mass_min+0.1,cnst.mass_max-0.1)
+        else: graph.Fit(funct,'q','',cnst.mass_fine_min+0.1,cnst.mass_max-0.1)
+    else: graph.Fit(funct,'q','',cnst.mass_min+0.1,cnst.mass_max_scales-0.1)
+        
     if mttbin >= 3:
         line_up = TLine(cnst.mass_min,1.,cnst.mass_max,1.)
         line_down = TLine(cnst.mass_min,-1.,cnst.mass_max,-1.)
@@ -1902,12 +1973,13 @@ def getTotalError (ratios_and_errs, pdf_errors, extr_errors, scale_errors):
     err_ratio_3_2 = ratios_and_errs[4]
     err_ratio_4_2 = ratios_and_errs[5]
 
-    err_pdf_1_2_up = pdf_errors[0]
-    err_pdf_1_2_down = pdf_errors[1]
-    err_pdf_3_2_up = pdf_errors[2]
-    err_pdf_3_2_down = pdf_errors[3]
-    err_pdf_4_2_up = pdf_errors[4]
-    err_pdf_4_2_down = pdf_errors[5]
+    if not newscales: # FIXME #
+        err_pdf_1_2_up = pdf_errors[0]
+        err_pdf_1_2_down = pdf_errors[1]
+        err_pdf_3_2_up = pdf_errors[2]
+        err_pdf_3_2_down = pdf_errors[3]
+        err_pdf_4_2_up = pdf_errors[4]
+        err_pdf_4_2_down = pdf_errors[5]
 
     err_extr_1_2_up = extr_errors[0]
     err_extr_1_2_down = extr_errors[1]
@@ -1916,13 +1988,22 @@ def getTotalError (ratios_and_errs, pdf_errors, extr_errors, scale_errors):
     err_extr_4_2_up = extr_errors[4]
     err_extr_4_2_down = extr_errors[5]
 
-    err_1_2_up = (err_ratio_1_2**2 + err_pdf_1_2_up**2 + err_extr_1_2_up **2)**.5
-    err_1_2_down = (err_ratio_1_2**2 + err_pdf_1_2_down**2 + err_extr_1_2_down **2)**.5
-    err_3_2_up = (err_ratio_3_2**2 + err_pdf_3_2_up**2 + err_extr_3_2_up **2)**.5
-    err_3_2_down = (err_ratio_3_2**2 + err_pdf_3_2_down**2 + err_extr_3_2_down **2)**.5
-    err_4_2_up = (err_ratio_4_2**2 + err_pdf_4_2_up**2 + err_extr_4_2_up **2)**.5
-    err_4_2_down = (err_ratio_4_2**2 + err_pdf_4_2_down**2 + err_extr_4_2_down **2)**.5
+    if not newscales: # FIXME #
+        err_1_2_up = (err_ratio_1_2**2 + err_pdf_1_2_up**2 + err_extr_1_2_up **2)**.5
+        err_1_2_down = (err_ratio_1_2**2 + err_pdf_1_2_down**2 + err_extr_1_2_down **2)**.5
+        err_3_2_up = (err_ratio_3_2**2 + err_pdf_3_2_up**2 + err_extr_3_2_up **2)**.5
+        err_3_2_down = (err_ratio_3_2**2 + err_pdf_3_2_down**2 + err_extr_3_2_down **2)**.5
+        err_4_2_up = (err_ratio_4_2**2 + err_pdf_4_2_up**2 + err_extr_4_2_up **2)**.5
+        err_4_2_down = (err_ratio_4_2**2 + err_pdf_4_2_down**2 + err_extr_4_2_down **2)**.5
+    else:
+        err_1_2_up = (err_ratio_1_2**2 + err_extr_1_2_up **2)**.5
+        err_1_2_down = (err_ratio_1_2**2 + err_extr_1_2_down **2)**.5
+        err_3_2_up = (err_ratio_3_2**2 + err_extr_3_2_up **2)**.5
+        err_3_2_down = (err_ratio_3_2**2 + err_extr_3_2_down **2)**.5
+        err_4_2_up = (err_ratio_4_2**2 + err_extr_4_2_up **2)**.5
+        err_4_2_down = (err_ratio_4_2**2 + err_extr_4_2_down **2)**.5
 
+        
     if do_scale_variations:
         err_scale_1_2_up = scale_errors[0]
         err_scale_1_2_down = scale_errors[1]
@@ -1942,8 +2023,9 @@ def getTotalError (ratios_and_errs, pdf_errors, extr_errors, scale_errors):
     print '\n'
     print 'uncertainties ratio_1_2:\n'
     print 'experimental =', round(err_ratio_1_2,3), round(err_ratio_1_2/ratio_1_2*100.,2), '%'
-    print 'PDFs up =', round(err_pdf_1_2_up,3), round(err_pdf_1_2_up/ratio_1_2*100.,2), '%'
-    print 'PDFs down =', round(err_pdf_1_2_down,3), round(err_pdf_1_2_down/ratio_1_2*100.,2), '%'
+    if not newscales: # FIXME #
+        print 'PDFs up =', round(err_pdf_1_2_up,3), round(err_pdf_1_2_up/ratio_1_2*100.,2), '%'
+        print 'PDFs down =', round(err_pdf_1_2_down,3), round(err_pdf_1_2_down/ratio_1_2*100.,2), '%'
     print 'extr up =', round(err_extr_1_2_up,3), round(err_extr_1_2_up/ratio_1_2*100.,2), '%'
     print 'extr down =', round(err_extr_1_2_down,3), round(err_extr_1_2_down/ratio_1_2*100.,2), '%'
     if do_scale_variations:
@@ -1954,8 +2036,9 @@ def getTotalError (ratios_and_errs, pdf_errors, extr_errors, scale_errors):
     print '\n'
     print 'uncertainties ratio_3_2:\n'
     print 'experimental =', round(err_ratio_3_2,3), round(err_ratio_3_2/ratio_3_2*100.,2), '%'
-    print 'PDFs up =', round(err_pdf_3_2_up,3), round(err_pdf_3_2_up/ratio_3_2*100.,2), '%'
-    print 'PDFs down =', round(err_pdf_3_2_down,3), round(err_pdf_3_2_down/ratio_3_2*100.,2), '%'
+    if not newscales: # FIXME #
+        print 'PDFs up =', round(err_pdf_3_2_up,3), round(err_pdf_3_2_up/ratio_3_2*100.,2), '%'
+        print 'PDFs down =', round(err_pdf_3_2_down,3), round(err_pdf_3_2_down/ratio_3_2*100.,2), '%'
     print 'extr up =', round(err_extr_3_2_up,3), round(err_extr_3_2_up/ratio_3_2*100.,2), '%'
     print 'extr down =', round(err_extr_3_2_down,3), round(err_extr_3_2_down/ratio_3_2*100.,2), '%'
     if do_scale_variations:
@@ -1967,8 +2050,9 @@ def getTotalError (ratios_and_errs, pdf_errors, extr_errors, scale_errors):
     print '\n'
     print 'uncertainties ratio_4_2:\n'
     print 'experimental =', round(err_ratio_4_2,3), round(err_ratio_4_2/ratio_4_2*100.,2), '%'
-    print 'PDFs up =', round(err_pdf_4_2_up,3), round(err_pdf_4_2_up/ratio_4_2*100.,2), '%'
-    print 'PDFs down =', round(err_pdf_4_2_down,3), round(err_pdf_4_2_down/ratio_4_2*100.,2), '%'
+    if not newscales: # FIXME #
+        print 'PDFs up =', round(err_pdf_4_2_up,3), round(err_pdf_4_2_up/ratio_4_2*100.,2), '%'
+        print 'PDFs down =', round(err_pdf_4_2_down,3), round(err_pdf_4_2_down/ratio_4_2*100.,2), '%'
     print 'extr up =', round(err_extr_4_2_up,3), round(err_extr_4_2_up/ratio_4_2*100.,2), '%'
     print 'extr down =', round(err_extr_4_2_down,3), round(err_extr_4_2_down/ratio_4_2*100.,2), '%'
     if do_scale_variations:
@@ -2012,17 +2096,21 @@ def execute():
     ratio_3_2 = ratios_and_errs[1]
     ratio_4_2 = ratios_and_errs[2]
 
-    pdf_errors = getPDFUncertainties(ratio_1_2, ratio_3_2, ratio_4_2)
+    # FIXME #
+    if not newscales: pdf_errors = getPDFUncertainties(ratio_1_2, ratio_3_2, ratio_4_2)
+    else: pdf_errors = []
+    
     extr_errors = getExtrapolationUncertainties(ratio_1_2, ratio_3_2, ratio_4_2)
 
     if do_scale_variations: scale_errors = getScaleUncertainties(ratio_1_2, ratio_3_2, ratio_4_2)
     else : scale_errors = []
 
-    makeMassPlots(mass_and_err_1[0], mass_and_err_1[1], mass_and_err_1[2],
-                  mass_and_err_2[0], mass_and_err_2[1], mass_and_err_2[2],
-                  mass_and_err_3[0], mass_and_err_3[1], mass_and_err_3[2],
-                  mass_and_err_4[0], mass_and_err_4[1], mass_and_err_4[2],
-    )
+    if not newscales: # FIXME #
+        makeMassPlots(mass_and_err_1[0], mass_and_err_1[1], mass_and_err_1[2],
+                      mass_and_err_2[0], mass_and_err_2[1], mass_and_err_2[2],
+                      mass_and_err_3[0], mass_and_err_3[1], mass_and_err_3[2],
+                      mass_and_err_4[0], mass_and_err_4[1], mass_and_err_4[2],
+        )
 
     err_ratio_1_2 = ratios_and_errs[3]
     err_ratio_3_2 = ratios_and_errs[4]

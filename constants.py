@@ -9,6 +9,7 @@ n_mttbins = 4
 
 mass_min = 140.0
 mass_max = 172.0
+mass_max_scales = 180.0
 mass_fine_min = 152.0
 mass_fine_max = 172.0
 
