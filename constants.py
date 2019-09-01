@@ -15,7 +15,9 @@ mass_fine_max = 172.0
 mu_1 = 383.95
 mu_2 = 476.19
 mu_3 = 644.27
+mu_4 = 1024
 
-mtmt = 164.02
-mtmt_err = 1.58
-
+mtmt = 162.91
+mtmt_err = 1.59
+mtmt_scale_up = 2.54
+mtmt_scale_down = 3.03 
