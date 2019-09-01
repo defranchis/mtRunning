@@ -13,7 +13,7 @@ from variables import xsec_1, xsec_2, xsec_3
 
 # options
 
-estimate_contribs = True
+estimate_contribs = False
 ntoys = 0
 
 replace_corr = False
@@ -984,6 +984,32 @@ def makeChi2Test(mass2, ratio12, ratio32, err12_up, err12_down, err32_up, err32_
     
     return
 
+################################
+
+# "getChi2Uncorrelated" performs a transformation to an orthogonal basis
+#  before calculating the chisquare, in order to take correlations into account.
+
+################################
+
+
+def getChi2Uncorrelated(ratio12, th1, err12, ratio32, th3, err32):
+    diff_1_2 = (ratio12 - th1)
+    diff_3_2 = (ratio32 - th3)
+
+    V = [[err12*err12, err12*err32*rcorr],
+         [err12*err32*rcorr, err32*err32]]
+
+    E = np.linalg.eigh(V)
+    values = E[0]
+    vectors = E[1]
+    
+    x = np.array([diff_1_2, diff_3_2])
+    y1 = np.inner(np.array(vectors[0]),x)
+    y2 = np.inner(np.array(vectors[1]),x)
+    
+    chi2 = (y1**2)/values[0] + (y2**2)/values[1] 
+    return chi2
+
 
 
 ################################
@@ -999,13 +1025,19 @@ def makeChi2Significance(mass2, ratio12, ratio32, err12, err32):
     th_ratio12 = mtmu2mtmu(mass2, cnst.mu_2, cnst.mu_1, 'nominal')/mass2
     th_ratio32 = mtmu2mtmu(mass2, cnst.mu_2, cnst.mu_3, 'nominal')/mass2
 
+    global ntoys
+    if ntoys < 1000 :
+        ntoys = 1000
+        estimateMassCorrelations()
+        ntoys = 0
+    
     graph = TGraph()
     
     for x in range(0,31):
         x = x/10.
         th1 = x*(th_ratio12-1)+1
         th3 = x*(th_ratio32-1)+1
-        chi2 = ((ratio12-th1)/err12)**2 + ((ratio32-th3)/err32)**2
+        chi2 = getChi2Uncorrelated(ratio12, th1, err12, ratio32, th3, err32)
         
         graph.SetPoint(int(x*10),x,chi2)
 
@@ -1052,7 +1084,7 @@ def makeChi2Significance(mass2, ratio12, ratio32, err12, err32):
             x = x/10.
             th1 = x*(th_ratio12-1)+1
             th3 = x*(th_ratio32-1)+1
-            chi2 = ((ratio_1_2-th1)/err_ratio_1_2)**2 + ((ratio_3_2-th3)/err_ratio_3_2)**2
+            chi2 = getChi2Uncorrelated(ratio_1_2, th1, err_ratio_1_2, ratio_3_2, th3, err_ratio_3_2)
             graph.SetPoint(int(x*10),x,chi2)
 
         funct = TF1('funct','pol2(0)',0,3)
@@ -1099,7 +1131,7 @@ def makeChi2Significance(mass2, ratio12, ratio32, err12, err32):
             x = x/10.
             th1 = x*(th_ratio12-1)+1
             th3 = x*(th_ratio32-1)+1
-            chi2 = ((ratio_1_2-th1)/err_ratio_1_2)**2 + ((ratio_3_2-th3)/err_ratio_3_2)**2
+            chi2 = getChi2Uncorrelated(ratio_1_2, th1, err_ratio_1_2, ratio_3_2, th3, err_ratio_3_2)
             graph.SetPoint(int(x*10),x,chi2)
 
         funct = TF1('funct','pol2(0)',0,3)
@@ -1353,6 +1385,8 @@ def estimateMassCorrelations():
     c.SaveAs(outdir+'/xsec_corr_23.pdf')
     c.SaveAs(outdir+'/xsec_corr_23.root')
 
+    global rcorr
+    rcorr = r_corr.GetCorrelationFactor()
     
     print
     if replace_corr:
