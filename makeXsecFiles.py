@@ -1141,11 +1141,13 @@ def makeMassPlots(mtmu_1, err_1, mtmt_1, mtmu_2, err_2, mtmt_2, mtmu_3, err_3, m
     graph.SetTitle('')
     
     # leg = TLegend(.15,.23,.7,.35)
-    leg = TLegend(.15,.15,.77,.3)
+    leg = TLegend(.17,.19,.8,.4)
     leg.SetBorderSize(0)
     leg.AddEntry(graph,'NLO extraction from differential #sigma_{t#bar{t}}','pe')
-    leg.AddEntry(gr_add,'NLO extraction from inclusive #sigma_{t#bar{t}} (same data)','pe')
-    leg.AddEntry(gr_band,'Evolved uncertainty, one loop RGE (5 flavours)','f')
+    leg.AddEntry(gr_add,'NLO extraction from inclusive #sigma_{t#bar{t}}','pe')
+    leg.AddEntry(gr_band,'One-loop RGE, n_{f} = 5, #alpha_{s}(m_{Z}) = 0.1191','f')
+
+
     
     c = TCanvas()
     gr_band.SetMinimum(125)
@@ -1154,6 +1156,19 @@ def makeMassPlots(mtmu_1, err_1, mtmt_1, mtmu_2, err_2, mtmt_2, mtmu_3, err_3, m
     graph.Draw('p same')
     leg.Draw('same')
 
+    c.SetLeftMargin(0.13)
+    c.SetBottomMargin(0.12)
+    c.SetRightMargin(0.05)
+    c.SetTopMargin(0.08)
+
+    gr_band.GetXaxis().SetTitleSize(0.06)
+    gr_band.GetXaxis().SetTitleOffset(.8)
+    gr_band.GetYaxis().SetTitleSize(0.05)
+    gr_band.GetYaxis().SetTitleOffset(1.1)
+    gr_band.GetYaxis().SetLabelSize(0.05)
+    gr_band.GetXaxis().SetLabelSize(0.05)
+
+    
     #fromhere
     latexLabel1 = TLatex()
     latexLabel1.SetTextSize(0.06)
@@ -1164,10 +1179,18 @@ def makeMassPlots(mtmu_1, err_1, mtmt_1, mtmu_2, err_2, mtmt_2, mtmu_3, err_3, m
     latexLabel2.SetTextFont(42)
     latexLabel2.SetNDC()
 
-    latexLabel1.DrawLatex(0.11, 0.92, "CMS")
-    latexLabel2.DrawLatex(0.70, 0.92, "35.9 fb^{-1} (13 TeV)")
-    latexLabel2.DrawLatex(0.59, 0.78, "ABMP16_5_nlo PDF set")
-    # latexLabel2.DrawLatex(0.59, 0.73, "#mu_{ref} = "+str(round(cnst.mu_2,1))+" GeV")
+    latexLabel3 = TLatex()
+    latexLabel3.SetTextSize(0.045)
+    latexLabel3.SetTextFont(42)
+    latexLabel3.SetNDC()
+
+    latexLabel1.DrawLatex(0.16, 0.94, "CMS")
+    latexLabel3.DrawLatex(0.26, 0.94 , "#it{Supplementary}")
+    latexLabel2.DrawLatex(0.48, 0.94 , "arXiv:19xx.xxxxx")
+    latexLabel2.DrawLatex(0.76, 0.94, "35.9 fb^{-1} (13 TeV)")
+    latexLabel2.DrawLatex(0.63, 0.83, "ABMP16_5_nlo PDF set")
+    latexLabel2.DrawLatex(0.63, 0.78, "#mu_{0} = m_{t} = 163 GeV")
+    
 
     
     outdir = 'plots_running'
@@ -1210,8 +1233,8 @@ def makeMassPlots(mtmu_1, err_1, mtmt_1, mtmu_2, err_2, mtmt_2, mtmu_3, err_3, m
     graph_scale.SetPointError(1,0,0,errors[11],errors[10])
     graph_scale.SetPointError(2,0,0,errors[13],errors[12])
     graph_scale.SetPointError(3,0,0,errors[15],errors[14])
-    graph.SetLineWidth(2)
-    gr_add.SetLineWidth(2)
+    # graph.SetLineWidth(2)
+    # gr_add.SetLineWidth(2)
     
     gr_add_scale=TGraphAsymmErrors()
     gr_add_scale.SetPoint(0,cnst.mtmt,cnst.mtmt)
@@ -1225,7 +1248,7 @@ def makeMassPlots(mtmu_1, err_1, mtmt_1, mtmu_2, err_2, mtmt_2, mtmu_3, err_3, m
     gr_band.SetMaximum(175)
     graph_scale.Draw('p same')
     gr_add_scale.Draw('p same')
-    gr_band_fit.Draw('f same')
+    # gr_band_fit.Draw('f same')
     c.Update()
     c.SaveAs(outdir+'/test_mtmu_abs_scale.png')
     c.SaveAs(outdir+'/test_mtmu_abs_scale.pdf')
