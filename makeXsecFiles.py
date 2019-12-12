@@ -10,6 +10,7 @@ import constants as cnst
 from ROOT import TString, TH2D, TRandom3, TF1, TGraph, TLine, TCanvas, TGraphErrors, TGraphAsymmErrors, TLegend, TLatex
 from variables import xsec_1, xsec_2, xsec_3, xsec_4
 
+rt.gStyle.SetOptStat(0000)
 
 # options
 
@@ -366,7 +367,7 @@ def getMassAndError(mttbin, murscale, mufscale, pdfmember, extrapol, contrib):
         os.makedirs(outdir)
 
     c = TCanvas()
-    c.SetGrid()
+    # c.SetGrid()
     c.SetBottomMargin(.12)
     graph.Draw('ap')
     graph.SetMarkerStyle(7)
@@ -1434,19 +1435,39 @@ def makeChi2Significance(mass2, ratio12, ratio32, ratio42, err12, err32, err42):
     err = xmin - funct.GetX(ymin+1,0,xmin)
    
     c = TCanvas()
+    # c.SetGrid()
+    c.SetBottomMargin(.10)
     graph.Draw('ap')
     graph.SetMarkerStyle(8)
     graph.SetMinimum(0)
 
     graph.GetXaxis().SetTitle('x')
     graph.GetYaxis().SetTitle('#chi^{2}')
+
+    graph.GetXaxis().SetTitleSize(.05)
+    graph.GetYaxis().SetTitleSize(.05)
+    graph.GetXaxis().SetTitleOffset(.7)
+    graph.GetYaxis().SetTitleOffset(.8)
+
     
     outdir = 'plots_chi2'
     if not os.path.exists(outdir):
         os.makedirs(outdir)
 
-    c.Print(outdir+'/chi2_significance_nominal.png')
+    latexLabel2 = TLatex()
+    latexLabel2.SetTextSize(0.04)
+    latexLabel2.SetTextFont(42)
+    latexLabel2.SetNDC()
+    latexLabel2.DrawLatex(0.7, 0.92, "35.9 fb^{-1} (13 TeV)")
 
+    line = TLine(0,ymin+1,3,ymin+1)
+    line.SetLineColor(rt.kBlue)
+    line.SetLineStyle(9)
+    line.Draw('same')
+    
+    c.Print(outdir+'/chi2_significance_nominal.png')
+    c.SaveAs(outdir+'/chi2_significance_nominal.pdf')
+    c.SaveAs(outdir+'/chi2_significance_nominal.root')
 
     err_pdf_up = 0
     err_pdf_down = 0
@@ -1769,8 +1790,8 @@ def estimateMassCorrelations():
 
     
     r_corr_12 = TH2D('r_corr_12','r_corr_12',100,0.9,1.15,100,0.75,1.15)
-    r_corr_13 = TH2D('r_corr_13','r_corr_13',100,0.9,1.15,100,0.75,1.15)
-    r_corr_23 = TH2D('r_corr_23','r_corr_23',100,0.9,1.15,100,0.75,1.15)
+    r_corr_13 = TH2D('r_corr_13','r_corr_13',100,0.9,1.15,100,0.65,1.15)
+    r_corr_23 = TH2D('r_corr_23','r_corr_23',100,0.8,1.15,100,0.65,1.15)
     
     print '\nexecuting', ntoys, 'toys\n'
 
@@ -1819,6 +1840,14 @@ def estimateMassCorrelations():
         os.makedirs(outdir)
 
     c = TCanvas()
+    c.SetBottomMargin(0.12)
+    c.SetRightMargin(0.13)
+    
+    latexLabel2 = TLatex()
+    latexLabel2.SetTextSize(0.04)
+    latexLabel2.SetTextFont(42)
+    latexLabel2.SetNDC()
+
     m12.SetTitle('correlation = '+str(round(m12.GetCorrelationFactor(),2)))
     m12.GetXaxis().SetTitle('mt ('+str(int(cnst.mu_1))+' GeV) [GeV]')
     m12.GetYaxis().SetTitle('mt ('+str(int(cnst.mu_2))+' GeV) [GeV]')
@@ -1843,24 +1872,42 @@ def estimateMassCorrelations():
     c.SaveAs(outdir+'/mass_corr_4_2.pdf')
     c.SaveAs(outdir+'/mass_corr_4_2.root')
     c.Clear()
-    r_corr_12.SetTitle('correlation = '+str(round(r_corr_12.GetCorrelationFactor(),2)))
-    r_corr_12.GetXaxis().SetTitle('mt ('+str(int(cnst.mu_1))+' GeV) / mt ('+str(int(cnst.mu_2))+' GeV)')
-    r_corr_12.GetYaxis().SetTitle('mt ('+str(int(cnst.mu_3))+' GeV) / mt ('+str(int(cnst.mu_2))+' GeV)')
-    r_corr_12.DrawNormalized('colz')
+    # r_corr_12.SetTitle('correlation = '+str(round(r_corr_12.GetCorrelationFactor(),2)))
+    r_corr_12.SetTitle('')
+    r_corr_12.GetXaxis().SetTitle('r_{12}')
+    r_corr_12.GetYaxis().SetTitle('r_{32}')
+    r_corr_12.GetXaxis().SetTitleSize(.05)
+    r_corr_12.GetYaxis().SetTitleSize(.05)
+    r_corr_12.GetXaxis().SetTitleOffset(.97)
+    r_corr_12.GetYaxis().SetTitleOffset(.9)
+    r_corr_12.Draw('colz')
+    latexLabel2.DrawLatex(0.67, 0.92, "35.9 fb^{-1} (13 TeV)")
     c.SaveAs(outdir+'/ratio_corr_12.png')
     c.SaveAs(outdir+'/ratio_corr_12.pdf')
     c.SaveAs(outdir+'/ratio_corr_12.root')
-    r_corr_13.SetTitle('correlation = '+str(round(r_corr_13.GetCorrelationFactor(),2)))
-    r_corr_13.GetXaxis().SetTitle('mt ('+str(int(cnst.mu_1))+' GeV) / mt ('+str(int(cnst.mu_2))+' GeV)')
-    r_corr_13.GetYaxis().SetTitle('mt ('+str(int(cnst.mu_4))+' GeV) / mt ('+str(int(cnst.mu_2))+' GeV)')
-    r_corr_13.DrawNormalized('colz')
+    # r_corr_13.SetTitle('correlation = '+str(round(r_corr_13.GetCorrelationFactor(),2)))
+    r_corr_13.SetTitle('')
+    r_corr_13.GetXaxis().SetTitle('r_{12}')
+    r_corr_13.GetYaxis().SetTitle('r_{42}')
+    r_corr_13.GetXaxis().SetTitleSize(.05)
+    r_corr_13.GetYaxis().SetTitleSize(.05)
+    r_corr_13.GetXaxis().SetTitleOffset(.97)
+    r_corr_13.GetYaxis().SetTitleOffset(.9)
+    r_corr_13.Draw('colz')
+    latexLabel2.DrawLatex(0.67, 0.92, "35.9 fb^{-1} (13 TeV)")
     c.SaveAs(outdir+'/ratio_corr_13.png')
     c.SaveAs(outdir+'/ratio_corr_13.pdf')
     c.SaveAs(outdir+'/ratio_corr_13.root')
-    r_corr_23.SetTitle('correlation = '+str(round(r_corr_23.GetCorrelationFactor(),2)))
-    r_corr_23.GetXaxis().SetTitle('mt ('+str(int(cnst.mu_3))+' GeV) / mt ('+str(int(cnst.mu_2))+' GeV)')
-    r_corr_23.GetYaxis().SetTitle('mt ('+str(int(cnst.mu_4))+' GeV) / mt ('+str(int(cnst.mu_2))+' GeV)')
-    r_corr_23.DrawNormalized('colz')
+    # r_corr_23.SetTitle('correlation = '+str(round(r_corr_23.GetCorrelationFactor(),2)))
+    r_corr_23.SetTitle('')
+    r_corr_23.GetXaxis().SetTitle('r_{32}')
+    r_corr_23.GetYaxis().SetTitle('r_{42}')
+    r_corr_23.GetXaxis().SetTitleSize(.05)
+    r_corr_23.GetYaxis().SetTitleSize(.05)
+    r_corr_23.GetXaxis().SetTitleOffset(.97)
+    r_corr_23.GetYaxis().SetTitleOffset(.9)
+    r_corr_23.Draw('colz')
+    latexLabel2.DrawLatex(0.67, 0.92, "35.9 fb^{-1} (13 TeV)")
     c.SaveAs(outdir+'/ratio_corr_23.png')
     c.SaveAs(outdir+'/ratio_corr_23.pdf')
     c.SaveAs(outdir+'/ratio_corr_23.root')
