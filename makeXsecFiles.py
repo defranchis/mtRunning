@@ -754,7 +754,7 @@ def makeRatioPlots (mass_2, ratio_12, ratio_32, ratio_42, err_12_up, err_12_down
     th_band.Draw('f same')
     g.Draw('psame')
     latexLabel1.DrawLatex(0.16, 0.94, "CMS")
-    latexLabel2.DrawLatex(0.76, 0.94, "35.9 fb^{-1} (13 TeV)")
+    latexLabel2.DrawLatex(0.75, 0.94, "35.9 fb^{-1} (13 TeV)")
     latexLabel2.DrawLatex(0.63, 0.83, "ABMP16_5_nlo PDF set")
     latexLabel2.DrawLatex(0.63, 0.78, "#mu_{ref} = "+str(int(cnst.mu_2))+" GeV")
     latexLabel2.DrawLatex(0.63, 0.73, "#mu_{0} = #mu_{ref}")
@@ -837,7 +837,7 @@ def makeRatioPlots (mass_2, ratio_12, ratio_32, ratio_42, err_12_up, err_12_down
     g1.Draw('p same')
     leg2.Draw('same')
     latexLabel1.DrawLatex(0.16, 0.94, "CMS")
-    latexLabel2.DrawLatex(0.76, 0.94, "35.9 fb^{-1} (13 TeV)")
+    latexLabel2.DrawLatex(0.75, 0.94, "35.9 fb^{-1} (13 TeV)")
     latexLabel2.DrawLatex(0.63, 0.83, "ABMP16_5_nlo PDF set")
     latexLabel2.DrawLatex(0.63, 0.78, "#mu_{ref} = "+str(int(cnst.mu_2))+" GeV")
     latexLabel2.DrawLatex(0.63, 0.73, "#mu_{0} = m_{t} = 163 GeV")
@@ -1186,8 +1186,8 @@ def makeMassPlots(mtmu_1, err_1, mtmt_1, mtmu_2, err_2, mtmt_2, mtmu_3, err_3, m
 
     latexLabel1.DrawLatex(0.16, 0.94, "CMS")
     latexLabel3.DrawLatex(0.26, 0.94 , "#it{Supplementary}")
-    latexLabel2.DrawLatex(0.48, 0.94 , "arXiv:19xx.xxxxx")
-    latexLabel2.DrawLatex(0.76, 0.94, "35.9 fb^{-1} (13 TeV)")
+    latexLabel2.DrawLatex(0.48, 0.94 , "arXiv:1909.09193")
+    latexLabel2.DrawLatex(0.75, 0.94, "35.9 fb^{-1} (13 TeV)")
     latexLabel2.DrawLatex(0.63, 0.83, "ABMP16_5_nlo PDF set")
     latexLabel2.DrawLatex(0.63, 0.78, "#mu_{0} = m_{t} = 163 GeV")
     
