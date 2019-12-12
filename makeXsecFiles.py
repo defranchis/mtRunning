@@ -357,7 +357,9 @@ def getMassAndError(mttbin, murscale, mufscale, pdfmember, extrapol, contrib):
 
     line_up.SetLineColor(rt.kGreen+2)
     line_down.SetLineColor(rt.kGreen+2)
-    line_central.SetLineColor(rt.kRed)
+    line_central.SetLineColor(rt.kBlue)
+    line_up.SetLineStyle(9)
+    line_down.SetLineStyle(9)
 
     outdir = 'plots_chi2'
     if not os.path.exists(outdir):
@@ -365,14 +367,27 @@ def getMassAndError(mttbin, murscale, mufscale, pdfmember, extrapol, contrib):
 
     c = TCanvas()
     c.SetGrid()
+    c.SetBottomMargin(.12)
     graph.Draw('ap')
     graph.SetMarkerStyle(7)
-    graph.SetTitle('signed #chi^{2} vs top mass in MCFM prediction; m_{t}(m_{t}) [GeV]; data-theory #chi^{2}')
+    graph.SetTitle('; m_{t}(m_{t}) [GeV]; data to theory #chi^{2}')
+    graph.GetXaxis().SetTitleSize(.05)
+    graph.GetYaxis().SetTitleSize(.05)
+    graph.GetXaxis().SetTitleOffset(.97)
+    graph.GetYaxis().SetTitleOffset(.8)
     line_up.Draw('same')
     line_down.Draw('same')
     line_central.Draw('same')
+    latexLabel2 = TLatex()
+    latexLabel2.SetTextSize(0.04)
+    latexLabel2.SetTextFont(42)
+    latexLabel2.SetNDC()
+    latexLabel2.DrawLatex(0.7, 0.92, "35.9 fb^{-1} (13 TeV)")
     if not doingToys:
         c.Print(outdir+'/test_mtt'+str(mttbin)+'_mur_'+murscale+'_muf_'+mufscale+'_extrapol'+str(extrapol)+'_pdf'+str(pdfmember)+'_contrib'+str(contrib)+'.png')
+        if murscale == 'nominal' and mufscale == 'nominal' and extrapol == 0 and pdfmember == 0 and contrib == 0:
+            c.SaveAs(outdir+'/test_mtt'+str(mttbin)+'_mur_'+murscale+'_muf_'+mufscale+'_extrapol'+str(extrapol)+'_pdf'+str(pdfmember)+'_contrib'+str(contrib)+'.pdf')
+            c.SaveAs(outdir+'/test_mtt'+str(mttbin)+'_mur_'+murscale+'_muf_'+mufscale+'_extrapol'+str(extrapol)+'_pdf'+str(pdfmember)+'_contrib'+str(contrib)+'.root')
 
     if mttbin==3:
         fitted_mass = funct.GetX(0,cnst.mass_min-30,cnst.mass_max+30)
