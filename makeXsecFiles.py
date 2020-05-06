@@ -856,7 +856,7 @@ def makeRatioPlots (mass_2, ratio_12, ratio_32, ratio_42, err_12_up, err_12_down
     latexLabel2.DrawLatex(0.75, 0.94, "35.9 fb^{-1} (13 TeV)")
     latexLabel2.DrawLatex(0.63, 0.83, "ABMP16_5_nlo PDF set")
     latexLabel2.DrawLatex(0.63, 0.78, "#mu_{ref} = "+str(int(cnst.mu_2))+" GeV")
-    latexLabel2.DrawLatex(0.63, 0.73, "#mu_{0} = m_{t} = 163 GeV")
+    latexLabel2.DrawLatex(0.63, 0.73, "#mu_{0} = m_{t}^{incl}(mt) = 163 GeV")
     if preliminary: latexLabel2.DrawLatex(0.205, 0.92 , "#it{Preliminary}")
     
     c.SaveAs(outdir+'/test_incl.png')
