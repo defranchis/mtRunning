@@ -10,6 +10,7 @@ import constants as cnst
 from ROOT import TString, TH2D, TRandom3, TF1, TGraph, TLine, TCanvas, TGraphErrors, TGraphAsymmErrors, TLegend, TLatex
 from variables import xsec_1, xsec_2, xsec_3, xsec_4
 
+rt.gStyle.SetOptStat(0000)
 
 # options
 
@@ -357,22 +358,37 @@ def getMassAndError(mttbin, murscale, mufscale, pdfmember, extrapol, contrib):
 
     line_up.SetLineColor(rt.kGreen+2)
     line_down.SetLineColor(rt.kGreen+2)
-    line_central.SetLineColor(rt.kRed)
+    line_central.SetLineColor(rt.kBlue)
+    line_up.SetLineStyle(9)
+    line_down.SetLineStyle(9)
 
     outdir = 'plots_chi2'
     if not os.path.exists(outdir):
         os.makedirs(outdir)
 
     c = TCanvas()
-    c.SetGrid()
+    # c.SetGrid()
+    c.SetBottomMargin(.12)
     graph.Draw('ap')
     graph.SetMarkerStyle(7)
-    graph.SetTitle('signed #chi^{2} vs top mass in MCFM prediction; m_{t}(m_{t}) [GeV]; data-theory #chi^{2}')
+    graph.SetTitle('; m_{t}(m_{t}) [GeV]; data to theory #chi^{2}')
+    graph.GetXaxis().SetTitleSize(.05)
+    graph.GetYaxis().SetTitleSize(.05)
+    graph.GetXaxis().SetTitleOffset(.97)
+    graph.GetYaxis().SetTitleOffset(.8)
     line_up.Draw('same')
     line_down.Draw('same')
     line_central.Draw('same')
+    latexLabel2 = TLatex()
+    latexLabel2.SetTextSize(0.04)
+    latexLabel2.SetTextFont(42)
+    latexLabel2.SetNDC()
+    latexLabel2.DrawLatex(0.7, 0.92, "35.9 fb^{-1} (13 TeV)")
     if not doingToys:
         c.Print(outdir+'/test_mtt'+str(mttbin)+'_mur_'+murscale+'_muf_'+mufscale+'_extrapol'+str(extrapol)+'_pdf'+str(pdfmember)+'_contrib'+str(contrib)+'.png')
+        if murscale == 'nominal' and mufscale == 'nominal' and extrapol == 0 and pdfmember == 0 and contrib == 0:
+            c.SaveAs(outdir+'/test_mtt'+str(mttbin)+'_mur_'+murscale+'_muf_'+mufscale+'_extrapol'+str(extrapol)+'_pdf'+str(pdfmember)+'_contrib'+str(contrib)+'.pdf')
+            c.SaveAs(outdir+'/test_mtt'+str(mttbin)+'_mur_'+murscale+'_muf_'+mufscale+'_extrapol'+str(extrapol)+'_pdf'+str(pdfmember)+'_contrib'+str(contrib)+'.root')
 
     if mttbin==3:
         fitted_mass = funct.GetX(0,cnst.mass_min-30,cnst.mass_max+30)
@@ -734,11 +750,12 @@ def makeRatioPlots (mass_2, ratio_12, ratio_32, ratio_42, err_12_up, err_12_down
     g1.SetMarkerStyle(4)
     # g1.SetMarkerSize(1.5)
 
-    leg = TLegend(.17,.2,.78,.36)
+    leg = TLegend(.17,.19,.78,.39)
+    # leg2 = TLegend(.17,.2,.8,.4)
     leg.SetBorderSize(0)
     leg.AddEntry(graph,'NLO extraction from differential #sigma_{t#bar{t}}','pe')
-    leg.AddEntry(g1,'Reference scale (#mu = #mu_{ref})','p')
-    leg.AddEntry(th,'one-loop RGE, n_{f} = 5, #alpha_{s}(m_{Z}) = 0.1191','l')
+    leg.AddEntry(g1,'Reference scale #mu_{ref}','p')
+    leg.AddEntry(th,'One-loop RGE, n_{f} = 5, #alpha_{s}(m_{Z}) = 0.1191','l')
     
     c = TCanvas()
     c.SetLeftMargin(0.13)
@@ -753,10 +770,10 @@ def makeRatioPlots (mass_2, ratio_12, ratio_32, ratio_42, err_12_up, err_12_down
     th_band.Draw('f same')
     g.Draw('psame')
     latexLabel1.DrawLatex(0.16, 0.94, "CMS")
-    latexLabel2.DrawLatex(0.76, 0.94, "35.9 fb^{-1} (13 TeV)")
-    latexLabel2.DrawLatex(0.63, 0.81, "ABMP16_5_nlo PDF set")
-    latexLabel2.DrawLatex(0.63, 0.76, "#mu_{ref} = "+str(int(cnst.mu_2))+" GeV")
-    latexLabel2.DrawLatex(0.63, 0.71, "#mu_{0} = #mu_{ref}")
+    latexLabel2.DrawLatex(0.75, 0.94, "35.9 fb^{-1} (13 TeV)")
+    latexLabel2.DrawLatex(0.63, 0.83, "ABMP16_5_nlo PDF set")
+    latexLabel2.DrawLatex(0.63, 0.78, "#mu_{ref} = "+str(int(cnst.mu_2))+" GeV")
+    latexLabel2.DrawLatex(0.63, 0.73, "#mu_{0} = #mu_{ref}")
     if preliminary: latexLabel2.DrawLatex(0.205, 0.92 , "#it{Preliminary}")
     
     outdir = 'plots_running'
@@ -795,7 +812,6 @@ def makeRatioPlots (mass_2, ratio_12, ratio_32, ratio_42, err_12_up, err_12_down
     gr_band.GetYaxis().SetTitle('m_{t}(#mu) / m_{t}(#mu_{ref})')
     gr_band.SetTitle('')
 
-
     gr_band.GetXaxis().SetTitleSize(0.06)
     gr_band.GetXaxis().SetTitleOffset(.8)
     gr_band.GetYaxis().SetTitleSize(0.05)
@@ -817,28 +833,30 @@ def makeRatioPlots (mass_2, ratio_12, ratio_32, ratio_42, err_12_up, err_12_down
     g1.SetMarkerStyle(4)
 
 
-    leg2 = TLegend(.14,.18,.86,.39)
+    leg2 = TLegend(.17,.19,.8,.4)
     # leg2 = TLegend(.13,.15,.75,.32)
+    # leg = TLegend(.17,.2,.78,.36)
     leg2.SetBorderSize(0)
     leg2.AddEntry(graph,'NLO extraction from differential #sigma_{t#bar{t}}','pe')
-    leg2.AddEntry(g1,'Reference value (#mu = #mu_{ref})','p')
-    leg2.AddEntry(gr_add,'NLO extraction from inclusive #sigma_{t#bar{t}} (same data)','pe')
-    leg2.AddEntry(gr_band,'Evolved uncert. One-loop RGE, n_{f} = 5, #alpha_{s}(m_{Z}) = 0.1191','f')
+    leg2.AddEntry(g1,'Reference scale = #mu_{ref}','p')
+    leg2.AddEntry(gr_add,'NLO extraction from inclusive #sigma_{t#bar{t}}','pe')
+    leg2.AddEntry(gr_band,'One-loop RGE, n_{f} = 5, #alpha_{s}(m_{Z}) = 0.1191','f')
 
 
     
     c.Clear()
-    gr_band.SetMinimum(0.79)
+    gr_band.SetMinimum(0.82)
+    gr_band.SetMaximum(1.12)
     gr_band.Draw('af')
     gr_add.Draw('p same')
     g.Draw('p same')
     g1.Draw('p same')
     leg2.Draw('same')
     latexLabel1.DrawLatex(0.16, 0.94, "CMS")
-    latexLabel2.DrawLatex(0.76, 0.94, "35.9 fb^{-1} (13 TeV)")
-    latexLabel2.DrawLatex(0.63, 0.81, "ABMP16_5_nlo PDF set")
-    latexLabel2.DrawLatex(0.63, 0.76, "#mu_{ref} = "+str(int(cnst.mu_2))+" GeV")
-    latexLabel2.DrawLatex(0.63, 0.71, "#mu_{0} = m_{t}")
+    latexLabel2.DrawLatex(0.75, 0.94, "35.9 fb^{-1} (13 TeV)")
+    latexLabel2.DrawLatex(0.63, 0.83, "ABMP16_5_nlo PDF set")
+    latexLabel2.DrawLatex(0.63, 0.78, "#mu_{ref} = "+str(int(cnst.mu_2))+" GeV")
+    latexLabel2.DrawLatex(0.63, 0.73, "#mu_{0} = m_{t}^{incl}(mt) = 163 GeV")
     if preliminary: latexLabel2.DrawLatex(0.205, 0.92 , "#it{Preliminary}")
     
     c.SaveAs(outdir+'/test_incl.png')
@@ -1139,11 +1157,13 @@ def makeMassPlots(mtmu_1, err_1, mtmt_1, mtmu_2, err_2, mtmt_2, mtmu_3, err_3, m
     graph.SetTitle('')
     
     # leg = TLegend(.15,.23,.7,.35)
-    leg = TLegend(.15,.15,.77,.3)
+    leg = TLegend(.17,.19,.8,.4)
     leg.SetBorderSize(0)
     leg.AddEntry(graph,'NLO extraction from differential #sigma_{t#bar{t}}','pe')
-    leg.AddEntry(gr_add,'NLO extraction from inclusive #sigma_{t#bar{t}} (same data)','pe')
-    leg.AddEntry(gr_band,'Evolved uncertainty, one loop RGE (5 flavours)','f')
+    leg.AddEntry(gr_add,'NLO extraction from inclusive #sigma_{t#bar{t}}','pe')
+    leg.AddEntry(gr_band,'One-loop RGE, n_{f} = 5, #alpha_{s}(m_{Z}) = 0.1191','f')
+
+
     
     c = TCanvas()
     gr_band.SetMinimum(125)
@@ -1152,6 +1172,19 @@ def makeMassPlots(mtmu_1, err_1, mtmt_1, mtmu_2, err_2, mtmt_2, mtmu_3, err_3, m
     graph.Draw('p same')
     leg.Draw('same')
 
+    c.SetLeftMargin(0.13)
+    c.SetBottomMargin(0.12)
+    c.SetRightMargin(0.05)
+    c.SetTopMargin(0.08)
+
+    gr_band.GetXaxis().SetTitleSize(0.06)
+    gr_band.GetXaxis().SetTitleOffset(.8)
+    gr_band.GetYaxis().SetTitleSize(0.05)
+    gr_band.GetYaxis().SetTitleOffset(1.1)
+    gr_band.GetYaxis().SetLabelSize(0.05)
+    gr_band.GetXaxis().SetLabelSize(0.05)
+
+    
     #fromhere
     latexLabel1 = TLatex()
     latexLabel1.SetTextSize(0.06)
@@ -1162,10 +1195,18 @@ def makeMassPlots(mtmu_1, err_1, mtmt_1, mtmu_2, err_2, mtmt_2, mtmu_3, err_3, m
     latexLabel2.SetTextFont(42)
     latexLabel2.SetNDC()
 
-    latexLabel1.DrawLatex(0.11, 0.92, "CMS")
-    latexLabel2.DrawLatex(0.70, 0.92, "35.9 fb^{-1} (13 TeV)")
-    latexLabel2.DrawLatex(0.59, 0.78, "ABMP16_5_nlo PDF set")
-    # latexLabel2.DrawLatex(0.59, 0.73, "#mu_{ref} = "+str(round(cnst.mu_2,1))+" GeV")
+    latexLabel3 = TLatex()
+    latexLabel3.SetTextSize(0.045)
+    latexLabel3.SetTextFont(42)
+    latexLabel3.SetNDC()
+
+    latexLabel1.DrawLatex(0.16, 0.94, "CMS")
+    latexLabel3.DrawLatex(0.26, 0.94 , "#it{Supplementary}")
+    latexLabel2.DrawLatex(0.48, 0.94 , "arXiv:1909.09193")
+    latexLabel2.DrawLatex(0.75, 0.94, "35.9 fb^{-1} (13 TeV)")
+    latexLabel2.DrawLatex(0.63, 0.83, "ABMP16_5_nlo PDF set")
+    latexLabel2.DrawLatex(0.63, 0.78, "#mu_{0} = m_{t} = 163 GeV")
+    
 
     
     outdir = 'plots_running'
@@ -1208,8 +1249,8 @@ def makeMassPlots(mtmu_1, err_1, mtmt_1, mtmu_2, err_2, mtmt_2, mtmu_3, err_3, m
     graph_scale.SetPointError(1,0,0,errors[11],errors[10])
     graph_scale.SetPointError(2,0,0,errors[13],errors[12])
     graph_scale.SetPointError(3,0,0,errors[15],errors[14])
-    graph.SetLineWidth(2)
-    gr_add.SetLineWidth(2)
+    # graph.SetLineWidth(2)
+    # gr_add.SetLineWidth(2)
     
     gr_add_scale=TGraphAsymmErrors()
     gr_add_scale.SetPoint(0,cnst.mtmt,cnst.mtmt)
@@ -1223,7 +1264,7 @@ def makeMassPlots(mtmu_1, err_1, mtmt_1, mtmu_2, err_2, mtmt_2, mtmu_3, err_3, m
     gr_band.SetMaximum(175)
     graph_scale.Draw('p same')
     gr_add_scale.Draw('p same')
-    gr_band_fit.Draw('f same')
+    # gr_band_fit.Draw('f same')
     c.Update()
     c.SaveAs(outdir+'/test_mtmu_abs_scale.png')
     c.SaveAs(outdir+'/test_mtmu_abs_scale.pdf')
@@ -1394,19 +1435,39 @@ def makeChi2Significance(mass2, ratio12, ratio32, ratio42, err12, err32, err42):
     err = xmin - funct.GetX(ymin+1,0,xmin)
    
     c = TCanvas()
+    # c.SetGrid()
+    c.SetBottomMargin(.10)
     graph.Draw('ap')
     graph.SetMarkerStyle(8)
     graph.SetMinimum(0)
 
     graph.GetXaxis().SetTitle('x')
     graph.GetYaxis().SetTitle('#chi^{2}')
+
+    graph.GetXaxis().SetTitleSize(.05)
+    graph.GetYaxis().SetTitleSize(.05)
+    graph.GetXaxis().SetTitleOffset(.7)
+    graph.GetYaxis().SetTitleOffset(.8)
+
     
     outdir = 'plots_chi2'
     if not os.path.exists(outdir):
         os.makedirs(outdir)
 
-    c.Print(outdir+'/chi2_significance_nominal.png')
+    latexLabel2 = TLatex()
+    latexLabel2.SetTextSize(0.04)
+    latexLabel2.SetTextFont(42)
+    latexLabel2.SetNDC()
+    latexLabel2.DrawLatex(0.7, 0.92, "35.9 fb^{-1} (13 TeV)")
 
+    line = TLine(0,ymin+1,3,ymin+1)
+    line.SetLineColor(rt.kBlue)
+    line.SetLineStyle(9)
+    line.Draw('same')
+    
+    c.Print(outdir+'/chi2_significance_nominal.png')
+    c.SaveAs(outdir+'/chi2_significance_nominal.pdf')
+    c.SaveAs(outdir+'/chi2_significance_nominal.root')
 
     err_pdf_up = 0
     err_pdf_down = 0
@@ -1729,8 +1790,8 @@ def estimateMassCorrelations():
 
     
     r_corr_12 = TH2D('r_corr_12','r_corr_12',100,0.9,1.15,100,0.75,1.15)
-    r_corr_13 = TH2D('r_corr_13','r_corr_13',100,0.9,1.15,100,0.75,1.15)
-    r_corr_23 = TH2D('r_corr_23','r_corr_23',100,0.9,1.15,100,0.75,1.15)
+    r_corr_13 = TH2D('r_corr_13','r_corr_13',100,0.9,1.15,100,0.65,1.15)
+    r_corr_23 = TH2D('r_corr_23','r_corr_23',100,0.8,1.15,100,0.65,1.15)
     
     print '\nexecuting', ntoys, 'toys\n'
 
@@ -1779,6 +1840,14 @@ def estimateMassCorrelations():
         os.makedirs(outdir)
 
     c = TCanvas()
+    c.SetBottomMargin(0.12)
+    c.SetRightMargin(0.13)
+    
+    latexLabel2 = TLatex()
+    latexLabel2.SetTextSize(0.04)
+    latexLabel2.SetTextFont(42)
+    latexLabel2.SetNDC()
+
     m12.SetTitle('correlation = '+str(round(m12.GetCorrelationFactor(),2)))
     m12.GetXaxis().SetTitle('mt ('+str(int(cnst.mu_1))+' GeV) [GeV]')
     m12.GetYaxis().SetTitle('mt ('+str(int(cnst.mu_2))+' GeV) [GeV]')
@@ -1803,24 +1872,42 @@ def estimateMassCorrelations():
     c.SaveAs(outdir+'/mass_corr_4_2.pdf')
     c.SaveAs(outdir+'/mass_corr_4_2.root')
     c.Clear()
-    r_corr_12.SetTitle('correlation = '+str(round(r_corr_12.GetCorrelationFactor(),2)))
-    r_corr_12.GetXaxis().SetTitle('mt ('+str(int(cnst.mu_1))+' GeV) / mt ('+str(int(cnst.mu_2))+' GeV)')
-    r_corr_12.GetYaxis().SetTitle('mt ('+str(int(cnst.mu_3))+' GeV) / mt ('+str(int(cnst.mu_2))+' GeV)')
-    r_corr_12.DrawNormalized('colz')
+    # r_corr_12.SetTitle('correlation = '+str(round(r_corr_12.GetCorrelationFactor(),2)))
+    r_corr_12.SetTitle('')
+    r_corr_12.GetXaxis().SetTitle('r_{12}')
+    r_corr_12.GetYaxis().SetTitle('r_{32}')
+    r_corr_12.GetXaxis().SetTitleSize(.05)
+    r_corr_12.GetYaxis().SetTitleSize(.05)
+    r_corr_12.GetXaxis().SetTitleOffset(.97)
+    r_corr_12.GetYaxis().SetTitleOffset(.9)
+    r_corr_12.Draw('colz')
+    latexLabel2.DrawLatex(0.67, 0.92, "35.9 fb^{-1} (13 TeV)")
     c.SaveAs(outdir+'/ratio_corr_12.png')
     c.SaveAs(outdir+'/ratio_corr_12.pdf')
     c.SaveAs(outdir+'/ratio_corr_12.root')
-    r_corr_13.SetTitle('correlation = '+str(round(r_corr_13.GetCorrelationFactor(),2)))
-    r_corr_13.GetXaxis().SetTitle('mt ('+str(int(cnst.mu_1))+' GeV) / mt ('+str(int(cnst.mu_2))+' GeV)')
-    r_corr_13.GetYaxis().SetTitle('mt ('+str(int(cnst.mu_4))+' GeV) / mt ('+str(int(cnst.mu_2))+' GeV)')
-    r_corr_13.DrawNormalized('colz')
+    # r_corr_13.SetTitle('correlation = '+str(round(r_corr_13.GetCorrelationFactor(),2)))
+    r_corr_13.SetTitle('')
+    r_corr_13.GetXaxis().SetTitle('r_{12}')
+    r_corr_13.GetYaxis().SetTitle('r_{42}')
+    r_corr_13.GetXaxis().SetTitleSize(.05)
+    r_corr_13.GetYaxis().SetTitleSize(.05)
+    r_corr_13.GetXaxis().SetTitleOffset(.97)
+    r_corr_13.GetYaxis().SetTitleOffset(.9)
+    r_corr_13.Draw('colz')
+    latexLabel2.DrawLatex(0.67, 0.92, "35.9 fb^{-1} (13 TeV)")
     c.SaveAs(outdir+'/ratio_corr_13.png')
     c.SaveAs(outdir+'/ratio_corr_13.pdf')
     c.SaveAs(outdir+'/ratio_corr_13.root')
-    r_corr_23.SetTitle('correlation = '+str(round(r_corr_23.GetCorrelationFactor(),2)))
-    r_corr_23.GetXaxis().SetTitle('mt ('+str(int(cnst.mu_3))+' GeV) / mt ('+str(int(cnst.mu_2))+' GeV)')
-    r_corr_23.GetYaxis().SetTitle('mt ('+str(int(cnst.mu_4))+' GeV) / mt ('+str(int(cnst.mu_2))+' GeV)')
-    r_corr_23.DrawNormalized('colz')
+    # r_corr_23.SetTitle('correlation = '+str(round(r_corr_23.GetCorrelationFactor(),2)))
+    r_corr_23.SetTitle('')
+    r_corr_23.GetXaxis().SetTitle('r_{32}')
+    r_corr_23.GetYaxis().SetTitle('r_{42}')
+    r_corr_23.GetXaxis().SetTitleSize(.05)
+    r_corr_23.GetYaxis().SetTitleSize(.05)
+    r_corr_23.GetXaxis().SetTitleOffset(.97)
+    r_corr_23.GetYaxis().SetTitleOffset(.9)
+    r_corr_23.Draw('colz')
+    latexLabel2.DrawLatex(0.67, 0.92, "35.9 fb^{-1} (13 TeV)")
     c.SaveAs(outdir+'/ratio_corr_23.png')
     c.SaveAs(outdir+'/ratio_corr_23.pdf')
     c.SaveAs(outdir+'/ratio_corr_23.root')
