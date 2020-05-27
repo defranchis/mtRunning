@@ -42,7 +42,9 @@ def setMasses():
     mass_v = []
     if not newscales: i_mass = cnst.mass_max
     else: i_mass = cnst.mass_max_scales
-    while i_mass >= cnst.mass_min :
+    if not newscales: m_min = cnst.mass_min
+    else: m_min = cnst.mass_min_scales
+    while i_mass >= m_min :
         mass_v.append(i_mass)
         if i_mass <= cnst.mass_fine_max and i_mass > cnst.mass_fine_min+.1 and not newscales: i_mass-= 0.2
         else : i_mass-= 0.5
@@ -183,10 +185,6 @@ def newInputFileName ( renscale, facscale, topmass, pdfmember ):
 
     renscale = round(renscale,0)
     facscale = round(facscale,0)
-
-    # REMOVE THESE LINES!!! #
-    if renscale == 644.0 : renscale = 664.0
-    if facscale == 644.0 : facscale = 664.0
     
     if renscale>=1000 : infileName+='_'
     if renscale>=100 : infileName+=str(renscale)+'_'
@@ -415,7 +413,7 @@ def getMassAndError(mttbin, murscale, mufscale, pdfmember, extrapol, contrib):
     if not newscales:
         if mttbin>=3: graph.Fit(funct,'q','',cnst.mass_min+0.1,cnst.mass_max-0.1)
         else: graph.Fit(funct,'q','',cnst.mass_fine_min+0.1,cnst.mass_max-0.1)
-    else: graph.Fit(funct,'q','',cnst.mass_min+0.1,cnst.mass_max_scales-0.1)
+    else: graph.Fit(funct,'q','',cnst.mass_min_scales+0.5,cnst.mass_max_scales-0.5)
         
     if mttbin >= 3:
         line_up = TLine(cnst.mass_min,1.,cnst.mass_max,1.)
