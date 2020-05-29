@@ -203,9 +203,9 @@ def newInputFileName ( renscale, facscale, topmass, pdfmember ):
     tempname = infileName
     infileName+=str(topmassevolved)+'_MSbar.dat'
 
-    if not os.path.isfile('scales_new/'+infileName):
+    if not os.path.isfile('scales_Grazzini/'+infileName):
         infileName=tempname+str(topmassevolved+.1)+'_MSbar.dat'
-    if not os.path.isfile('scales_new/'+infileName):
+    if not os.path.isfile('scales_Grazzini/'+infileName):
         infileName=tempname+str(topmassevolved-.1)+'_MSbar.dat'
 
     return infileName
@@ -226,7 +226,7 @@ def readCalculatedXsec (renscale, facscale, topmass, pdfmember, mttbin):
     if not newscales:
         if renscale == topmass and facscale == topmass: indir = 'out_hists/'
         else : indir = 'out_scales/'
-    else: indir = 'scales_new/'
+    else: indir = 'scales_Grazzini/'
     if not os.path.isfile(indir+fileName):
         print 'WARNING: missing file', fileName
         return 0
@@ -680,7 +680,7 @@ def makeTheoryPrediction(outfile, mass_2):
     r_down = []
     out = open(outfile+'.txt','w')
         
-    for scale in range(350,1050+1):
+    for scale in range(350/2,(1050+1)/2):
         ratio = mtmu2mtmu(mass_2, cnst.mu_2, scale, 'nominal')/mass_2
         out.write(str(scale)+'\t'+str(ratio)+'\n')
         ratio_up = mtmu2mtmu(mass_2, cnst.mu_2, scale, 'up')/mass_2
