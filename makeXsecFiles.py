@@ -42,8 +42,7 @@ def setMasses():
     i_mass = cnst.mass_max
     while i_mass >= cnst.mass_min :
         mass_v.append(i_mass)
-        if i_mass <= cnst.mass_fine_max and i_mass > cnst.mass_fine_min+.1 : i_mass-= 0.2
-        else : i_mass-= 0.5
+        i_mass-= 0.5
     return
 
 
@@ -96,6 +95,11 @@ def mtmu2mtmu (mtmu1, mu1, mu2, var_as):
     return mtmu2
 
 
+def getHorribleString(scale):
+    tmp = TString(str(scale)).ReplaceAll('.','_.')
+    return tmp
+
+
 ################################
 
 # "formInputFileName" provides the correct name of the .dat input file from where
@@ -104,26 +108,31 @@ def mtmu2mtmu (mtmu1, mu1, mu2, var_as):
 ################################
 
 
-def formInputFileName ( renscale, facscale, topmass, pdfmember ):
+def formInputFileName ( murscale, mufscale, topmass, pdfmember, mttbin ):
 
+    if mttbin == 1: mtscale = cnst.mu_1
+    elif mttbin == 2: mtscale = cnst.mu_2
+    elif mttbin == 3: mtscale = cnst.mu_3
+    else: mtscale = cnst.mu_4
+    
     infileName='tt_tot_tot_ABMP16_'
     infileName+=str(pdfmember)+'_'
     if pdfmember<10 : infileName+='_'
 
-    topmassevolved=topmass
-    if renscale != topmass:
-        topmassevolved = float(int(mtmt2mtmu(topmass, renscale)*10))/10.
+    topmassevolved = float(int(mtmt2mtmu(topmass, mtscale)*10))/10.
+    renscale = topmassevolved
+    facscale = topmassevolved
 
-    origrenscale = renscale
-    origfacscale = facscale
+    if murscale == 'up' : renscale *= 2.
+    elif murscale == 'down' : renscale = round(renscale/2.,1)
+
+    if mufscale == 'up' : facscale *= 2.
+    elif mufscale == 'down' : facscale = round(facscale/2.,1)
+
     
-    if renscale != topmass or facscale != topmass:
-        if TString(str(topmass)).EndsWith('.6') or TString(str(topmass)).EndsWith('.2'):
-            renscale = round(renscale-.1,1)
-            facscale = round(facscale-.1,1)
-        elif TString(str(topmass)).EndsWith('.5'):
-            if renscale < topmass : renscale = round(renscale-.1,1)
-            if facscale < topmass : facscale = round(facscale-.1,1)
+    if TString(str(topmass)).EndsWith('.6') or TString(str(topmass)).EndsWith('.2'):
+        renscale = round(renscale-.1,1)
+        facscale = round(facscale-.1,1)
         
     if renscale>=1000 : infileName+='_'
     if renscale>=100 : infileName+=str(renscale)+'_'
@@ -139,25 +148,46 @@ def formInputFileName ( renscale, facscale, topmass, pdfmember ):
         facstr.ReplaceAll('.','_.')
         infileName+=str(facstr)+'_'
 
-    tempname = infileName
+    infileName += str(round(mtscale,1))+'_'
     infileName+=str(topmassevolved)+'_MSbar.dat'
+    
 
-    #because of some problem with MCFM outputs...
-    if renscale == facscale == topmass:
-        if TString(infileName).Contains('.2') :
-            infileName=str(TString(infileName).ReplaceAll('.2','.1'))
-        if TString(infileName).Contains('.6') :
-            infileName=str(TString(infileName).ReplaceAll('.6','.5'))
-    elif origrenscale == topmass:
-        if TString(infileName).Contains('.2_MS') :
-            infileName=str(TString(infileName).ReplaceAll('.2_MS','.1_MS'))
-        if TString(infileName).Contains('.6_MS') :
-            infileName=str(TString(infileName).ReplaceAll('.6_MS','.5_MS'))
+    if murscale == 'nominal' and mufscale == 'nominal':
+        if not os.path.isfile('out_scales_new/'+infileName):
+            infileName = str(TString(infileName).ReplaceAll(str(topmassevolved),str(topmassevolved+.1)))
+        if not os.path.isfile('out_scales_new/'+infileName):
+            infileName = str(TString(infileName).ReplaceAll(str(topmassevolved+.1),str(topmassevolved-.1)))
     else:
-        if not os.path.isfile('out_scales/'+infileName):
-            infileName=tempname+str(topmassevolved+.1)+'_MSbar.dat'
-        if not os.path.isfile('out_scales/'+infileName):
-            infileName=tempname+str(topmassevolved-.1)+'_MSbar.dat'
+        if not os.path.isfile('out_scales_new/'+infileName):
+            tmpname = infileName
+            tmpname= str(TString(tmpname).ReplaceAll(str(renscale),str(topmassevolved)))
+            tmpname= str(TString(tmpname).ReplaceAll(str(facscale),str(topmassevolved)))
+            tmpname= str(TString(tmpname).ReplaceAll(getHorribleString(renscale),str(topmassevolved)))
+            tmpname= str(TString(tmpname).ReplaceAll(getHorribleString(facscale),str(topmassevolved)))
+            if not os.path.isfile('out_scales_new/'+tmpname):
+                tmpname = str(TString(tmpname).ReplaceAll(str(topmassevolved),str(topmassevolved+.1)))
+                if os.path.isfile('out_scales_new/'+tmpname): infileName = str(TString(infileName).ReplaceAll(str(topmassevolved),str(topmassevolved+.1)))
+                else: infileName = str(TString(infileName).ReplaceAll(str(topmassevolved),str(topmassevolved-.1)))
+            origname = infileName
+                        
+            if not os.path.isfile('out_scales_new/'+infileName):
+                if murscale!='nominal': infileName = str(TString(infileName).ReplaceAll(str(renscale),str(renscale+.1)))
+                if mufscale!='nominal': infileName = str(TString(infileName).ReplaceAll(str(facscale),str(facscale+.1)))
+            if not os.path.isfile('out_scales_new/'+infileName):
+                if murscale!='nominal': infileName = str(TString(infileName).ReplaceAll(str(renscale+.1),str(renscale+.2)))
+                if mufscale!='nominal': infileName = str(TString(infileName).ReplaceAll(str(facscale+.1),str(facscale+.2)))
+            if not os.path.isfile('out_scales_new/'+infileName):
+                if murscale!='nominal': infileName = str(TString(infileName).ReplaceAll(str(renscale+.2),str(renscale-.1)))
+                if mufscale!='nominal': infileName = str(TString(infileName).ReplaceAll(str(facscale+.2),str(facscale-.1)))
+            if not os.path.isfile('out_scales_new/'+infileName):
+                if murscale!='nominal': infileName = str(TString(origname).ReplaceAll(getHorribleString(renscale),getHorribleString(renscale+.1)))
+                if mufscale!='nominal': infileName = str(TString(origname).ReplaceAll(getHorribleString(facscale),getHorribleString(facscale+.1)))
+            if not os.path.isfile('out_scales_new/'+infileName):
+                if murscale!='nominal': infileName = str(TString(origname).ReplaceAll(getHorribleString(renscale),getHorribleString(renscale-.1)))
+                if mufscale!='nominal': infileName = str(TString(origname).ReplaceAll(getHorribleString(facscale),getHorribleString(facscale-.1)))
+
+
+    
     return infileName
 
 
@@ -172,9 +202,8 @@ def formInputFileName ( renscale, facscale, topmass, pdfmember ):
 
 def readCalculatedXsec (renscale, facscale, topmass, pdfmember, mttbin):
 
-    fileName = formInputFileName ( renscale, facscale, topmass, pdfmember )
-    if renscale == topmass and facscale == topmass: indir = 'out_hists/'
-    else : indir = 'out_scales/'
+    fileName = formInputFileName ( renscale, facscale, topmass, pdfmember, mttbin )
+    indir = 'out_scales_new/'
     if not os.path.isfile(indir+fileName):
         print 'WARNING: missing file', fileName
         return 0
@@ -233,13 +262,7 @@ def getMassAndError(mttbin, murscale, mufscale, pdfmember, extrapol, contrib):
     mass_v_sel = []
     for mass in mass_v:
         i+=1
-        mur = mass
-        muf = mass
-        if (murscale == 'up')   : mur*=2
-        if (mufscale == 'up')   : muf*=2
-        if (murscale == 'down') : mur*=.5
-        if (mufscale == 'down') : muf*=.5
-        xsec_th = readCalculatedXsec(mur, muf, mass, pdfmember, mttbin) 
+        xsec_th = readCalculatedXsec(murscale, mufscale, mass, pdfmember, mttbin) 
         if xsec_th == 0 : continue # torm
         xsec_exp = xsec_err = 0.
         if mttbin == 1 : 
@@ -391,7 +414,7 @@ def getMassAndError(mttbin, murscale, mufscale, pdfmember, extrapol, contrib):
             c.SaveAs(outdir+'/test_mtt'+str(mttbin)+'_mur_'+murscale+'_muf_'+mufscale+'_extrapol'+str(extrapol)+'_pdf'+str(pdfmember)+'_contrib'+str(contrib)+'.root')
 
     if mttbin==3:
-        fitted_mass = funct.GetX(0,cnst.mass_min-30,cnst.mass_max+30)
+        fitted_mass = funct.GetX(0,cnst.mass_min-10,cnst.mass_max+10)
         fitted_mass_up = funct.GetX(-1,fitted_mass-10,fitted_mass+10)
         fitted_mass_down = funct.GetX(1,fitted_mass-10,fitted_mass+10)
     elif mttbin==2:
@@ -533,7 +556,7 @@ def getPDFUncertainties (central_ratio_1_2, central_ratio_3_2, central_ratio_4_2
         mass_and_err_2 = getMassAndError(2, 'nominal', 'nominal', pdf , 0 , 0 )
         mass_and_err_3 = getMassAndError(3, 'nominal', 'nominal', pdf , 0 , 0 )
         mass_and_err_4 = getMassAndError(4, 'nominal', 'nominal', pdf , 0 , 0 )
-        
+
         ratios_and_errs = getRatios(mass_and_err_1[0], mass_and_err_2[0], mass_and_err_3[0], mass_and_err_4[0],
                                     mass_and_err_1[1], mass_and_err_2[1], mass_and_err_3[1], mass_and_err_4[1])
 
@@ -1095,7 +1118,7 @@ def getTotalMassError(mtmu_1, err_1, mtmu_2, err_2, mtmu_3, err_3, mtmu_4, err_4
 
     print
     print 'mt_mu1 =', round(mtmu_1,1), '+/-', round(err_1,1), '(fit) +', round(pdf_error_1_up,1), '-', round(pdf_error_1_down,1), '(pdf) +', round(extr_error_1_up,1), '-', round(extr_error_1_down,1), '(extr) +', round(scale_error_1_up,1), '-', round(scale_error_1_down,1), '(scale) =', round(mtmu_1,1), '+', round(tot_error_1_up,1), '-', round(tot_error_1_down,1), '(tot)' 
-    print 'mt_mu1 =', round(mtmu_2,1), '+/-', round(err_2,1), '(fit) +', round(pdf_error_2_up,1), '-', round(pdf_error_2_down,1), '(pdf) +', round(extr_error_2_up,1), '-', round(extr_error_2_down,1), '(extr) +', round(scale_error_2_up,1), '-', round(scale_error_2_down,1), '(scale) =', round(mtmu_2,1), '+', round(tot_error_2_up,1), '-', round(tot_error_2_down,1), '(tot)' 
+    print 'mt_mu2 =', round(mtmu_2,1), '+/-', round(err_2,1), '(fit) +', round(pdf_error_2_up,1), '-', round(pdf_error_2_down,1), '(pdf) +', round(extr_error_2_up,1), '-', round(extr_error_2_down,1), '(extr) +', round(scale_error_2_up,1), '-', round(scale_error_2_down,1), '(scale) =', round(mtmu_2,1), '+', round(tot_error_2_up,1), '-', round(tot_error_2_down,1), '(tot)' 
     print 'mt_mu3 =', round(mtmu_3,1), '+/-', round(err_3,1), '(fit) +', round(pdf_error_3_up,1), '-', round(pdf_error_3_down,1), '(pdf) +', round(extr_error_3_up,1), '-', round(extr_error_3_down,1), '(extr) +', round(scale_error_3_up,1), '-', round(scale_error_3_down,1), '(scale) =', round(mtmu_3,1), '+', round(tot_error_3_up,1), '-', round(tot_error_3_down,1), '(tot)' 
     print 'mt_mu4 =', round(mtmu_4,1), '+/-', round(err_4,1), '(fit) +', round(pdf_error_4_up,1), '-', round(pdf_error_4_down,1), '(pdf) +', round(extr_error_4_up,1), '-', round(extr_error_4_down,1), '(extr) +', round(scale_error_4_up,1), '-', round(scale_error_4_down,1), '(scale) =', round(mtmu_4,1), '+', round(tot_error_4_up,1), '-', round(tot_error_4_down,1), '(tot)' 
     print
