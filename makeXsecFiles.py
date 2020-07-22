@@ -2,6 +2,7 @@
 import os
 import rundec
 import numpy as np
+from scipy import special
 
 import ROOT as rt
 import variables as var
@@ -15,7 +16,7 @@ rt.gStyle.SetOptStat(0000)
 # options
 
 estimate_contribs = False
-estimate_significance = False
+estimate_significance = True
 
 do_scale_variations = True # not yet well tested
 facscale_only = False # only factorization scale
@@ -1662,6 +1663,12 @@ def makeChi2Significance(mass2, ratio12, ratio32, ratio42, err12, err32, err42):
     print 'significance wrt no running =', round(xmin/err_down,2)
     print 'significance wrt RGE =', round((xmin-1)/err_down,2)
     print
+
+    v = xmin/err_down
+    erf = special.erf(v/2**.5)
+    excl = (1-(1-erf)/2)*100
+
+    print 'no running excluded at', round(excl,1), '% C.L.' 
 
 
 
