@@ -1220,7 +1220,6 @@ def makeMassPlots(mtmu_1, err_1, mtmt_1, mtmu_2, err_2, mtmt_2, mtmu_3, err_3, m
     gr_band.GetXaxis().SetLabelSize(0.05)
 
     
-    #fromhere
     latexLabel1 = TLatex()
     latexLabel1.SetTextSize(0.06)
     latexLabel1.SetNDC()
@@ -1601,44 +1600,52 @@ def makeChi2Significance(mass2, ratio12, ratio32, ratio42, err12, err32, err42):
     err_scale_down = 0
 
     if do_scale_variations:
-        for facscale in ['up','down']:
-            mass_and_err_1 = getMassAndError(1, 'nominal', facscale, 0 , 0 , 0 )
-            mass_and_err_2 = getMassAndError(2, 'nominal', facscale, 0 , 0 , 0 )
-            mass_and_err_3 = getMassAndError(3, 'nominal', facscale, 0 , 0 , 0 )
-            mass_and_err_4 = getMassAndError(4, 'nominal', facscale, 0 , 0 , 0 )
+        for facscale in ['nominal','up','down']:
+            for renscale in ['nominal', 'up','down']:
+                if renscale == 'up' and facscale == 'down': continue
+                if renscale == 'down' and facscale == 'up': continue
 
-            ratios_and_errs = getRatios(mass_and_err_1[0], mass_and_err_2[0], mass_and_err_3[0], mass_and_err_4[0],
-                                        mass_and_err_1[1], mass_and_err_2[1], mass_and_err_3[1], mass_and_err_4[1])
+                if facscale_only:
+                    if renscale != 'nominal': continue
+
+                
+                mass_and_err_1 = getMassAndError(1, renscale, facscale, 0 , 0 , 0 )
+                mass_and_err_2 = getMassAndError(2, renscale, facscale, 0 , 0 , 0 )
+                mass_and_err_3 = getMassAndError(3, renscale, facscale, 0 , 0 , 0 )
+                mass_and_err_4 = getMassAndError(4, renscale, facscale, 0 , 0 , 0 )
+
+                ratios_and_errs = getRatios(mass_and_err_1[0], mass_and_err_2[0], mass_and_err_3[0], mass_and_err_4[0],
+                                            mass_and_err_1[1], mass_and_err_2[1], mass_and_err_3[1], mass_and_err_4[1])
             
-            ratio_1_2 = ratios_and_errs[0]
-            ratio_3_2 = ratios_and_errs[1]
-            ratio_4_2 = ratios_and_errs[2]
-            err_ratio_1_2 = ratios_and_errs[3]
-            err_ratio_3_2 = ratios_and_errs[4]
-            err_ratio_4_2 = ratios_and_errs[5]
+                ratio_1_2 = ratios_and_errs[0]
+                ratio_3_2 = ratios_and_errs[1]
+                ratio_4_2 = ratios_and_errs[2]
+                err_ratio_1_2 = ratios_and_errs[3]
+                err_ratio_3_2 = ratios_and_errs[4]
+                err_ratio_4_2 = ratios_and_errs[5]
 
-            graph.Clear()
+                graph.Clear()
         
-            for x in range(0,31):
-                x = x/10.
-                th1 = x*(th_ratio12-1)+1
-                th3 = x*(th_ratio32-1)+1
-                th4 = x*(th_ratio42-1)+1
-                chi2 = getChi2Uncorrelated(ratio_1_2, th1, err_ratio_1_2, ratio_3_2, th3, err_ratio_3_2, ratio_4_2, th4, err_ratio_4_2)
-                graph.SetPoint(int(x*10),x,chi2)
+                for x in range(0,31):
+                    x = x/10.
+                    th1 = x*(th_ratio12-1)+1
+                    th3 = x*(th_ratio32-1)+1
+                    th4 = x*(th_ratio42-1)+1
+                    chi2 = getChi2Uncorrelated(ratio_1_2, th1, err_ratio_1_2, ratio_3_2, th3, err_ratio_3_2, ratio_4_2, th4, err_ratio_4_2)
+                    graph.SetPoint(int(x*10),x,chi2)
 
-            funct = TF1('funct','pol2(0)',0,3)
-            graph.Fit(funct,'q','',0,3)
+                funct = TF1('funct','pol2(0)',0,3)
+                graph.Fit(funct,'q','',0,3)
 
-            c.Clear()
-            graph.Draw('ap')
-            c.Print(outdir+'/chi2_significance_facscale_'+facscale+'.png')
+                c.Clear()
+                graph.Draw('ap')
+                c.Print(outdir+'/chi2_significance_facscale_'+facscale+'.png')
             
-            xmin_SCALE = funct.GetMinimumX()
-            err_scale = (xmin-xmin_SCALE)**2
+                xmin_SCALE = funct.GetMinimumX()
+                err_scale = (xmin-xmin_SCALE)**2
         
-            if xmin_SCALE > xmin : err_scale_up += err_scale
-            else : err_scale_down += err_scale
+                if xmin_SCALE > xmin : err_scale_up += err_scale
+                else : err_scale_down += err_scale
 
         err_scale_up = err_scale_up**.5
         err_scale_down = err_scale_up**.5
