@@ -17,8 +17,8 @@ rt.gStyle.SetOptStat(0000)
 estimate_contribs = False
 estimate_significance = False
 
-do_scale_variations = False # not yet well tested
-facscale_only = True # only factorization scale
+do_scale_variations = True # not yet well tested
+facscale_only = False # only factorization scale
 
 ntoys = 0
 replace_corr = False  #recommended: False
@@ -650,7 +650,7 @@ def makeTheoryPrediction(outfile, mass_2):
     r_down = []
     out = open(outfile+'.txt','w')
         
-    for scale in range(350,1050+1):
+    for scale in range(350/2,1050/2):
         ratio = mtmu2mtmu(mass_2, cnst.mu_2, scale, 'nominal')/mass_2
         out.write(str(scale)+'\t'+str(ratio)+'\n')
         ratio_up = mtmu2mtmu(mass_2, cnst.mu_2, scale, 'up')/mass_2
@@ -707,8 +707,11 @@ def makeAdditionalTheoryPrediction (mtmt, err_mtmt_up, err_mtmt_down, mtmu, dora
 ################################
 
 
-def makeRatioPlots (mass_2, ratio_12, ratio_32, ratio_42, err_12_up, err_12_down, err_32_up, err_32_down, err_42_up, err_42_down, mtmt_2):
+def makeRatioPlots (mass_2, ratio_12, ratio_32, ratio_42, err_12_up, err_12_down, err_32_up, err_32_down, err_42_up, err_42_down, mtmt_2, err_12_up_noscale, err_12_down_noscale, err_32_up_noscale, err_32_down_noscale, err_42_up_noscale, err_42_down_noscale):
 
+    print 'testMD', err_12_up, err_12_down, err_32_up, err_32_down, err_42_up, err_42_down
+    print 'testMD', err_12_up_noscale, err_12_down_noscale, err_32_up_noscale, err_32_down_noscale, err_42_up_noscale, err_42_down_noscale
+    
     graph = TGraphAsymmErrors(3)
     
     graph.SetPoint(0,cnst.mu_1,ratio_12)
@@ -723,6 +726,7 @@ def makeRatioPlots (mass_2, ratio_12, ratio_32, ratio_42, err_12_up, err_12_down
     graph.SetPoint(3,cnst.mu_4,ratio_42)
     graph.SetPointError(3,0,0,err_42_down,err_42_up)
 
+    
     theoryFileName = 'theory_prediction'
     l = makeTheoryPrediction(theoryFileName,mass_2)
     th = TGraph(theoryFileName+'.txt')    
@@ -773,6 +777,12 @@ def makeRatioPlots (mass_2, ratio_12, ratio_32, ratio_42, err_12_up, err_12_down
     g1.SetMarkerStyle(4)
     # g1.SetMarkerSize(1.5)
 
+    graph_noscale = g.Clone()
+    graph_noscale.SetPointError(0,0,0,err_12_down_noscale,err_12_up_noscale)
+    graph_noscale.SetPointError(1,0,0,err_32_down_noscale,err_32_up_noscale)
+    graph_noscale.SetPointError(2,0,0,err_42_down_noscale,err_42_up_noscale)
+
+    
     leg = TLegend(.17,.19,.78,.39)
     # leg2 = TLegend(.17,.2,.8,.4)
     leg.SetBorderSize(0)
@@ -792,6 +802,7 @@ def makeRatioPlots (mass_2, ratio_12, ratio_32, ratio_42, err_12_up, err_12_down
     leg.Draw('same')
     th_band.Draw('f same')
     g.Draw('psame')
+    graph_noscale.Draw('psame')
     latexLabel1.DrawLatex(0.16, 0.94, "CMS")
     latexLabel2.DrawLatex(0.75, 0.94, "35.9 fb^{-1} (13 TeV)")
     latexLabel2.DrawLatex(0.63, 0.83, "ABMP16_5_nlo PDF set")
@@ -2033,7 +2044,7 @@ def getTotalError (ratios_and_errs, pdf_errors, extr_errors, scale_errors):
     err_4_2_up = (err_ratio_4_2**2 + err_pdf_4_2_up**2 + err_extr_4_2_up **2)**.5
     err_4_2_down = (err_ratio_4_2**2 + err_pdf_4_2_down**2 + err_extr_4_2_down **2)**.5
 
-    if do_scale_variations:
+    if do_scale_variations and scale_errors != []:
         err_scale_1_2_up = scale_errors[0]
         err_scale_1_2_down = scale_errors[1]
         err_scale_3_2_up = scale_errors[2]
@@ -2048,50 +2059,53 @@ def getTotalError (ratios_and_errs, pdf_errors, extr_errors, scale_errors):
         err_4_2_up = (err_4_2_up**2 + err_scale_4_2_up**2)**.5
         err_4_2_down = (err_4_2_down**2 + err_scale_4_2_down**2)**.5
 
+    silent = False
+    if do_scale_variations and scale_errors == []: silent = True
 
-    print '\n'
-    print 'uncertainties ratio_1_2:\n'
-    print 'experimental =', round(err_ratio_1_2,3), round(err_ratio_1_2/ratio_1_2*100.,2), '%'
-    print 'PDFs up =', round(err_pdf_1_2_up,3), round(err_pdf_1_2_up/ratio_1_2*100.,2), '%'
-    print 'PDFs down =', round(err_pdf_1_2_down,3), round(err_pdf_1_2_down/ratio_1_2*100.,2), '%'
-    print 'extr up =', round(err_extr_1_2_up,3), round(err_extr_1_2_up/ratio_1_2*100.,2), '%'
-    print 'extr down =', round(err_extr_1_2_down,3), round(err_extr_1_2_down/ratio_1_2*100.,2), '%'
-    if do_scale_variations:
-        print 'scale up =', round(err_scale_1_2_up,3), round(err_scale_1_2_up/ratio_1_2*100.,2), '%'
-        print 'scale down =', round(err_scale_1_2_down,3), round(err_scale_1_2_down/ratio_1_2*100.,2), '%'
-    print 'total =', round(.5*(err_1_2_up+err_1_2_down)/ratio_1_2*100.,2), '%'
+    if not silent:
+        print '\n'
+        print 'uncertainties ratio_1_2:\n'
+        print 'experimental =', round(err_ratio_1_2,3), round(err_ratio_1_2/ratio_1_2*100.,2), '%'
+        print 'PDFs up =', round(err_pdf_1_2_up,3), round(err_pdf_1_2_up/ratio_1_2*100.,2), '%'
+        print 'PDFs down =', round(err_pdf_1_2_down,3), round(err_pdf_1_2_down/ratio_1_2*100.,2), '%'
+        print 'extr up =', round(err_extr_1_2_up,3), round(err_extr_1_2_up/ratio_1_2*100.,2), '%'
+        print 'extr down =', round(err_extr_1_2_down,3), round(err_extr_1_2_down/ratio_1_2*100.,2), '%'
+        if do_scale_variations:
+            print 'scale up =', round(err_scale_1_2_up,3), round(err_scale_1_2_up/ratio_1_2*100.,2), '%'
+            print 'scale down =', round(err_scale_1_2_down,3), round(err_scale_1_2_down/ratio_1_2*100.,2), '%'
+        print 'total =', round(.5*(err_1_2_up+err_1_2_down)/ratio_1_2*100.,2), '%'
 
-    print '\n'
-    print 'uncertainties ratio_3_2:\n'
-    print 'experimental =', round(err_ratio_3_2,3), round(err_ratio_3_2/ratio_3_2*100.,2), '%'
-    print 'PDFs up =', round(err_pdf_3_2_up,3), round(err_pdf_3_2_up/ratio_3_2*100.,2), '%'
-    print 'PDFs down =', round(err_pdf_3_2_down,3), round(err_pdf_3_2_down/ratio_3_2*100.,2), '%'
-    print 'extr up =', round(err_extr_3_2_up,3), round(err_extr_3_2_up/ratio_3_2*100.,2), '%'
-    print 'extr down =', round(err_extr_3_2_down,3), round(err_extr_3_2_down/ratio_3_2*100.,2), '%'
-    if do_scale_variations:
-        print 'scale up =', round(err_scale_3_2_up,3), round(err_scale_3_2_up/ratio_3_2*100.,2), '%'
-        print 'scale down =', round(err_scale_3_2_down,3), round(err_scale_3_2_down/ratio_3_2*100.,2), '%'
-    print 'total =', round(.5*(err_3_2_up+err_3_2_down)/ratio_3_2*100.,2), '%'
-    print '\n'
+        print '\n'
+        print 'uncertainties ratio_3_2:\n'
+        print 'experimental =', round(err_ratio_3_2,3), round(err_ratio_3_2/ratio_3_2*100.,2), '%'
+        print 'PDFs up =', round(err_pdf_3_2_up,3), round(err_pdf_3_2_up/ratio_3_2*100.,2), '%'
+        print 'PDFs down =', round(err_pdf_3_2_down,3), round(err_pdf_3_2_down/ratio_3_2*100.,2), '%'
+        print 'extr up =', round(err_extr_3_2_up,3), round(err_extr_3_2_up/ratio_3_2*100.,2), '%'
+        print 'extr down =', round(err_extr_3_2_down,3), round(err_extr_3_2_down/ratio_3_2*100.,2), '%'
+        if do_scale_variations:
+            print 'scale up =', round(err_scale_3_2_up,3), round(err_scale_3_2_up/ratio_3_2*100.,2), '%'
+            print 'scale down =', round(err_scale_3_2_down,3), round(err_scale_3_2_down/ratio_3_2*100.,2), '%'
+        print 'total =', round(.5*(err_3_2_up+err_3_2_down)/ratio_3_2*100.,2), '%'
+        print '\n'
 
-    print '\n'
-    print 'uncertainties ratio_4_2:\n'
-    print 'experimental =', round(err_ratio_4_2,3), round(err_ratio_4_2/ratio_4_2*100.,2), '%'
-    print 'PDFs up =', round(err_pdf_4_2_up,3), round(err_pdf_4_2_up/ratio_4_2*100.,2), '%'
-    print 'PDFs down =', round(err_pdf_4_2_down,3), round(err_pdf_4_2_down/ratio_4_2*100.,2), '%'
-    print 'extr up =', round(err_extr_4_2_up,3), round(err_extr_4_2_up/ratio_4_2*100.,2), '%'
-    print 'extr down =', round(err_extr_4_2_down,3), round(err_extr_4_2_down/ratio_4_2*100.,2), '%'
-    if do_scale_variations:
-        print 'scale up =', round(err_scale_4_2_up,3), round(err_scale_4_2_up/ratio_4_2*100.,2), '%'
-        print 'scale down =', round(err_scale_4_2_down,3), round(err_scale_4_2_down/ratio_4_2*100.,2), '%'
-    print 'total =', round(.5*(err_4_2_up+err_4_2_down)/ratio_4_2*100.,2), '%'
-    print '\n'
+        print '\n'
+        print 'uncertainties ratio_4_2:\n'
+        print 'experimental =', round(err_ratio_4_2,3), round(err_ratio_4_2/ratio_4_2*100.,2), '%'
+        print 'PDFs up =', round(err_pdf_4_2_up,3), round(err_pdf_4_2_up/ratio_4_2*100.,2), '%'
+        print 'PDFs down =', round(err_pdf_4_2_down,3), round(err_pdf_4_2_down/ratio_4_2*100.,2), '%'
+        print 'extr up =', round(err_extr_4_2_up,3), round(err_extr_4_2_up/ratio_4_2*100.,2), '%'
+        print 'extr down =', round(err_extr_4_2_down,3), round(err_extr_4_2_down/ratio_4_2*100.,2), '%'
+        if do_scale_variations:
+            print 'scale up =', round(err_scale_4_2_up,3), round(err_scale_4_2_up/ratio_4_2*100.,2), '%'
+            print 'scale down =', round(err_scale_4_2_down,3), round(err_scale_4_2_down/ratio_4_2*100.,2), '%'
+        print 'total =', round(.5*(err_4_2_up+err_4_2_down)/ratio_4_2*100.,2), '%'
+        print '\n'
 
-    print 'results:\n'
-    print 'ratio_1_2 =', round(ratio_1_2,3), '+' , round(err_1_2_up,3), '-' , round(err_1_2_down,3)
-    print 'ratio_3_2 =', round(ratio_3_2,3), '+' , round(err_3_2_up,3), '-' , round(err_3_2_down,3)
-    print 'ratio_4_2 =', round(ratio_4_2,3), '+' , round(err_4_2_up,3), '-' , round(err_4_2_down,3) 
-    print
+        print 'results:\n'
+        print 'ratio_1_2 =', round(ratio_1_2,3), '+' , round(err_1_2_up,3), '-' , round(err_1_2_down,3)
+        print 'ratio_3_2 =', round(ratio_3_2,3), '+' , round(err_3_2_up,3), '-' , round(err_3_2_down,3)
+        print 'ratio_4_2 =', round(ratio_4_2,3), '+' , round(err_4_2_up,3), '-' , round(err_4_2_down,3) 
+        print
     
     return [err_1_2_up, err_1_2_down, err_3_2_up, err_3_2_down, err_4_2_up, err_4_2_down]
 
@@ -2145,8 +2159,16 @@ def execute():
     err_3_2_down = tot_err[3]
     err_4_2_up = tot_err[4]
     err_4_2_down = tot_err[5]
+
+    err_noscale = getTotalError (ratios_and_errs, pdf_errors, extr_errors, [])
+    err_1_2_up_noscale = err_noscale[0]
+    err_1_2_down_noscale = err_noscale[1]
+    err_3_2_up_noscale = err_noscale[2]
+    err_3_2_down_noscale = err_noscale[3]
+    err_4_2_up_noscale = err_noscale[4]
+    err_4_2_down_noscale = err_noscale[5]
     
-    makeRatioPlots (mass_and_err_2[0], ratio_1_2, ratio_3_2, ratio_4_2, err_1_2_up, err_1_2_down, err_3_2_up, err_3_2_down, err_4_2_up, err_4_2_down, mass_and_err_2[2])
+    makeRatioPlots (mass_and_err_2[0], ratio_1_2, ratio_3_2, ratio_4_2, err_1_2_up, err_1_2_down, err_3_2_up, err_3_2_down, err_4_2_up, err_4_2_down, mass_and_err_2[2],err_1_2_up_noscale,err_1_2_down_noscale,err_3_2_up_noscale,err_3_2_down_noscale,err_4_2_up_noscale,err_4_2_down_noscale)
     # makeChi2Test (mass_and_err_2[0], ratio_1_2, ratio_3_2, ratio_4_2, err_1_2_up, err_1_2_down, err_3_2_up, err_3_2_down, err_4_2_up, err_4_2_down)
     if estimate_contribs : estimateSystContributions (ratio_1_2,ratio_3_2,ratio_4_2)
     if estimate_significance : makeChi2Significance (mass_and_err_2[0], ratio_1_2, ratio_3_2, ratio_4_2, err_ratio_1_2, err_ratio_3_2, err_ratio_4_2)
