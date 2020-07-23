@@ -1607,12 +1607,12 @@ def makeChi2Significance(mass2, ratio12, ratio32, ratio42, err12, err32, err42):
 
                 if facscale_only:
                     if renscale != 'nominal': continue
-
                 
                 mass_and_err_1 = getMassAndError(1, renscale, facscale, 0 , 0 , 0 )
                 mass_and_err_2 = getMassAndError(2, renscale, facscale, 0 , 0 , 0 )
                 mass_and_err_3 = getMassAndError(3, renscale, facscale, 0 , 0 , 0 )
                 mass_and_err_4 = getMassAndError(4, renscale, facscale, 0 , 0 , 0 )
+
 
                 ratios_and_errs = getRatios(mass_and_err_1[0], mass_and_err_2[0], mass_and_err_3[0], mass_and_err_4[0],
                                             mass_and_err_1[1], mass_and_err_2[1], mass_and_err_3[1], mass_and_err_4[1])
