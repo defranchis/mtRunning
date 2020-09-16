@@ -12,11 +12,12 @@ from ROOT import TString, TH2D, TRandom3, TF1, TGraph, TLine, TCanvas, TGraphErr
 from variables import xsec_1, xsec_2, xsec_3, xsec_4
 
 rt.gStyle.SetOptStat(0000)
+rt.gROOT.SetBatch(True)
 
 # options
 
 estimate_contribs = False
-estimate_significance = True
+estimate_significance = False
 
 do_scale_variations = False # not yet well tested
 facscale_only = False # only factorization scale
@@ -430,6 +431,8 @@ def getMassAndError(mttbin, murscale, mufscale, pdfmember, extrapol, contrib):
         fitted_mass = funct.GetX(0,cnst.mass_fine_min,cnst.mass_fine_max)
         fitted_mass_up = funct.GetX(-1,fitted_mass-3,fitted_mass+3)
         fitted_mass_down = funct.GetX(1,fitted_mass-3,fitted_mass+3)
+
+        
     #now evolve masses
     mu = 0
     if mttbin == 1 : mu = cnst.mu_1
@@ -682,7 +685,7 @@ def makeAdditionalTheoryPrediction (mtmt, err_mtmt_up, err_mtmt_down, mtmu, dora
     ru.append((mtmt+err_mtmt_up)/mtmu)
     rd.append((mtmt-err_mtmt_down)/mtmu)
     scales.append(mtmt)
-    for scale in range(int(mtmt)+1,1050+1):
+    for scale in range(int(mtmt)+1,1050/2+1):
         ratio = mtmt2mtmu(mtmt,scale)/mtmu
         ratio_up = mtmt2mtmu(mtmt+err_mtmt_up,scale)/mtmu
         ratio_down = mtmt2mtmu(mtmt-err_mtmt_down,scale)/mtmu
@@ -758,6 +761,12 @@ def makeRatioPlots (mass_2, ratio_12, ratio_32, ratio_42, err_12_up, err_12_down
     latexLabel2.SetTextSize(0.04)
     latexLabel2.SetTextFont(42)
     latexLabel2.SetNDC()
+
+    latexLabel3 = TLatex()
+    latexLabel3.SetTextSize(0.045)
+    latexLabel3.SetTextFont(42)
+    latexLabel3.SetNDC()
+
     
     graph.GetXaxis().SetTitle('#mu [GeV]')
     graph.GetXaxis().SetTitleSize(0.06)
@@ -790,6 +799,8 @@ def makeRatioPlots (mass_2, ratio_12, ratio_32, ratio_42, err_12_up, err_12_down
     leg.AddEntry(graph,'NLO extraction from differential #sigma_{t#bar{t}}','pe')
     leg.AddEntry(g1,'Reference scale #mu_{ref}','p')
     leg.AddEntry(th,'One-loop RGE, n_{f} = 5, #alpha_{s}(m_{Z}) = 0.1191','l')
+
+    g.GetYaxis().SetRangeUser(.83,1.07)
     
     c = TCanvas()
     c.SetLeftMargin(0.13)
@@ -804,11 +815,14 @@ def makeRatioPlots (mass_2, ratio_12, ratio_32, ratio_42, err_12_up, err_12_down
     th_band.Draw('f same')
     g.Draw('psame')
     graph_noscale.Draw('psame')
-    # latexLabel1.DrawLatex(0.16, 0.94, "CMS")
+    latexLabel1.DrawLatex(0.16, 0.94, "CMS")
     latexLabel2.DrawLatex(0.75, 0.94, "35.9 fb^{-1} (13 TeV)")
     latexLabel2.DrawLatex(0.63, 0.83, "ABMP16_5_nlo PDF set")
     latexLabel2.DrawLatex(0.63, 0.78, "#mu_{ref} = "+str(int(cnst.mu_2))+" GeV")
     latexLabel2.DrawLatex(0.63, 0.73, "#mu_{0} = #mu_{ref}")
+    latexLabel3.DrawLatex(0.26, 0.94 , "#it{Supplementary}")
+    latexLabel2.DrawLatex(0.48, 0.94 , "arXiv:1909.09193")
+    # latexLabel2.DrawLatex(0.48, 0.94 , "PLB 803 (2020) 135263")
     if preliminary: latexLabel2.DrawLatex(0.205, 0.92 , "#it{Preliminary}")
     
     outdir = 'plots_running'
@@ -1294,7 +1308,7 @@ def makeMassPlots(mtmu_1, err_1, mtmt_1, mtmu_2, err_2, mtmt_2, mtmu_3, err_3, m
     gr_add_scale.SetLineColor(rt.kBlue)
 
     
-    gr_band.SetMinimum(110)
+    gr_band.SetMinimum(120)
     gr_band.SetMaximum(175)
     graph_scale.Draw('p same')
     gr_add_scale.Draw('p same')
@@ -1790,7 +1804,9 @@ def throwToyCrossSections(r):
     xsec_2 = y[1]
     xsec_3 = y[2]
     xsec_4 = y[3]
-        
+
+    # print xsec_1, xsec_2, xsec_3, xsec_4
+    
     return
 
 
