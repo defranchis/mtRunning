@@ -11,6 +11,7 @@ from ROOT import TString, TH2D, TRandom3, TF1, TGraph, TLine, TCanvas, TGraphErr
 from variables import xsec_1, xsec_2, xsec_3, xsec_4
 
 rt.gStyle.SetOptStat(0000)
+rt.gROOT.SetBatch(True)
 
 # options
 
@@ -627,7 +628,7 @@ def makeTheoryPrediction(outfile, mass_2):
     r_down = []
     out = open(outfile+'.txt','w')
         
-    for scale in range(350,1050+1):
+    for scale in range(350/2,1050/2+1):
         ratio = mtmu2mtmu(mass_2, cnst.mu_2, scale, 'nominal')/mass_2
         out.write(str(scale)+'\t'+str(ratio)+'\n')
         ratio_up = mtmu2mtmu(mass_2, cnst.mu_2, scale, 'up')/mass_2
@@ -775,6 +776,7 @@ def makeRatioPlots (mass_2, ratio_12, ratio_32, ratio_42, err_12_up, err_12_down
     latexLabel2.DrawLatex(0.63, 0.78, "#mu_{ref} = "+str(int(cnst.mu_2))+" GeV")
     latexLabel2.DrawLatex(0.63, 0.73, "#mu_{0} = #mu_{ref}")
     if preliminary: latexLabel2.DrawLatex(0.205, 0.92 , "#it{Preliminary}")
+    latexLabel2.DrawLatex(0.205, 0.92 , "#it{Internal}")
     
     outdir = 'plots_running'
     if not os.path.exists(outdir):
