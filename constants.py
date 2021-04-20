@@ -8,14 +8,14 @@ nloops = 1
 n_mttbins = 4
 
 mass_min = 140.0
-mass_max = 172.0
+mass_max = 180.0
 mass_fine_min = 152.0
 mass_fine_max = 172.0
 
-mu_1 = 383.95
-mu_2 = 476.19
-mu_3 = 644.27
-mu_4 = 1024
+mu_1 = 384/2
+mu_2 = 476/2
+mu_3 = 644/2
+mu_4 = 1024/2
 
 mtmt = 162.91
 mtmt_err = 1.59

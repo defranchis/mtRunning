@@ -2,6 +2,7 @@
 import os
 import rundec
 import numpy as np
+from scipy import special
 
 import ROOT as rt
 import variables as var
@@ -11,6 +12,7 @@ from ROOT import TString, TH2D, TRandom3, TF1, TGraph, TLine, TCanvas, TGraphErr
 from variables import xsec_1, xsec_2, xsec_3, xsec_4
 
 rt.gStyle.SetOptStat(0000)
+rt.gROOT.SetBatch(True)
 
 # options
 
@@ -18,7 +20,7 @@ estimate_contribs = False
 estimate_significance = False
 
 do_scale_variations = False # not yet well tested
-facscale_only = True # only factorization scale
+facscale_only = False # only factorization scale
 
 ntoys = 0
 replace_corr = False  #recommended: False
@@ -42,8 +44,7 @@ def setMasses():
     i_mass = cnst.mass_max
     while i_mass >= cnst.mass_min :
         mass_v.append(i_mass)
-        if i_mass <= cnst.mass_fine_max and i_mass > cnst.mass_fine_min+.1 : i_mass-= 0.2
-        else : i_mass-= 0.5
+        i_mass-= 0.5
     return
 
 
@@ -96,6 +97,11 @@ def mtmu2mtmu (mtmu1, mu1, mu2, var_as):
     return mtmu2
 
 
+def getHorribleString(scale):
+    tmp = TString(str(scale)).ReplaceAll('.','_.')
+    return tmp
+
+
 ################################
 
 # "formInputFileName" provides the correct name of the .dat input file from where
@@ -104,26 +110,31 @@ def mtmu2mtmu (mtmu1, mu1, mu2, var_as):
 ################################
 
 
-def formInputFileName ( renscale, facscale, topmass, pdfmember ):
+def formInputFileName ( murscale, mufscale, topmass, pdfmember, mttbin ):
 
+    if mttbin == 1: mtscale = cnst.mu_1
+    elif mttbin == 2: mtscale = cnst.mu_2
+    elif mttbin == 3: mtscale = cnst.mu_3
+    else: mtscale = cnst.mu_4
+    
     infileName='tt_tot_tot_ABMP16_'
     infileName+=str(pdfmember)+'_'
     if pdfmember<10 : infileName+='_'
 
-    topmassevolved=topmass
-    if renscale != topmass:
-        topmassevolved = float(int(mtmt2mtmu(topmass, renscale)*10))/10.
+    topmassevolved = float(int(mtmt2mtmu(topmass, mtscale)*10))/10.
+    renscale = topmassevolved
+    facscale = topmassevolved
 
-    origrenscale = renscale
-    origfacscale = facscale
+    if murscale == 'up' : renscale *= 2.
+    elif murscale == 'down' : renscale = round(renscale/2.,1)
+
+    if mufscale == 'up' : facscale *= 2.
+    elif mufscale == 'down' : facscale = round(facscale/2.,1)
+
     
-    if renscale != topmass or facscale != topmass:
-        if TString(str(topmass)).EndsWith('.6') or TString(str(topmass)).EndsWith('.2'):
-            renscale = round(renscale-.1,1)
-            facscale = round(facscale-.1,1)
-        elif TString(str(topmass)).EndsWith('.5'):
-            if renscale < topmass : renscale = round(renscale-.1,1)
-            if facscale < topmass : facscale = round(facscale-.1,1)
+    if TString(str(topmass)).EndsWith('.6') or TString(str(topmass)).EndsWith('.2'):
+        renscale = round(renscale-.1,1)
+        facscale = round(facscale-.1,1)
         
     if renscale>=1000 : infileName+='_'
     if renscale>=100 : infileName+=str(renscale)+'_'
@@ -139,25 +150,46 @@ def formInputFileName ( renscale, facscale, topmass, pdfmember ):
         facstr.ReplaceAll('.','_.')
         infileName+=str(facstr)+'_'
 
-    tempname = infileName
+    infileName += str(round(mtscale,1))+'_'
     infileName+=str(topmassevolved)+'_MSbar.dat'
+    
 
-    #because of some problem with MCFM outputs...
-    if renscale == facscale == topmass:
-        if TString(infileName).Contains('.2') :
-            infileName=str(TString(infileName).ReplaceAll('.2','.1'))
-        if TString(infileName).Contains('.6') :
-            infileName=str(TString(infileName).ReplaceAll('.6','.5'))
-    elif origrenscale == topmass:
-        if TString(infileName).Contains('.2_MS') :
-            infileName=str(TString(infileName).ReplaceAll('.2_MS','.1_MS'))
-        if TString(infileName).Contains('.6_MS') :
-            infileName=str(TString(infileName).ReplaceAll('.6_MS','.5_MS'))
+    if murscale == 'nominal' and mufscale == 'nominal':
+        if not os.path.isfile('out_scales_new/'+infileName):
+            infileName = str(TString(infileName).ReplaceAll(str(topmassevolved),str(topmassevolved+.1)))
+        if not os.path.isfile('out_scales_new/'+infileName):
+            infileName = str(TString(infileName).ReplaceAll(str(topmassevolved+.1),str(topmassevolved-.1)))
     else:
-        if not os.path.isfile('out_scales/'+infileName):
-            infileName=tempname+str(topmassevolved+.1)+'_MSbar.dat'
-        if not os.path.isfile('out_scales/'+infileName):
-            infileName=tempname+str(topmassevolved-.1)+'_MSbar.dat'
+        if not os.path.isfile('out_scales_new/'+infileName):
+            tmpname = infileName
+            tmpname= str(TString(tmpname).ReplaceAll(str(renscale),str(topmassevolved)))
+            tmpname= str(TString(tmpname).ReplaceAll(str(facscale),str(topmassevolved)))
+            tmpname= str(TString(tmpname).ReplaceAll(getHorribleString(renscale),str(topmassevolved)))
+            tmpname= str(TString(tmpname).ReplaceAll(getHorribleString(facscale),str(topmassevolved)))
+            if not os.path.isfile('out_scales_new/'+tmpname):
+                tmpname = str(TString(tmpname).ReplaceAll(str(topmassevolved),str(topmassevolved+.1)))
+                if os.path.isfile('out_scales_new/'+tmpname): infileName = str(TString(infileName).ReplaceAll(str(topmassevolved),str(topmassevolved+.1)))
+                else: infileName = str(TString(infileName).ReplaceAll(str(topmassevolved),str(topmassevolved-.1)))
+            origname = infileName
+                        
+            if not os.path.isfile('out_scales_new/'+infileName):
+                if murscale!='nominal': infileName = str(TString(infileName).ReplaceAll(str(renscale),str(renscale+.1)))
+                if mufscale!='nominal': infileName = str(TString(infileName).ReplaceAll(str(facscale),str(facscale+.1)))
+            if not os.path.isfile('out_scales_new/'+infileName):
+                if murscale!='nominal': infileName = str(TString(infileName).ReplaceAll(str(renscale+.1),str(renscale+.2)))
+                if mufscale!='nominal': infileName = str(TString(infileName).ReplaceAll(str(facscale+.1),str(facscale+.2)))
+            if not os.path.isfile('out_scales_new/'+infileName):
+                if murscale!='nominal': infileName = str(TString(infileName).ReplaceAll(str(renscale+.2),str(renscale-.1)))
+                if mufscale!='nominal': infileName = str(TString(infileName).ReplaceAll(str(facscale+.2),str(facscale-.1)))
+            if not os.path.isfile('out_scales_new/'+infileName):
+                if murscale!='nominal': infileName = str(TString(origname).ReplaceAll(getHorribleString(renscale),getHorribleString(renscale+.1)))
+                if mufscale!='nominal': infileName = str(TString(origname).ReplaceAll(getHorribleString(facscale),getHorribleString(facscale+.1)))
+            if not os.path.isfile('out_scales_new/'+infileName):
+                if murscale!='nominal': infileName = str(TString(origname).ReplaceAll(getHorribleString(renscale),getHorribleString(renscale-.1)))
+                if mufscale!='nominal': infileName = str(TString(origname).ReplaceAll(getHorribleString(facscale),getHorribleString(facscale-.1)))
+
+
+    
     return infileName
 
 
@@ -172,9 +204,8 @@ def formInputFileName ( renscale, facscale, topmass, pdfmember ):
 
 def readCalculatedXsec (renscale, facscale, topmass, pdfmember, mttbin):
 
-    fileName = formInputFileName ( renscale, facscale, topmass, pdfmember )
-    if renscale == topmass and facscale == topmass: indir = 'out_hists/'
-    else : indir = 'out_scales/'
+    fileName = formInputFileName ( renscale, facscale, topmass, pdfmember, mttbin )
+    indir = 'out_scales_new/'
     if not os.path.isfile(indir+fileName):
         print 'WARNING: missing file', fileName
         return 0
@@ -233,13 +264,7 @@ def getMassAndError(mttbin, murscale, mufscale, pdfmember, extrapol, contrib):
     mass_v_sel = []
     for mass in mass_v:
         i+=1
-        mur = mass
-        muf = mass
-        if (murscale == 'up')   : mur*=2
-        if (mufscale == 'up')   : muf*=2
-        if (murscale == 'down') : mur*=.5
-        if (mufscale == 'down') : muf*=.5
-        xsec_th = readCalculatedXsec(mur, muf, mass, pdfmember, mttbin) 
+        xsec_th = readCalculatedXsec(murscale, mufscale, mass, pdfmember, mttbin) 
         if xsec_th == 0 : continue # torm
         xsec_exp = xsec_err = 0.
         if mttbin == 1 : 
@@ -391,7 +416,7 @@ def getMassAndError(mttbin, murscale, mufscale, pdfmember, extrapol, contrib):
             c.SaveAs(outdir+'/test_mtt'+str(mttbin)+'_mur_'+murscale+'_muf_'+mufscale+'_extrapol'+str(extrapol)+'_pdf'+str(pdfmember)+'_contrib'+str(contrib)+'.root')
 
     if mttbin==3:
-        fitted_mass = funct.GetX(0,cnst.mass_min-30,cnst.mass_max+30)
+        fitted_mass = funct.GetX(0,cnst.mass_min-10,cnst.mass_max+10)
         fitted_mass_up = funct.GetX(-1,fitted_mass-10,fitted_mass+10)
         fitted_mass_down = funct.GetX(1,fitted_mass-10,fitted_mass+10)
     elif mttbin==2:
@@ -406,6 +431,8 @@ def getMassAndError(mttbin, murscale, mufscale, pdfmember, extrapol, contrib):
         fitted_mass = funct.GetX(0,cnst.mass_fine_min,cnst.mass_fine_max)
         fitted_mass_up = funct.GetX(-1,fitted_mass-3,fitted_mass+3)
         fitted_mass_down = funct.GetX(1,fitted_mass-3,fitted_mass+3)
+
+        
     #now evolve masses
     mu = 0
     if mttbin == 1 : mu = cnst.mu_1
@@ -533,7 +560,7 @@ def getPDFUncertainties (central_ratio_1_2, central_ratio_3_2, central_ratio_4_2
         mass_and_err_2 = getMassAndError(2, 'nominal', 'nominal', pdf , 0 , 0 )
         mass_and_err_3 = getMassAndError(3, 'nominal', 'nominal', pdf , 0 , 0 )
         mass_and_err_4 = getMassAndError(4, 'nominal', 'nominal', pdf , 0 , 0 )
-        
+
         ratios_and_errs = getRatios(mass_and_err_1[0], mass_and_err_2[0], mass_and_err_3[0], mass_and_err_4[0],
                                     mass_and_err_1[1], mass_and_err_2[1], mass_and_err_3[1], mass_and_err_4[1])
 
@@ -627,7 +654,7 @@ def makeTheoryPrediction(outfile, mass_2):
     r_down = []
     out = open(outfile+'.txt','w')
         
-    for scale in range(350,1050+1):
+    for scale in range(350/2,1050/2):
         ratio = mtmu2mtmu(mass_2, cnst.mu_2, scale, 'nominal')/mass_2
         out.write(str(scale)+'\t'+str(ratio)+'\n')
         ratio_up = mtmu2mtmu(mass_2, cnst.mu_2, scale, 'up')/mass_2
@@ -658,7 +685,7 @@ def makeAdditionalTheoryPrediction (mtmt, err_mtmt_up, err_mtmt_down, mtmu, dora
     ru.append((mtmt+err_mtmt_up)/mtmu)
     rd.append((mtmt-err_mtmt_down)/mtmu)
     scales.append(mtmt)
-    for scale in range(int(mtmt)+1,1050+1):
+    for scale in range(int(mtmt)+1,1050/2+1):
         ratio = mtmt2mtmu(mtmt,scale)/mtmu
         ratio_up = mtmt2mtmu(mtmt+err_mtmt_up,scale)/mtmu
         ratio_down = mtmt2mtmu(mtmt-err_mtmt_down,scale)/mtmu
@@ -684,8 +711,11 @@ def makeAdditionalTheoryPrediction (mtmt, err_mtmt_up, err_mtmt_down, mtmu, dora
 ################################
 
 
-def makeRatioPlots (mass_2, ratio_12, ratio_32, ratio_42, err_12_up, err_12_down, err_32_up, err_32_down, err_42_up, err_42_down, mtmt_2):
+def makeRatioPlots (mass_2, ratio_12, ratio_32, ratio_42, err_12_up, err_12_down, err_32_up, err_32_down, err_42_up, err_42_down, mtmt_2, err_12_up_noscale, err_12_down_noscale, err_32_up_noscale, err_32_down_noscale, err_42_up_noscale, err_42_down_noscale):
 
+    # print 'testMD', err_12_up, err_12_down, err_32_up, err_32_down, err_42_up, err_42_down
+    # print 'testMD', err_12_up_noscale, err_12_down_noscale, err_32_up_noscale, err_32_down_noscale, err_42_up_noscale, err_42_down_noscale
+    
     graph = TGraphAsymmErrors(3)
     
     graph.SetPoint(0,cnst.mu_1,ratio_12)
@@ -700,6 +730,7 @@ def makeRatioPlots (mass_2, ratio_12, ratio_32, ratio_42, err_12_up, err_12_down
     graph.SetPoint(3,cnst.mu_4,ratio_42)
     graph.SetPointError(3,0,0,err_42_down,err_42_up)
 
+    
     theoryFileName = 'theory_prediction'
     l = makeTheoryPrediction(theoryFileName,mass_2)
     th = TGraph(theoryFileName+'.txt')    
@@ -730,6 +761,12 @@ def makeRatioPlots (mass_2, ratio_12, ratio_32, ratio_42, err_12_up, err_12_down
     latexLabel2.SetTextSize(0.04)
     latexLabel2.SetTextFont(42)
     latexLabel2.SetNDC()
+
+    latexLabel3 = TLatex()
+    latexLabel3.SetTextSize(0.045)
+    latexLabel3.SetTextFont(42)
+    latexLabel3.SetNDC()
+
     
     graph.GetXaxis().SetTitle('#mu [GeV]')
     graph.GetXaxis().SetTitleSize(0.06)
@@ -750,12 +787,20 @@ def makeRatioPlots (mass_2, ratio_12, ratio_32, ratio_42, err_12_up, err_12_down
     g1.SetMarkerStyle(4)
     # g1.SetMarkerSize(1.5)
 
+    graph_noscale = g.Clone()
+    graph_noscale.SetPointError(0,0,0,err_12_down_noscale,err_12_up_noscale)
+    graph_noscale.SetPointError(1,0,0,err_32_down_noscale,err_32_up_noscale)
+    graph_noscale.SetPointError(2,0,0,err_42_down_noscale,err_42_up_noscale)
+
+    
     leg = TLegend(.17,.19,.78,.39)
     # leg2 = TLegend(.17,.2,.8,.4)
     leg.SetBorderSize(0)
     leg.AddEntry(graph,'NLO extraction from differential #sigma_{t#bar{t}}','pe')
     leg.AddEntry(g1,'Reference scale #mu_{ref}','p')
     leg.AddEntry(th,'One-loop RGE, n_{f} = 5, #alpha_{s}(m_{Z}) = 0.1191','l')
+
+    g.GetYaxis().SetRangeUser(.83,1.07)
     
     c = TCanvas()
     c.SetLeftMargin(0.13)
@@ -769,11 +814,15 @@ def makeRatioPlots (mass_2, ratio_12, ratio_32, ratio_42, err_12_up, err_12_down
     leg.Draw('same')
     th_band.Draw('f same')
     g.Draw('psame')
+    graph_noscale.Draw('psame')
     latexLabel1.DrawLatex(0.16, 0.94, "CMS")
     latexLabel2.DrawLatex(0.75, 0.94, "35.9 fb^{-1} (13 TeV)")
     latexLabel2.DrawLatex(0.63, 0.83, "ABMP16_5_nlo PDF set")
     latexLabel2.DrawLatex(0.63, 0.78, "#mu_{ref} = "+str(int(cnst.mu_2))+" GeV")
     latexLabel2.DrawLatex(0.63, 0.73, "#mu_{0} = #mu_{ref}")
+    latexLabel3.DrawLatex(0.26, 0.94 , "#it{Supplementary}")
+    latexLabel2.DrawLatex(0.48, 0.94 , "arXiv:1909.09193")
+    # latexLabel2.DrawLatex(0.48, 0.94 , "PLB 803 (2020) 135263")
     if preliminary: latexLabel2.DrawLatex(0.205, 0.92 , "#it{Preliminary}")
     
     outdir = 'plots_running'
@@ -1095,7 +1144,7 @@ def getTotalMassError(mtmu_1, err_1, mtmu_2, err_2, mtmu_3, err_3, mtmu_4, err_4
 
     print
     print 'mt_mu1 =', round(mtmu_1,1), '+/-', round(err_1,1), '(fit) +', round(pdf_error_1_up,1), '-', round(pdf_error_1_down,1), '(pdf) +', round(extr_error_1_up,1), '-', round(extr_error_1_down,1), '(extr) +', round(scale_error_1_up,1), '-', round(scale_error_1_down,1), '(scale) =', round(mtmu_1,1), '+', round(tot_error_1_up,1), '-', round(tot_error_1_down,1), '(tot)' 
-    print 'mt_mu1 =', round(mtmu_2,1), '+/-', round(err_2,1), '(fit) +', round(pdf_error_2_up,1), '-', round(pdf_error_2_down,1), '(pdf) +', round(extr_error_2_up,1), '-', round(extr_error_2_down,1), '(extr) +', round(scale_error_2_up,1), '-', round(scale_error_2_down,1), '(scale) =', round(mtmu_2,1), '+', round(tot_error_2_up,1), '-', round(tot_error_2_down,1), '(tot)' 
+    print 'mt_mu2 =', round(mtmu_2,1), '+/-', round(err_2,1), '(fit) +', round(pdf_error_2_up,1), '-', round(pdf_error_2_down,1), '(pdf) +', round(extr_error_2_up,1), '-', round(extr_error_2_down,1), '(extr) +', round(scale_error_2_up,1), '-', round(scale_error_2_down,1), '(scale) =', round(mtmu_2,1), '+', round(tot_error_2_up,1), '-', round(tot_error_2_down,1), '(tot)' 
     print 'mt_mu3 =', round(mtmu_3,1), '+/-', round(err_3,1), '(fit) +', round(pdf_error_3_up,1), '-', round(pdf_error_3_down,1), '(pdf) +', round(extr_error_3_up,1), '-', round(extr_error_3_down,1), '(extr) +', round(scale_error_3_up,1), '-', round(scale_error_3_down,1), '(scale) =', round(mtmu_3,1), '+', round(tot_error_3_up,1), '-', round(tot_error_3_down,1), '(tot)' 
     print 'mt_mu4 =', round(mtmu_4,1), '+/-', round(err_4,1), '(fit) +', round(pdf_error_4_up,1), '-', round(pdf_error_4_down,1), '(pdf) +', round(extr_error_4_up,1), '-', round(extr_error_4_down,1), '(extr) +', round(scale_error_4_up,1), '-', round(scale_error_4_down,1), '(scale) =', round(mtmu_4,1), '+', round(tot_error_4_up,1), '-', round(tot_error_4_down,1), '(tot)' 
     print
@@ -1185,7 +1234,6 @@ def makeMassPlots(mtmu_1, err_1, mtmt_1, mtmu_2, err_2, mtmt_2, mtmu_3, err_3, m
     gr_band.GetXaxis().SetLabelSize(0.05)
 
     
-    #fromhere
     latexLabel1 = TLatex()
     latexLabel1.SetTextSize(0.06)
     latexLabel1.SetNDC()
@@ -1260,7 +1308,7 @@ def makeMassPlots(mtmu_1, err_1, mtmt_1, mtmu_2, err_2, mtmt_2, mtmu_3, err_3, m
     gr_add_scale.SetLineColor(rt.kBlue)
 
     
-    gr_band.SetMinimum(110)
+    gr_band.SetMinimum(120)
     gr_band.SetMaximum(175)
     graph_scale.Draw('p same')
     gr_add_scale.Draw('p same')
@@ -1566,44 +1614,52 @@ def makeChi2Significance(mass2, ratio12, ratio32, ratio42, err12, err32, err42):
     err_scale_down = 0
 
     if do_scale_variations:
-        for facscale in ['up','down']:
-            mass_and_err_1 = getMassAndError(1, 'nominal', facscale, 0 , 0 , 0 )
-            mass_and_err_2 = getMassAndError(2, 'nominal', facscale, 0 , 0 , 0 )
-            mass_and_err_3 = getMassAndError(3, 'nominal', facscale, 0 , 0 , 0 )
-            mass_and_err_4 = getMassAndError(4, 'nominal', facscale, 0 , 0 , 0 )
+        for facscale in ['nominal','up','down']:
+            for renscale in ['nominal', 'up','down']:
+                if renscale == 'up' and facscale == 'down': continue
+                if renscale == 'down' and facscale == 'up': continue
 
-            ratios_and_errs = getRatios(mass_and_err_1[0], mass_and_err_2[0], mass_and_err_3[0], mass_and_err_4[0],
-                                        mass_and_err_1[1], mass_and_err_2[1], mass_and_err_3[1], mass_and_err_4[1])
+                if facscale_only:
+                    if renscale != 'nominal': continue
+                
+                mass_and_err_1 = getMassAndError(1, renscale, facscale, 0 , 0 , 0 )
+                mass_and_err_2 = getMassAndError(2, renscale, facscale, 0 , 0 , 0 )
+                mass_and_err_3 = getMassAndError(3, renscale, facscale, 0 , 0 , 0 )
+                mass_and_err_4 = getMassAndError(4, renscale, facscale, 0 , 0 , 0 )
+
+
+                ratios_and_errs = getRatios(mass_and_err_1[0], mass_and_err_2[0], mass_and_err_3[0], mass_and_err_4[0],
+                                            mass_and_err_1[1], mass_and_err_2[1], mass_and_err_3[1], mass_and_err_4[1])
             
-            ratio_1_2 = ratios_and_errs[0]
-            ratio_3_2 = ratios_and_errs[1]
-            ratio_4_2 = ratios_and_errs[2]
-            err_ratio_1_2 = ratios_and_errs[3]
-            err_ratio_3_2 = ratios_and_errs[4]
-            err_ratio_4_2 = ratios_and_errs[5]
+                ratio_1_2 = ratios_and_errs[0]
+                ratio_3_2 = ratios_and_errs[1]
+                ratio_4_2 = ratios_and_errs[2]
+                err_ratio_1_2 = ratios_and_errs[3]
+                err_ratio_3_2 = ratios_and_errs[4]
+                err_ratio_4_2 = ratios_and_errs[5]
 
-            graph.Clear()
+                graph.Clear()
         
-            for x in range(0,31):
-                x = x/10.
-                th1 = x*(th_ratio12-1)+1
-                th3 = x*(th_ratio32-1)+1
-                th4 = x*(th_ratio42-1)+1
-                chi2 = getChi2Uncorrelated(ratio_1_2, th1, err_ratio_1_2, ratio_3_2, th3, err_ratio_3_2, ratio_4_2, th4, err_ratio_4_2)
-                graph.SetPoint(int(x*10),x,chi2)
+                for x in range(0,31):
+                    x = x/10.
+                    th1 = x*(th_ratio12-1)+1
+                    th3 = x*(th_ratio32-1)+1
+                    th4 = x*(th_ratio42-1)+1
+                    chi2 = getChi2Uncorrelated(ratio_1_2, th1, err_ratio_1_2, ratio_3_2, th3, err_ratio_3_2, ratio_4_2, th4, err_ratio_4_2)
+                    graph.SetPoint(int(x*10),x,chi2)
 
-            funct = TF1('funct','pol2(0)',0,3)
-            graph.Fit(funct,'q','',0,3)
+                funct = TF1('funct','pol2(0)',0,3)
+                graph.Fit(funct,'q','',0,3)
 
-            c.Clear()
-            graph.Draw('ap')
-            c.Print(outdir+'/chi2_significance_facscale_'+facscale+'.png')
+                c.Clear()
+                graph.Draw('ap')
+                c.Print(outdir+'/chi2_significance_facscale_'+facscale+'.png')
             
-            xmin_SCALE = funct.GetMinimumX()
-            err_scale = (xmin-xmin_SCALE)**2
+                xmin_SCALE = funct.GetMinimumX()
+                err_scale = (xmin-xmin_SCALE)**2
         
-            if xmin_SCALE > xmin : err_scale_up += err_scale
-            else : err_scale_down += err_scale
+                if xmin_SCALE > xmin : err_scale_up += err_scale
+                else : err_scale_down += err_scale
 
         err_scale_up = err_scale_up**.5
         err_scale_down = err_scale_up**.5
@@ -1628,6 +1684,12 @@ def makeChi2Significance(mass2, ratio12, ratio32, ratio42, err12, err32, err42):
     print 'significance wrt no running =', round(xmin/err_down,2)
     print 'significance wrt RGE =', round((xmin-1)/err_down,2)
     print
+
+    v = xmin/err_down
+    erf = special.erf(v/2**.5)
+    excl = (1-(1-erf)/2)*100
+
+    print 'no running excluded at', round(excl,1), '% C.L.' 
 
 
 
@@ -1742,7 +1804,9 @@ def throwToyCrossSections(r):
     xsec_2 = y[1]
     xsec_3 = y[2]
     xsec_4 = y[3]
-        
+
+    # print xsec_1, xsec_2, xsec_3, xsec_4
+    
     return
 
 
@@ -2010,7 +2074,7 @@ def getTotalError (ratios_and_errs, pdf_errors, extr_errors, scale_errors):
     err_4_2_up = (err_ratio_4_2**2 + err_pdf_4_2_up**2 + err_extr_4_2_up **2)**.5
     err_4_2_down = (err_ratio_4_2**2 + err_pdf_4_2_down**2 + err_extr_4_2_down **2)**.5
 
-    if do_scale_variations:
+    if do_scale_variations and scale_errors != []:
         err_scale_1_2_up = scale_errors[0]
         err_scale_1_2_down = scale_errors[1]
         err_scale_3_2_up = scale_errors[2]
@@ -2025,50 +2089,53 @@ def getTotalError (ratios_and_errs, pdf_errors, extr_errors, scale_errors):
         err_4_2_up = (err_4_2_up**2 + err_scale_4_2_up**2)**.5
         err_4_2_down = (err_4_2_down**2 + err_scale_4_2_down**2)**.5
 
+    silent = False
+    if do_scale_variations and scale_errors == []: silent = True
 
-    print '\n'
-    print 'uncertainties ratio_1_2:\n'
-    print 'experimental =', round(err_ratio_1_2,3), round(err_ratio_1_2/ratio_1_2*100.,2), '%'
-    print 'PDFs up =', round(err_pdf_1_2_up,3), round(err_pdf_1_2_up/ratio_1_2*100.,2), '%'
-    print 'PDFs down =', round(err_pdf_1_2_down,3), round(err_pdf_1_2_down/ratio_1_2*100.,2), '%'
-    print 'extr up =', round(err_extr_1_2_up,3), round(err_extr_1_2_up/ratio_1_2*100.,2), '%'
-    print 'extr down =', round(err_extr_1_2_down,3), round(err_extr_1_2_down/ratio_1_2*100.,2), '%'
-    if do_scale_variations:
-        print 'scale up =', round(err_scale_1_2_up,3), round(err_scale_1_2_up/ratio_1_2*100.,2), '%'
-        print 'scale down =', round(err_scale_1_2_down,3), round(err_scale_1_2_down/ratio_1_2*100.,2), '%'
-    print 'total =', round(.5*(err_1_2_up+err_1_2_down)/ratio_1_2*100.,2), '%'
+    if not silent:
+        print '\n'
+        print 'uncertainties ratio_1_2:\n'
+        print 'experimental =', round(err_ratio_1_2,3), round(err_ratio_1_2/ratio_1_2*100.,2), '%'
+        print 'PDFs up =', round(err_pdf_1_2_up,3), round(err_pdf_1_2_up/ratio_1_2*100.,2), '%'
+        print 'PDFs down =', round(err_pdf_1_2_down,3), round(err_pdf_1_2_down/ratio_1_2*100.,2), '%'
+        print 'extr up =', round(err_extr_1_2_up,3), round(err_extr_1_2_up/ratio_1_2*100.,2), '%'
+        print 'extr down =', round(err_extr_1_2_down,3), round(err_extr_1_2_down/ratio_1_2*100.,2), '%'
+        if do_scale_variations:
+            print 'scale up =', round(err_scale_1_2_up,3), round(err_scale_1_2_up/ratio_1_2*100.,2), '%'
+            print 'scale down =', round(err_scale_1_2_down,3), round(err_scale_1_2_down/ratio_1_2*100.,2), '%'
+        print 'total =', round(.5*(err_1_2_up+err_1_2_down)/ratio_1_2*100.,2), '%'
 
-    print '\n'
-    print 'uncertainties ratio_3_2:\n'
-    print 'experimental =', round(err_ratio_3_2,3), round(err_ratio_3_2/ratio_3_2*100.,2), '%'
-    print 'PDFs up =', round(err_pdf_3_2_up,3), round(err_pdf_3_2_up/ratio_3_2*100.,2), '%'
-    print 'PDFs down =', round(err_pdf_3_2_down,3), round(err_pdf_3_2_down/ratio_3_2*100.,2), '%'
-    print 'extr up =', round(err_extr_3_2_up,3), round(err_extr_3_2_up/ratio_3_2*100.,2), '%'
-    print 'extr down =', round(err_extr_3_2_down,3), round(err_extr_3_2_down/ratio_3_2*100.,2), '%'
-    if do_scale_variations:
-        print 'scale up =', round(err_scale_3_2_up,3), round(err_scale_3_2_up/ratio_3_2*100.,2), '%'
-        print 'scale down =', round(err_scale_3_2_down,3), round(err_scale_3_2_down/ratio_3_2*100.,2), '%'
-    print 'total =', round(.5*(err_3_2_up+err_3_2_down)/ratio_3_2*100.,2), '%'
-    print '\n'
+        print '\n'
+        print 'uncertainties ratio_3_2:\n'
+        print 'experimental =', round(err_ratio_3_2,3), round(err_ratio_3_2/ratio_3_2*100.,2), '%'
+        print 'PDFs up =', round(err_pdf_3_2_up,3), round(err_pdf_3_2_up/ratio_3_2*100.,2), '%'
+        print 'PDFs down =', round(err_pdf_3_2_down,3), round(err_pdf_3_2_down/ratio_3_2*100.,2), '%'
+        print 'extr up =', round(err_extr_3_2_up,3), round(err_extr_3_2_up/ratio_3_2*100.,2), '%'
+        print 'extr down =', round(err_extr_3_2_down,3), round(err_extr_3_2_down/ratio_3_2*100.,2), '%'
+        if do_scale_variations:
+            print 'scale up =', round(err_scale_3_2_up,3), round(err_scale_3_2_up/ratio_3_2*100.,2), '%'
+            print 'scale down =', round(err_scale_3_2_down,3), round(err_scale_3_2_down/ratio_3_2*100.,2), '%'
+        print 'total =', round(.5*(err_3_2_up+err_3_2_down)/ratio_3_2*100.,2), '%'
+        print '\n'
 
-    print '\n'
-    print 'uncertainties ratio_4_2:\n'
-    print 'experimental =', round(err_ratio_4_2,3), round(err_ratio_4_2/ratio_4_2*100.,2), '%'
-    print 'PDFs up =', round(err_pdf_4_2_up,3), round(err_pdf_4_2_up/ratio_4_2*100.,2), '%'
-    print 'PDFs down =', round(err_pdf_4_2_down,3), round(err_pdf_4_2_down/ratio_4_2*100.,2), '%'
-    print 'extr up =', round(err_extr_4_2_up,3), round(err_extr_4_2_up/ratio_4_2*100.,2), '%'
-    print 'extr down =', round(err_extr_4_2_down,3), round(err_extr_4_2_down/ratio_4_2*100.,2), '%'
-    if do_scale_variations:
-        print 'scale up =', round(err_scale_4_2_up,3), round(err_scale_4_2_up/ratio_4_2*100.,2), '%'
-        print 'scale down =', round(err_scale_4_2_down,3), round(err_scale_4_2_down/ratio_4_2*100.,2), '%'
-    print 'total =', round(.5*(err_4_2_up+err_4_2_down)/ratio_4_2*100.,2), '%'
-    print '\n'
+        print '\n'
+        print 'uncertainties ratio_4_2:\n'
+        print 'experimental =', round(err_ratio_4_2,3), round(err_ratio_4_2/ratio_4_2*100.,2), '%'
+        print 'PDFs up =', round(err_pdf_4_2_up,3), round(err_pdf_4_2_up/ratio_4_2*100.,2), '%'
+        print 'PDFs down =', round(err_pdf_4_2_down,3), round(err_pdf_4_2_down/ratio_4_2*100.,2), '%'
+        print 'extr up =', round(err_extr_4_2_up,3), round(err_extr_4_2_up/ratio_4_2*100.,2), '%'
+        print 'extr down =', round(err_extr_4_2_down,3), round(err_extr_4_2_down/ratio_4_2*100.,2), '%'
+        if do_scale_variations:
+            print 'scale up =', round(err_scale_4_2_up,3), round(err_scale_4_2_up/ratio_4_2*100.,2), '%'
+            print 'scale down =', round(err_scale_4_2_down,3), round(err_scale_4_2_down/ratio_4_2*100.,2), '%'
+        print 'total =', round(.5*(err_4_2_up+err_4_2_down)/ratio_4_2*100.,2), '%'
+        print '\n'
 
-    print 'results:\n'
-    print 'ratio_1_2 =', round(ratio_1_2,3), '+' , round(err_1_2_up,3), '-' , round(err_1_2_down,3)
-    print 'ratio_3_2 =', round(ratio_3_2,3), '+' , round(err_3_2_up,3), '-' , round(err_3_2_down,3)
-    print 'ratio_4_2 =', round(ratio_4_2,3), '+' , round(err_4_2_up,3), '-' , round(err_4_2_down,3) 
-    print
+        print 'results:\n'
+        print 'ratio_1_2 =', round(ratio_1_2,3), '+' , round(err_1_2_up,3), '-' , round(err_1_2_down,3)
+        print 'ratio_3_2 =', round(ratio_3_2,3), '+' , round(err_3_2_up,3), '-' , round(err_3_2_down,3)
+        print 'ratio_4_2 =', round(ratio_4_2,3), '+' , round(err_4_2_up,3), '-' , round(err_4_2_down,3) 
+        print
     
     return [err_1_2_up, err_1_2_down, err_3_2_up, err_3_2_down, err_4_2_up, err_4_2_down]
 
@@ -2122,8 +2189,16 @@ def execute():
     err_3_2_down = tot_err[3]
     err_4_2_up = tot_err[4]
     err_4_2_down = tot_err[5]
+
+    err_noscale = getTotalError (ratios_and_errs, pdf_errors, extr_errors, [])
+    err_1_2_up_noscale = err_noscale[0]
+    err_1_2_down_noscale = err_noscale[1]
+    err_3_2_up_noscale = err_noscale[2]
+    err_3_2_down_noscale = err_noscale[3]
+    err_4_2_up_noscale = err_noscale[4]
+    err_4_2_down_noscale = err_noscale[5]
     
-    makeRatioPlots (mass_and_err_2[0], ratio_1_2, ratio_3_2, ratio_4_2, err_1_2_up, err_1_2_down, err_3_2_up, err_3_2_down, err_4_2_up, err_4_2_down, mass_and_err_2[2])
+    makeRatioPlots (mass_and_err_2[0], ratio_1_2, ratio_3_2, ratio_4_2, err_1_2_up, err_1_2_down, err_3_2_up, err_3_2_down, err_4_2_up, err_4_2_down, mass_and_err_2[2],err_1_2_up_noscale,err_1_2_down_noscale,err_3_2_up_noscale,err_3_2_down_noscale,err_4_2_up_noscale,err_4_2_down_noscale)
     # makeChi2Test (mass_and_err_2[0], ratio_1_2, ratio_3_2, ratio_4_2, err_1_2_up, err_1_2_down, err_3_2_up, err_3_2_down, err_4_2_up, err_4_2_down)
     if estimate_contribs : estimateSystContributions (ratio_1_2,ratio_3_2,ratio_4_2)
     if estimate_significance : makeChi2Significance (mass_and_err_2[0], ratio_1_2, ratio_3_2, ratio_4_2, err_ratio_1_2, err_ratio_3_2, err_ratio_4_2)
