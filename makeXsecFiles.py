@@ -84,7 +84,7 @@ def mtmu2mtmu (mtmu1, mu1, mu2, var_as):
     elif var_as == 'up' : alphaS = cnst.asMZ+cnst.err_as
     elif var_as == 'down' : alphaS = cnst.asMZ-cnst.err_as
     else :
-        print 'ERROR!'
+        print('ERROR!')
         return 0
 
     crd = rundec.CRunDec()
@@ -207,7 +207,7 @@ def readCalculatedXsec (renscale, facscale, topmass, pdfmember, mttbin):
     fileName = formInputFileName ( renscale, facscale, topmass, pdfmember, mttbin )
     indir = 'out_scales_new/'
     if not os.path.isfile(indir+fileName):
-        print 'WARNING: missing file', fileName
+        print('WARNING: missing file', fileName)
         return 0
     infile = open(indir+fileName,'r')
     lines = infile.read().splitlines()
@@ -441,8 +441,8 @@ def getMassAndError(mttbin, murscale, mufscale, pdfmember, extrapol, contrib):
     elif mttbin == 4 : mu = cnst.mu_4
 
     if murscale=='nominal' and mufscale=='nominal' and pdfmember==0 and extrapol==0 and contrib==0 and not doingToys:
-        print
-        print 'mt(mt) bin', mttbin,'=', round(fitted_mass,2), round(fitted_mass_up-fitted_mass,2), round(fitted_mass-fitted_mass_down,2)
+        print()
+        print('mt(mt) bin', mttbin,'=', round(fitted_mass,2), round(fitted_mass_up-fitted_mass,2), round(fitted_mass-fitted_mass_down,2))
 
     fitted_mtmt = fitted_mass
     fitted_mass = mtmt2mtmu(fitted_mass, mu)
@@ -450,7 +450,7 @@ def getMassAndError(mttbin, murscale, mufscale, pdfmember, extrapol, contrib):
     fitted_mass_down = mtmt2mtmu(fitted_mass_down, mu)
 
     if murscale=='nominal' and mufscale=='nominal' and pdfmember==0 and extrapol==0 and contrib==0 and not doingToys:
-        print 'mt(mu) bin', mttbin,'=', round(fitted_mass,2), round(fitted_mass_up-fitted_mass,2), round(fitted_mass-fitted_mass_down,2)
+        print('mt(mu) bin', mttbin,'=', round(fitted_mass,2), round(fitted_mass_up-fitted_mass,2), round(fitted_mass-fitted_mass_down,2))
         
     fitted_mass_err = (fitted_mass_up - fitted_mass_down)/2
 
@@ -600,8 +600,8 @@ def getExtrapolationUncertainties (central_ratio_1_2, central_ratio_3_2, central
     err_extr_down_3_2 = 0
     err_extr_down_4_2 = 0
 
-    print '\n'
-    print 'extrapol', 'ratio_1_2', 'ratio_3_2', 'ratio_4_2\n'
+    print('\n')
+    print('extrapol', 'ratio_1_2', 'ratio_3_2', 'ratio_4_2\n')
     for extr in range(-len(var.extr_1_up),len(var.extr_1_up)+1) :
         if extr == 0 : continue
 
@@ -624,7 +624,7 @@ def getExtrapolationUncertainties (central_ratio_1_2, central_ratio_3_2, central
         name = var.extr_name[abs(extr)-1]
         if extr>0 : name+='_up'
         else : name+='_down'
-        print name, round(100*(ratio_1_2/central_ratio_1_2-1),2), round(100*(ratio_3_2/central_ratio_3_2-1),2), round(100*(ratio_4_2/central_ratio_4_2-1),2), '%'
+        print(name, round(100*(ratio_1_2/central_ratio_1_2-1),2), round(100*(ratio_3_2/central_ratio_3_2-1),2), round(100*(ratio_4_2/central_ratio_4_2-1),2), '%')
 
         
         if ratio_1_2 > central_ratio_1_2 : err_extr_up_1_2 += err_extr_1_2
@@ -1142,12 +1142,12 @@ def getTotalMassError(mtmu_1, err_1, mtmu_2, err_2, mtmu_3, err_3, mtmu_4, err_4
     tot_error_4_down = (pdf_error_4_down**2 + extr_error_4_down**2 + scale_error_4_down**2 + err_4**2)**.5
 
 
-    print
-    print 'mt_mu1 =', round(mtmu_1,1), '+/-', round(err_1,1), '(fit) +', round(pdf_error_1_up,1), '-', round(pdf_error_1_down,1), '(pdf) +', round(extr_error_1_up,1), '-', round(extr_error_1_down,1), '(extr) +', round(scale_error_1_up,1), '-', round(scale_error_1_down,1), '(scale) =', round(mtmu_1,1), '+', round(tot_error_1_up,1), '-', round(tot_error_1_down,1), '(tot)' 
-    print 'mt_mu2 =', round(mtmu_2,1), '+/-', round(err_2,1), '(fit) +', round(pdf_error_2_up,1), '-', round(pdf_error_2_down,1), '(pdf) +', round(extr_error_2_up,1), '-', round(extr_error_2_down,1), '(extr) +', round(scale_error_2_up,1), '-', round(scale_error_2_down,1), '(scale) =', round(mtmu_2,1), '+', round(tot_error_2_up,1), '-', round(tot_error_2_down,1), '(tot)' 
-    print 'mt_mu3 =', round(mtmu_3,1), '+/-', round(err_3,1), '(fit) +', round(pdf_error_3_up,1), '-', round(pdf_error_3_down,1), '(pdf) +', round(extr_error_3_up,1), '-', round(extr_error_3_down,1), '(extr) +', round(scale_error_3_up,1), '-', round(scale_error_3_down,1), '(scale) =', round(mtmu_3,1), '+', round(tot_error_3_up,1), '-', round(tot_error_3_down,1), '(tot)' 
-    print 'mt_mu4 =', round(mtmu_4,1), '+/-', round(err_4,1), '(fit) +', round(pdf_error_4_up,1), '-', round(pdf_error_4_down,1), '(pdf) +', round(extr_error_4_up,1), '-', round(extr_error_4_down,1), '(extr) +', round(scale_error_4_up,1), '-', round(scale_error_4_down,1), '(scale) =', round(mtmu_4,1), '+', round(tot_error_4_up,1), '-', round(tot_error_4_down,1), '(tot)' 
-    print
+    print()
+    print('mt_mu1 =', round(mtmu_1,1), '+/-', round(err_1,1), '(fit) +', round(pdf_error_1_up,1), '-', round(pdf_error_1_down,1), '(pdf) +', round(extr_error_1_up,1), '-', round(extr_error_1_down,1), '(extr) +', round(scale_error_1_up,1), '-', round(scale_error_1_down,1), '(scale) =', round(mtmu_1,1), '+', round(tot_error_1_up,1), '-', round(tot_error_1_down,1), '(tot)') 
+    print('mt_mu2 =', round(mtmu_2,1), '+/-', round(err_2,1), '(fit) +', round(pdf_error_2_up,1), '-', round(pdf_error_2_down,1), '(pdf) +', round(extr_error_2_up,1), '-', round(extr_error_2_down,1), '(extr) +', round(scale_error_2_up,1), '-', round(scale_error_2_down,1), '(scale) =', round(mtmu_2,1), '+', round(tot_error_2_up,1), '-', round(tot_error_2_down,1), '(tot)') 
+    print('mt_mu3 =', round(mtmu_3,1), '+/-', round(err_3,1), '(fit) +', round(pdf_error_3_up,1), '-', round(pdf_error_3_down,1), '(pdf) +', round(extr_error_3_up,1), '-', round(extr_error_3_down,1), '(extr) +', round(scale_error_3_up,1), '-', round(scale_error_3_down,1), '(scale) =', round(mtmu_3,1), '+', round(tot_error_3_up,1), '-', round(tot_error_3_down,1), '(tot)') 
+    print('mt_mu4 =', round(mtmu_4,1), '+/-', round(err_4,1), '(fit) +', round(pdf_error_4_up,1), '-', round(pdf_error_4_down,1), '(pdf) +', round(extr_error_4_up,1), '-', round(extr_error_4_down,1), '(extr) +', round(scale_error_4_up,1), '-', round(scale_error_4_down,1), '(scale) =', round(mtmu_4,1), '+', round(tot_error_4_up,1), '-', round(tot_error_4_down,1), '(tot)') 
+    print()
     
     return [fit_error_1_up, fit_error_1_down, fit_error_2_up, fit_error_2_down, fit_error_3_up, fit_error_3_down, fit_error_4_up, fit_error_4_down,
             tot_error_1_up, tot_error_1_down, tot_error_2_up, tot_error_2_down, tot_error_3_up, tot_error_3_down, tot_error_4_up, tot_error_4_down]
@@ -1388,8 +1388,8 @@ def makeChi2Test(mass2, ratio12, ratio32, ratio42, err12_up, err12_down, err32_u
     th_ratio32 = mtmu2mtmu(mass2, cnst.mu_2, cnst.mu_3, 'nominal')/mass2
     th_ratio42 = mtmu2mtmu(mass2, cnst.mu_2, cnst.mu_4, 'nominal')/mass2
 
-    print 
-    print 'theory:', round(th_ratio12,3), round(th_ratio32,3), round(th_ratio42,3)
+    print() 
+    print('theory:', round(th_ratio12,3), round(th_ratio32,3), round(th_ratio42,3))
 
     if ratio12 > th_ratio12: err12 = err12_down
     else: err12 = err12_up
@@ -1403,12 +1403,12 @@ def makeChi2Test(mass2, ratio12, ratio32, ratio42, err12_up, err12_down, err32_u
     chi2_no_run = ((ratio12-1)/err12)**2 + ((ratio32-1)/err32)**2 + ((ratio42-1)/err42)**2
     chi2_run = ((ratio12-th_ratio12)/err12)**2 + ((ratio32-th_ratio32)/err32)**2 + ((ratio42-th_ratio42)/err42)**2
 
-    print 
-    print 'chi2: running hp', round(chi2_run,2)
-    print 'chi2: no running hp', round(chi2_no_run,2)
-    print
-    print 'significance =', round((chi2_no_run-chi2_run)**.5,2)
-    print
+    print() 
+    print('chi2: running hp', round(chi2_run,2))
+    print('chi2: no running hp', round(chi2_no_run,2))
+    print()
+    print('significance =', round((chi2_no_run-chi2_run)**.5,2))
+    print()
     
     
     return
@@ -1460,8 +1460,8 @@ def makeChi2Significance(mass2, ratio12, ratio32, ratio42, err12, err32, err42):
     global ntoys
     if ntoys < 10000 :
         if ntoys < 1000: ntoys = 1000
-        print '\nWARNING: running only', ntoys ,'toys for estimate of correlations.'
-        print '         It is recommended to run at least 10.000'
+        print('\nWARNING: running only', ntoys ,'toys for estimate of correlations.')
+        print('         It is recommended to run at least 10.000')
     estimateMassCorrelations()
         
     graph = TGraph()
@@ -1674,22 +1674,22 @@ def makeChi2Significance(mass2, ratio12, ratio32, ratio42, err12, err32, err42):
 
 
         
-    print
+    print()
     if do_scale_variations:
-        print 'xmin =', round(xmin,2), '+/-' ,round(err,2), '(exp)', '+' ,round(err_pdf_up,2), '-', round(err_pdf_down,2), '(PDF)', '+' ,round(err_extr_up,2), '-', round(err_extr_down,2), '(extr)' , '+' ,round(err_scale_up,2), '-', round(err_scale_down,2), '(scale)'
-    else : print 'xmin =', round(xmin,2), '+/-' ,round(err,2), '(exp)', '+' ,round(err_pdf_up,2), '-', round(err_pdf_down,2), '(PDF)', '+' ,round(err_extr_up,2), '-', round(err_extr_down,2), '(extr)'
-    print
-    print 'xmin =', round(xmin,2), '+' ,round(err_up,2), '-', round(err_down,2), '(tot)'
-    print
-    print 'significance wrt no running =', round(xmin/err_down,2)
-    print 'significance wrt RGE =', round((xmin-1)/err_down,2)
-    print
+        print('xmin =', round(xmin,2), '+/-' ,round(err,2), '(exp)', '+' ,round(err_pdf_up,2), '-', round(err_pdf_down,2), '(PDF)', '+' ,round(err_extr_up,2), '-', round(err_extr_down,2), '(extr)' , '+' ,round(err_scale_up,2), '-', round(err_scale_down,2), '(scale)')
+    else : print('xmin =', round(xmin,2), '+/-' ,round(err,2), '(exp)', '+' ,round(err_pdf_up,2), '-', round(err_pdf_down,2), '(PDF)', '+' ,round(err_extr_up,2), '-', round(err_extr_down,2), '(extr)')
+    print()
+    print('xmin =', round(xmin,2), '+' ,round(err_up,2), '-', round(err_down,2), '(tot)')
+    print()
+    print('significance wrt no running =', round(xmin/err_down,2))
+    print('significance wrt RGE =', round((xmin-1)/err_down,2))
+    print()
 
     v = xmin/err_down
     erf = special.erf(v/2**.5)
     excl = (1-(1-erf)/2)*100
 
-    print 'no running excluded at', round(excl,1), '% C.L.' 
+    print('no running excluded at', round(excl,1), '% C.L.') 
 
 
 
@@ -1710,8 +1710,8 @@ def makeChi2Significance(mass2, ratio12, ratio32, ratio42, err12, err32, err42):
 
 def estimateSystContributions(central_ratio_1_2, central_ratio_3_2, central_ratio_4_2):
     
-    print
-    print 'contribs\n'
+    print()
+    print('contribs\n')
 
     for contrib in range(1,len(var.contribs_1)+1) :
 
@@ -1761,9 +1761,9 @@ def estimateSystContributions(central_ratio_1_2, central_ratio_3_2, central_rati
 
         
         if contr_1_2 > 0.2 or contr_3_2 > 0.3 or contr_4_2 > 0.5:
-            print var.syst_names[contrib-1], round(contr_1_2,2), round(contr_3_2,2), round(contr_4_2,2)
+            print(var.syst_names[contrib-1], round(contr_1_2,2), round(contr_3_2,2), round(contr_4_2,2))
 
-    print
+    print()
     
     return
 
@@ -1857,10 +1857,10 @@ def estimateMassCorrelations():
     r_corr_13 = TH2D('r_corr_13','r_corr_13',100,0.9,1.15,100,0.65,1.15)
     r_corr_23 = TH2D('r_corr_23','r_corr_23',100,0.8,1.15,100,0.65,1.15)
     
-    print '\nexecuting', ntoys, 'toys\n'
+    print('\nexecuting', ntoys, 'toys\n')
 
     for i in range(1,ntoys+1):
-        if i%1000==0 or i==1: print 'toy n.', i
+        if i%1000==0 or i==1: print('toy n.', i)
         throwToyCrossSections(r)
 
         xs12.Fill(xsec_1,xsec_2)
@@ -2025,21 +2025,21 @@ def estimateMassCorrelations():
     rcorr_13 = r_corr_13.GetCorrelationFactor()
     rcorr_23 = r_corr_23.GetCorrelationFactor()
     
-    print
+    print()
     if replace_corr:
-        print 'new corr_1_2 =', round(var.corr_1_2,3)
-        print 'new corr_3_2 =', round(var.corr_3_2,3)
-        print 'new corr_4_2 =', round(var.corr_4_2,3)
+        print('new corr_1_2 =', round(var.corr_1_2,3))
+        print('new corr_3_2 =', round(var.corr_3_2,3))
+        print('new corr_4_2 =', round(var.corr_4_2,3))
     else:    
-        print 'estimated corr_1_2 =', round(m12.GetCorrelationFactor(),3)
-        print 'estimated corr_3_2 =', round(m32.GetCorrelationFactor(),3)
-        print 'estimated corr_4_2 =', round(m42.GetCorrelationFactor(),3)
-        print
+        print('estimated corr_1_2 =', round(m12.GetCorrelationFactor(),3))
+        print('estimated corr_3_2 =', round(m32.GetCorrelationFactor(),3))
+        print('estimated corr_4_2 =', round(m42.GetCorrelationFactor(),3))
+        print()
         
-    print 'estimated corr ratios 1_2  =', round(r_corr_12.GetCorrelationFactor(),3)
-    print 'estimated corr ratios 1_3  =', round(r_corr_13.GetCorrelationFactor(),3)
-    print 'estimated corr ratios 2_3  =', round(r_corr_23.GetCorrelationFactor(),3)
-    print
+    print('estimated corr ratios 1_2  =', round(r_corr_12.GetCorrelationFactor(),3))
+    print('estimated corr ratios 1_3  =', round(r_corr_13.GetCorrelationFactor(),3))
+    print('estimated corr ratios 2_3  =', round(r_corr_23.GetCorrelationFactor(),3))
+    print()
     
     return
 
@@ -2093,49 +2093,49 @@ def getTotalError (ratios_and_errs, pdf_errors, extr_errors, scale_errors):
     if do_scale_variations and scale_errors == []: silent = True
 
     if not silent:
-        print '\n'
-        print 'uncertainties ratio_1_2:\n'
-        print 'experimental =', round(err_ratio_1_2,3), round(err_ratio_1_2/ratio_1_2*100.,2), '%'
-        print 'PDFs up =', round(err_pdf_1_2_up,3), round(err_pdf_1_2_up/ratio_1_2*100.,2), '%'
-        print 'PDFs down =', round(err_pdf_1_2_down,3), round(err_pdf_1_2_down/ratio_1_2*100.,2), '%'
-        print 'extr up =', round(err_extr_1_2_up,3), round(err_extr_1_2_up/ratio_1_2*100.,2), '%'
-        print 'extr down =', round(err_extr_1_2_down,3), round(err_extr_1_2_down/ratio_1_2*100.,2), '%'
+        print('\n')
+        print('uncertainties ratio_1_2:\n')
+        print('experimental =', round(err_ratio_1_2,3), round(err_ratio_1_2/ratio_1_2*100.,2), '%')
+        print('PDFs up =', round(err_pdf_1_2_up,3), round(err_pdf_1_2_up/ratio_1_2*100.,2), '%')
+        print('PDFs down =', round(err_pdf_1_2_down,3), round(err_pdf_1_2_down/ratio_1_2*100.,2), '%')
+        print('extr up =', round(err_extr_1_2_up,3), round(err_extr_1_2_up/ratio_1_2*100.,2), '%')
+        print('extr down =', round(err_extr_1_2_down,3), round(err_extr_1_2_down/ratio_1_2*100.,2), '%')
         if do_scale_variations:
-            print 'scale up =', round(err_scale_1_2_up,3), round(err_scale_1_2_up/ratio_1_2*100.,2), '%'
-            print 'scale down =', round(err_scale_1_2_down,3), round(err_scale_1_2_down/ratio_1_2*100.,2), '%'
-        print 'total =', round(.5*(err_1_2_up+err_1_2_down)/ratio_1_2*100.,2), '%'
+            print('scale up =', round(err_scale_1_2_up,3), round(err_scale_1_2_up/ratio_1_2*100.,2), '%')
+            print('scale down =', round(err_scale_1_2_down,3), round(err_scale_1_2_down/ratio_1_2*100.,2), '%')
+        print('total =', round(.5*(err_1_2_up+err_1_2_down)/ratio_1_2*100.,2), '%')
 
-        print '\n'
-        print 'uncertainties ratio_3_2:\n'
-        print 'experimental =', round(err_ratio_3_2,3), round(err_ratio_3_2/ratio_3_2*100.,2), '%'
-        print 'PDFs up =', round(err_pdf_3_2_up,3), round(err_pdf_3_2_up/ratio_3_2*100.,2), '%'
-        print 'PDFs down =', round(err_pdf_3_2_down,3), round(err_pdf_3_2_down/ratio_3_2*100.,2), '%'
-        print 'extr up =', round(err_extr_3_2_up,3), round(err_extr_3_2_up/ratio_3_2*100.,2), '%'
-        print 'extr down =', round(err_extr_3_2_down,3), round(err_extr_3_2_down/ratio_3_2*100.,2), '%'
+        print('\n')
+        print('uncertainties ratio_3_2:\n')
+        print('experimental =', round(err_ratio_3_2,3), round(err_ratio_3_2/ratio_3_2*100.,2), '%')
+        print('PDFs up =', round(err_pdf_3_2_up,3), round(err_pdf_3_2_up/ratio_3_2*100.,2), '%')
+        print('PDFs down =', round(err_pdf_3_2_down,3), round(err_pdf_3_2_down/ratio_3_2*100.,2), '%')
+        print('extr up =', round(err_extr_3_2_up,3), round(err_extr_3_2_up/ratio_3_2*100.,2), '%')
+        print('extr down =', round(err_extr_3_2_down,3), round(err_extr_3_2_down/ratio_3_2*100.,2), '%')
         if do_scale_variations:
-            print 'scale up =', round(err_scale_3_2_up,3), round(err_scale_3_2_up/ratio_3_2*100.,2), '%'
-            print 'scale down =', round(err_scale_3_2_down,3), round(err_scale_3_2_down/ratio_3_2*100.,2), '%'
-        print 'total =', round(.5*(err_3_2_up+err_3_2_down)/ratio_3_2*100.,2), '%'
-        print '\n'
+            print('scale up =', round(err_scale_3_2_up,3), round(err_scale_3_2_up/ratio_3_2*100.,2), '%')
+            print('scale down =', round(err_scale_3_2_down,3), round(err_scale_3_2_down/ratio_3_2*100.,2), '%')
+        print('total =', round(.5*(err_3_2_up+err_3_2_down)/ratio_3_2*100.,2), '%')
+        print('\n')
 
-        print '\n'
-        print 'uncertainties ratio_4_2:\n'
-        print 'experimental =', round(err_ratio_4_2,3), round(err_ratio_4_2/ratio_4_2*100.,2), '%'
-        print 'PDFs up =', round(err_pdf_4_2_up,3), round(err_pdf_4_2_up/ratio_4_2*100.,2), '%'
-        print 'PDFs down =', round(err_pdf_4_2_down,3), round(err_pdf_4_2_down/ratio_4_2*100.,2), '%'
-        print 'extr up =', round(err_extr_4_2_up,3), round(err_extr_4_2_up/ratio_4_2*100.,2), '%'
-        print 'extr down =', round(err_extr_4_2_down,3), round(err_extr_4_2_down/ratio_4_2*100.,2), '%'
+        print('\n')
+        print('uncertainties ratio_4_2:\n')
+        print('experimental =', round(err_ratio_4_2,3), round(err_ratio_4_2/ratio_4_2*100.,2), '%')
+        print('PDFs up =', round(err_pdf_4_2_up,3), round(err_pdf_4_2_up/ratio_4_2*100.,2), '%')
+        print('PDFs down =', round(err_pdf_4_2_down,3), round(err_pdf_4_2_down/ratio_4_2*100.,2), '%')
+        print('extr up =', round(err_extr_4_2_up,3), round(err_extr_4_2_up/ratio_4_2*100.,2), '%')
+        print('extr down =', round(err_extr_4_2_down,3), round(err_extr_4_2_down/ratio_4_2*100.,2), '%')
         if do_scale_variations:
-            print 'scale up =', round(err_scale_4_2_up,3), round(err_scale_4_2_up/ratio_4_2*100.,2), '%'
-            print 'scale down =', round(err_scale_4_2_down,3), round(err_scale_4_2_down/ratio_4_2*100.,2), '%'
-        print 'total =', round(.5*(err_4_2_up+err_4_2_down)/ratio_4_2*100.,2), '%'
-        print '\n'
+            print('scale up =', round(err_scale_4_2_up,3), round(err_scale_4_2_up/ratio_4_2*100.,2), '%')
+            print('scale down =', round(err_scale_4_2_down,3), round(err_scale_4_2_down/ratio_4_2*100.,2), '%')
+        print('total =', round(.5*(err_4_2_up+err_4_2_down)/ratio_4_2*100.,2), '%')
+        print('\n')
 
-        print 'results:\n'
-        print 'ratio_1_2 =', round(ratio_1_2,3), '+' , round(err_1_2_up,3), '-' , round(err_1_2_down,3)
-        print 'ratio_3_2 =', round(ratio_3_2,3), '+' , round(err_3_2_up,3), '-' , round(err_3_2_down,3)
-        print 'ratio_4_2 =', round(ratio_4_2,3), '+' , round(err_4_2_up,3), '-' , round(err_4_2_down,3) 
-        print
+        print('results:\n')
+        print('ratio_1_2 =', round(ratio_1_2,3), '+' , round(err_1_2_up,3), '-' , round(err_1_2_down,3))
+        print('ratio_3_2 =', round(ratio_3_2,3), '+' , round(err_3_2_up,3), '-' , round(err_3_2_down,3))
+        print('ratio_4_2 =', round(ratio_4_2,3), '+' , round(err_4_2_up,3), '-' , round(err_4_2_down,3)) 
+        print()
     
     return [err_1_2_up, err_1_2_down, err_3_2_up, err_3_2_down, err_4_2_up, err_4_2_down]
 
