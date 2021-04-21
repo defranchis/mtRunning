@@ -152,13 +152,12 @@ def formInputFileName ( murscale, mufscale, topmass, pdfmember, mttbin ):
 
     infileName += str(round(mtscale,1))+'_'
     infileName+=str(topmassevolved)+'_MSbar.dat'
-    
 
     if murscale == 'nominal' and mufscale == 'nominal':
         if not os.path.isfile('out_scales_new/'+infileName):
-            infileName = str(TString(infileName).ReplaceAll(str(topmassevolved),str(topmassevolved+.1)))
+            infileName = str(TString(infileName).ReplaceAll(str(topmassevolved),str(round(topmassevolved+.1,1))))
         if not os.path.isfile('out_scales_new/'+infileName):
-            infileName = str(TString(infileName).ReplaceAll(str(topmassevolved+.1),str(topmassevolved-.1)))
+            infileName = str(TString(infileName).ReplaceAll(str(round(topmassevolved+.1,1)),str(round(topmassevolved-.1,1))))
     else:
         if not os.path.isfile('out_scales_new/'+infileName):
             tmpname = infileName
@@ -167,27 +166,26 @@ def formInputFileName ( murscale, mufscale, topmass, pdfmember, mttbin ):
             tmpname= str(TString(tmpname).ReplaceAll(getHorribleString(renscale),str(topmassevolved)))
             tmpname= str(TString(tmpname).ReplaceAll(getHorribleString(facscale),str(topmassevolved)))
             if not os.path.isfile('out_scales_new/'+tmpname):
-                tmpname = str(TString(tmpname).ReplaceAll(str(topmassevolved),str(topmassevolved+.1)))
-                if os.path.isfile('out_scales_new/'+tmpname): infileName = str(TString(infileName).ReplaceAll(str(topmassevolved),str(topmassevolved+.1)))
+                tmpname = str(TString(tmpname).ReplaceAll(str(topmassevolved),str(round(topmassevolved+.1,1))))
+                if os.path.isfile('out_scales_new/'+tmpname): infileName = str(TString(infileName).ReplaceAll(str(topmassevolved),str(round(topmassevolved+.1,1))))
                 else: infileName = str(TString(infileName).ReplaceAll(str(topmassevolved),str(topmassevolved-.1)))
             origname = infileName
                         
             if not os.path.isfile('out_scales_new/'+infileName):
-                if murscale!='nominal': infileName = str(TString(infileName).ReplaceAll(str(renscale),str(renscale+.1)))
-                if mufscale!='nominal': infileName = str(TString(infileName).ReplaceAll(str(facscale),str(facscale+.1)))
+                if murscale!='nominal': infileName = str(TString(infileName).ReplaceAll(str(renscale),str(round(renscale+.1,1))))
+                if mufscale!='nominal': infileName = str(TString(infileName).ReplaceAll(str(facscale),str(round(facscale+.1,1))))
             if not os.path.isfile('out_scales_new/'+infileName):
-                if murscale!='nominal': infileName = str(TString(infileName).ReplaceAll(str(renscale+.1),str(renscale+.2)))
-                if mufscale!='nominal': infileName = str(TString(infileName).ReplaceAll(str(facscale+.1),str(facscale+.2)))
+                if murscale!='nominal': infileName = str(TString(infileName).ReplaceAll(str(round(renscale+.1,1)),str(round(renscale+.2,1))))
+                if mufscale!='nominal': infileName = str(TString(infileName).ReplaceAll(str(round(facscale+.1,1)),str(round(facscale+.2,1))))
             if not os.path.isfile('out_scales_new/'+infileName):
-                if murscale!='nominal': infileName = str(TString(infileName).ReplaceAll(str(renscale+.2),str(renscale-.1)))
-                if mufscale!='nominal': infileName = str(TString(infileName).ReplaceAll(str(facscale+.2),str(facscale-.1)))
+                if murscale!='nominal': infileName = str(TString(infileName).ReplaceAll(str(round(renscale+.2,1)),str(round(renscale-.1,1))))
+                if mufscale!='nominal': infileName = str(TString(infileName).ReplaceAll(str(round(facscale+.2,1)),str(round(facscale-.1,1))))
             if not os.path.isfile('out_scales_new/'+infileName):
-                if murscale!='nominal': infileName = str(TString(origname).ReplaceAll(getHorribleString(renscale),getHorribleString(renscale+.1)))
-                if mufscale!='nominal': infileName = str(TString(origname).ReplaceAll(getHorribleString(facscale),getHorribleString(facscale+.1)))
+                if murscale!='nominal': infileName = str(TString(origname).ReplaceAll(getHorribleString(renscale),getHorribleString(round(renscale+.1,1))))
+                if mufscale!='nominal': infileName = str(TString(origname).ReplaceAll(getHorribleString(facscale),getHorribleString(round(facscale+.1,1))))
             if not os.path.isfile('out_scales_new/'+infileName):
-                if murscale!='nominal': infileName = str(TString(origname).ReplaceAll(getHorribleString(renscale),getHorribleString(renscale-.1)))
-                if mufscale!='nominal': infileName = str(TString(origname).ReplaceAll(getHorribleString(facscale),getHorribleString(facscale-.1)))
-
+                if murscale!='nominal': infileName = str(TString(origname).ReplaceAll(getHorribleString(renscale),getHorribleString(round(renscale-.1,1))))
+                if mufscale!='nominal': infileName = str(TString(origname).ReplaceAll(getHorribleString(facscale),getHorribleString(round(facscale-.1,1))))
 
     
     return infileName
@@ -205,6 +203,7 @@ def formInputFileName ( murscale, mufscale, topmass, pdfmember, mttbin ):
 def readCalculatedXsec (renscale, facscale, topmass, pdfmember, mttbin):
 
     fileName = formInputFileName ( renscale, facscale, topmass, pdfmember, mttbin )
+
     indir = 'out_scales_new/'
     if not os.path.isfile(indir+fileName):
         print('WARNING: missing file', fileName)
@@ -654,7 +653,7 @@ def makeTheoryPrediction(outfile, mass_2):
     r_down = []
     out = open(outfile+'.txt','w')
         
-    for scale in range(350/2,1050/2):
+    for scale in range(int(350/2),int(1050/2)):
         ratio = mtmu2mtmu(mass_2, cnst.mu_2, scale, 'nominal')/mass_2
         out.write(str(scale)+'\t'+str(ratio)+'\n')
         ratio_up = mtmu2mtmu(mass_2, cnst.mu_2, scale, 'up')/mass_2
@@ -685,7 +684,7 @@ def makeAdditionalTheoryPrediction (mtmt, err_mtmt_up, err_mtmt_down, mtmu, dora
     ru.append((mtmt+err_mtmt_up)/mtmu)
     rd.append((mtmt-err_mtmt_down)/mtmu)
     scales.append(mtmt)
-    for scale in range(int(mtmt)+1,1050/2+1):
+    for scale in range(int(mtmt)+1,int(1050/2)+1):
         ratio = mtmt2mtmu(mtmt,scale)/mtmu
         ratio_up = mtmt2mtmu(mtmt+err_mtmt_up,scale)/mtmu
         ratio_down = mtmt2mtmu(mtmt-err_mtmt_down,scale)/mtmu
