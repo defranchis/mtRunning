@@ -1686,12 +1686,12 @@ def makeChi2Significance(mass2, ratio12, ratio32, ratio42, err12, err32, err42):
         err_down = (err**2 + err_pdf_down**2 + err_extr_down**2)**.5
 
 
-    if xmin > 1:
+    if xmin > 0:
         err_sided_norunning = err_down
     else:
         err_sided_norunning = err_up
 
-    if xmin > 0:
+    if xmin > 1:
         err_sided_running = err_down
     else:
         err_sided_running = err_up
@@ -1707,7 +1707,7 @@ def makeChi2Significance(mass2, ratio12, ratio32, ratio42, err12, err32, err42):
     print('significance wrt RGE =', round((xmin-1)/err_sided_running,2))
     print()
 
-    v = xmin/err_sided_nornunning
+    v = xmin/err_sided_norunning
     erf = special.erf(v/2**.5)
     excl = (1-(1-erf)/2)*100
 
