@@ -11,11 +11,11 @@ from ROOT import TString, TH2D, TRandom3, TF1, TGraph, TLine, TCanvas, TGraphErr
 from variables import xsec_1, xsec_2, xsec_3, xsec_4
 
 rt.gStyle.SetOptStat(0000)
-
+rt.gROOT.SetBatch(True)
 # options
 
 estimate_contribs = False
-estimate_significance = False
+estimate_significance = True
 
 do_scale_variations = False # not yet well tested
 facscale_only = True # only factorization scale
@@ -110,12 +110,17 @@ def formInputFileName ( renscale, facscale, topmass, pdfmember ):
     infileName+=str(pdfmember)+'_'
     if pdfmember<10 : infileName+='_'
 
-    topmassevolved=topmass
-    if renscale != topmass:
-        topmassevolved = float(int(mtmt2mtmu(topmass, renscale)*10))/10.
+    topmassevolved = round(topmass,1)
+    topmass = round(topmass,1)
+    # if renscale != topmass:
+    #     topmassevolved = round(float(int(mtmt2mtmu(topmass, renscale)*10))/10.,1)
+    
+    renscale = round(renscale,1)
+    facscale = round(facscale,1)
 
     origrenscale = renscale
     origfacscale = facscale
+
     
     if renscale != topmass or facscale != topmass:
         if TString(str(topmass)).EndsWith('.6') or TString(str(topmass)).EndsWith('.2'):
@@ -155,9 +160,9 @@ def formInputFileName ( renscale, facscale, topmass, pdfmember ):
             infileName=str(TString(infileName).ReplaceAll('.6_MS','.5_MS'))
     else:
         if not os.path.isfile('out_scales/'+infileName):
-            infileName=tempname+str(topmassevolved+.1)+'_MSbar.dat'
+            infileName=tempname+str(round(topmassevolved+.1,1))+'_MSbar.dat'
         if not os.path.isfile('out_scales/'+infileName):
-            infileName=tempname+str(topmassevolved-.1)+'_MSbar.dat'
+            infileName=tempname+str(round(topmassevolved-.1,1))+'_MSbar.dat'
     return infileName
 
 
