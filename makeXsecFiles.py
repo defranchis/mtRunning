@@ -1671,7 +1671,15 @@ def makeChi2Significance(mass2, ratio12, ratio32, ratio42, err12, err32, err42):
         err_down = (err**2 + err_pdf_down**2 + err_extr_down**2)**.5
 
 
+    if x_min > 1:
+        err_sided_norunning = err_down:
+    else
+        err_sided_norunning = err_up
 
+    if x_min > 0:
+        err_sided_running = err_down:
+    else
+        err_sided_running = err_up
         
     print()
     if do_scale_variations:
@@ -1680,11 +1688,11 @@ def makeChi2Significance(mass2, ratio12, ratio32, ratio42, err12, err32, err42):
     print()
     print('xmin =', round(xmin,2), '+' ,round(err_up,2), '-', round(err_down,2), '(tot)')
     print()
-    print('significance wrt no running =', round(xmin/err_down,2))
-    print('significance wrt RGE =', round((xmin-1)/err_down,2))
+    print('significance wrt no running =', round(xmin/err_sided_norunning,2))
+    print('significance wrt RGE =', round((xmin-1)/err_sided_running,2))
     print()
 
-    v = xmin/err_down
+    v = xmin/err_sided_nornunning
     erf = special.erf(v/2**.5)
     excl = (1-(1-erf)/2)*100
 
@@ -2145,7 +2153,7 @@ def getTotalError (ratios_and_errs, pdf_errors, extr_errors, scale_errors):
 ################################
 
 
-def execute():
+def main():
 
     global doingToys
     doingToys = False
@@ -2211,8 +2219,9 @@ def execute():
 
 ################################
 
+if __name__ == "__main__":
+    main()
 
-execute()
 
 
 
