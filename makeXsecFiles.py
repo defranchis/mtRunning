@@ -17,7 +17,7 @@ rt.gROOT.SetBatch(True)
 # options
 
 estimate_contribs = False
-estimate_significance = False
+estimate_significance = True
 
 do_scale_variations = False # not yet well tested
 facscale_only = False # only factorization scale
@@ -1687,13 +1687,13 @@ def makeChi2Significance(mass2, ratio12, ratio32, ratio42, err12, err32, err42):
 
 
     if x_min > 1:
-        err_sided_norunning = err_down:
-    else
+        err_sided_norunning = err_down
+    else:
         err_sided_norunning = err_up
 
     if x_min > 0:
-        err_sided_running = err_down:
-    else
+        err_sided_running = err_down
+    else:
         err_sided_running = err_up
         
     print()
