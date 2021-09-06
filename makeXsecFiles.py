@@ -1412,12 +1412,26 @@ def makeChi2Test(mass2, ratio12, ratio32, ratio42, err12_up, err12_down, err32_u
     
     return
 
+
+def getChi2(ratio12, th1, err12, ratio32, th3, err32, ratio42, th4, err42):
+    diff_1_2 = (ratio12 - th1)
+    diff_3_2 = (ratio32 - th3)
+    diff_4_2 = (ratio42 - th4)
+
+    V = [[err12*err12, err12*err32*rcorr_12, err12*err42*rcorr_13],
+         [err12*err32*rcorr_12, err32*err32, err32*err42*rcorr_23],
+         [err12*err42*rcorr_13, err32*err42*rcorr_23, err42*err42]]
+
+    return np.matmul(np.array([diff_1_2, diff_3_2,diff_4_2]),np.matmul(np.linalg.inv(V),np.array([diff_1_2, diff_3_2,diff_4_2])))
+
+
 ################################
 
 # "getChi2Uncorrelated" performs a transformation to an orthogonal basis
 #  before calculating the chisquare, in order to take correlations into account.
 
 ################################
+
 
 
 def getChi2Uncorrelated(ratio12, th1, err12, ratio32, th3, err32, ratio42, th4, err42):
@@ -1439,6 +1453,7 @@ def getChi2Uncorrelated(ratio12, th1, err12, ratio32, th3, err32, ratio42, th4, 
     y3 = np.inner(np.array(vectors[2]),x)
     
     chi2 = (y1**2)/values[0] + (y2**2)/values[1] + (y3**2)/values[2]
+    
     return chi2
 
     
@@ -1470,7 +1485,7 @@ def makeChi2Significance(mass2, ratio12, ratio32, ratio42, err12, err32, err42):
         th1 = x*(th_ratio12-1)+1
         th3 = x*(th_ratio32-1)+1
         th4 = x*(th_ratio42-1)+1
-        chi2 = getChi2Uncorrelated(ratio12, th1, err12, ratio32, th3, err32, ratio42, th4, err42)
+        chi2 = getChi2(ratio12, th1, err12, ratio32, th3, err32, ratio42, th4, err42)
         
         graph.SetPoint(int(x*10),x,chi2)
 
@@ -1542,7 +1557,7 @@ def makeChi2Significance(mass2, ratio12, ratio32, ratio42, err12, err32, err42):
             th1 = x*(th_ratio12-1)+1
             th3 = x*(th_ratio32-1)+1
             th4 = x*(th_ratio42-1)+1
-            chi2 = getChi2Uncorrelated(ratio_1_2, th1, err_ratio_1_2, ratio_3_2, th3, err_ratio_3_2, ratio_4_2, th4, err_ratio_4_2)
+            chi2 = getChi2(ratio_1_2, th1, err_ratio_1_2, ratio_3_2, th3, err_ratio_3_2, ratio_4_2, th4, err_ratio_4_2)
             graph.SetPoint(int(x*10),x,chi2)
 
         funct = TF1('funct','pol2(0)',0,3)
@@ -1590,7 +1605,7 @@ def makeChi2Significance(mass2, ratio12, ratio32, ratio42, err12, err32, err42):
             th1 = x*(th_ratio12-1)+1
             th3 = x*(th_ratio32-1)+1
             th4 = x*(th_ratio42-1)+1
-            chi2 = getChi2Uncorrelated(ratio_1_2, th1, err_ratio_1_2, ratio_3_2, th3, err_ratio_3_2, ratio_4_2, th4, err_ratio_4_2)
+            chi2 = getChi2(ratio_1_2, th1, err_ratio_1_2, ratio_3_2, th3, err_ratio_3_2, ratio_4_2, th4, err_ratio_4_2)
             graph.SetPoint(int(x*10),x,chi2)
 
         funct = TF1('funct','pol2(0)',0,3)
@@ -1644,7 +1659,7 @@ def makeChi2Significance(mass2, ratio12, ratio32, ratio42, err12, err32, err42):
                     th1 = x*(th_ratio12-1)+1
                     th3 = x*(th_ratio32-1)+1
                     th4 = x*(th_ratio42-1)+1
-                    chi2 = getChi2Uncorrelated(ratio_1_2, th1, err_ratio_1_2, ratio_3_2, th3, err_ratio_3_2, ratio_4_2, th4, err_ratio_4_2)
+                    chi2 = getChi2(ratio_1_2, th1, err_ratio_1_2, ratio_3_2, th3, err_ratio_3_2, ratio_4_2, th4, err_ratio_4_2)
                     graph.SetPoint(int(x*10),x,chi2)
 
                 funct = TF1('funct','pol2(0)',0,3)
