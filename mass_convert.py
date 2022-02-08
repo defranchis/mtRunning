@@ -37,8 +37,8 @@ def mtp2mtmu(mtp,mu): #OK
     mtmu = crd.mOS2mMS(mtp,None,asmu,mu,cnst.nflav,cnst.nloops)
     return mtmu
 
-# example
-mtmu = 160.48
-mtmt = mtmu2mtmt(mtmu,cnst.mu_1)
-mtp = mtmu2mtp(mtmu,cnst.mu_1)
+mtmt = 162.0
+mtp = mtmu2mtp(mtmt,mtmt)
 print(mtp)
+
+
