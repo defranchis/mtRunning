@@ -408,7 +408,7 @@ def getMassAndError(mttbin, murscale, mufscale, pdfmember, extrapol, contrib):
     latexLabel2.SetTextSize(0.04)
     latexLabel2.SetTextFont(42)
     latexLabel2.SetNDC()
-    latexLabel2.DrawLatex(0.7, 0.92, "35.9 fb^{-1} (13 TeV)")
+    latexLabel2.DrawLatex(0.7, 0.92, "36.3 fb^{-1} (13 TeV)")
     if not doingToys:
         c.Print(outdir+'/test_mtt'+str(mttbin)+'_mur_'+murscale+'_muf_'+mufscale+'_extrapol'+str(extrapol)+'_pdf'+str(pdfmember)+'_contrib'+str(contrib)+'.png')
         if murscale == 'nominal' and mufscale == 'nominal' and extrapol == 0 and pdfmember == 0 and contrib == 0:
@@ -691,6 +691,11 @@ def makeAdditionalTheoryPrediction (mtmt, err_mtmt_up, err_mtmt_down, mtmu, dora
     return [r, ru, rd, scales]
 
 
+def getScaleRatio(i):
+    if i==0: return cnst.mu_1
+    if i==1: return cnst.mu_3
+    if i==2: return cnst.mu_4
+    return 999
 
 ################################
 
@@ -718,7 +723,21 @@ def makeRatioPlots (mass_2, ratio_12, ratio_32, ratio_42, err_12_up, err_12_down
     graph.SetPoint(3,cnst.mu_4,ratio_42)
     graph.SetPointError(3,0,0,err_42_down,err_42_up)
 
+
+    g_PLB = TGraph(3)
+    for i, r in enumerate(PLB_result):
+        g_PLB.SetPoint(i,getScaleRatio(i),r)
+
+    g_NNLO = TGraph(3)
+    for i, r in enumerate(NNLO_result):
+        g_NNLO.SetPoint(i,getScaleRatio(i),r)
     
+    g_PLB.SetMarkerStyle(25)
+    g_PLB.SetMarkerColor(rt.kBlue)
+
+    g_NNLO.SetMarkerStyle(26)
+    g_NNLO.SetMarkerColor(6)
+
     theoryFileName = 'theory_prediction'
     l = makeTheoryPrediction(theoryFileName,mass_2)
     th = TGraph(theoryFileName+'.txt')    
@@ -781,10 +800,13 @@ def makeRatioPlots (mass_2, ratio_12, ratio_32, ratio_42, err_12_up, err_12_down
     graph_noscale.SetPointError(2,0,0,err_42_down_noscale,err_42_up_noscale)
 
     
-    leg = TLegend(.17,.19,.78,.39)
+    leg = TLegend(.15,.19,.83,.45)
     # leg2 = TLegend(.17,.2,.8,.4)
     leg.SetBorderSize(0)
-    leg.AddEntry(graph,'NLO extraction from differential #sigma_{t#bar{t}}','pe')
+    leg.AddEntry(graph,'NLO with bin-by-bin dynamic scale','pe')
+    leg.AddEntry(g_PLB,'NLO with static scale [PLB 803 (2020) 135263]','p')
+    leg.AddEntry(g_NNLO,'NNLO [arXiv:2208.11399]','p')
+
     leg.AddEntry(g1,'Reference scale #mu_{ref}','p')
     leg.AddEntry(th,'One-loop RGE, n_{f} = 5, #alpha_{s}(m_{Z}) = 0.1191','l')
 
@@ -803,13 +825,15 @@ def makeRatioPlots (mass_2, ratio_12, ratio_32, ratio_42, err_12_up, err_12_down
     th_band.Draw('f same')
     g.Draw('psame')
     graph_noscale.Draw('psame')
+    g_PLB.Draw('psame')
+    g_NNLO.Draw('psame')
     latexLabel1.DrawLatex(0.16, 0.94, "CMS")
-    latexLabel2.DrawLatex(0.75, 0.94, "35.9 fb^{-1} (13 TeV)")
+    latexLabel2.DrawLatex(0.75, 0.94, "36.3 fb^{-1} (13 TeV)")
     latexLabel2.DrawLatex(0.63, 0.83, "ABMP16_5_nlo PDF set")
     latexLabel2.DrawLatex(0.63, 0.78, "#mu_{ref} = "+str(int(cnst.mu_2))+" GeV")
     latexLabel2.DrawLatex(0.63, 0.73, "#mu_{0} = #mu_{ref}")
-    latexLabel3.DrawLatex(0.26, 0.94 , "#it{Supplementary}")
-    latexLabel2.DrawLatex(0.48, 0.94 , "arXiv:1909.09193")
+    # latexLabel3.DrawLatex(0.26, 0.94 , "#it{Supplementary}")
+    # latexLabel2.DrawLatex(0.48, 0.94 , "arXiv:1909.09193")
     # latexLabel2.DrawLatex(0.48, 0.94 , "PLB 803 (2020) 135263")
     if preliminary: latexLabel2.DrawLatex(0.205, 0.92 , "#it{Preliminary}")
     
