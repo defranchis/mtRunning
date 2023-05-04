@@ -17,7 +17,7 @@ rt.gROOT.SetBatch(True)
 # options
 
 estimate_contribs = False
-estimate_significance = True
+estimate_significance = False
 
 do_scale_variations = False # not yet well tested
 facscale_only = False # only factorization scale
@@ -29,7 +29,8 @@ preliminary = False
 
 # end options
 
-
+PLB_result = [1.030, 0.982, 0.904]
+NNLO_result = [1.025, 0.974, 0.859]
 
 ################################
 
@@ -547,12 +548,9 @@ def getScaleUncertainties (central_ratio_1_2, central_ratio_3_2, central_ratio_4
 
 def getPDFUncertainties (central_ratio_1_2, central_ratio_3_2, central_ratio_4_2):
 
-    err_pdf_up_1_2 = 0
-    err_pdf_up_3_2 = 0
-    err_pdf_up_4_2 = 0
-    err_pdf_down_1_2 = 0
-    err_pdf_down_3_2 = 0
-    err_pdf_down_4_2 = 0
+    err_pdf_1_2 = 0
+    err_pdf_3_2 = 0
+    err_pdf_4_2 = 0
     
     for pdf in range(1,30):
         mass_and_err_1 = getMassAndError(1, 'nominal', 'nominal', pdf , 0 , 0 )
@@ -567,21 +565,12 @@ def getPDFUncertainties (central_ratio_1_2, central_ratio_3_2, central_ratio_4_2
         ratio_3_2 = ratios_and_errs[1]
         ratio_4_2 = ratios_and_errs[2]
 
-        err_pdf_1_2 = (ratio_1_2-central_ratio_1_2)**2
-        err_pdf_3_2 = (ratio_3_2-central_ratio_3_2)**2
-        err_pdf_4_2 = (ratio_4_2-central_ratio_4_2)**2
-
-        if ratio_1_2 > central_ratio_1_2 : err_pdf_up_1_2 += err_pdf_1_2
-        else : err_pdf_down_1_2 += err_pdf_1_2
-
-        if ratio_3_2 > central_ratio_3_2 : err_pdf_up_3_2 += err_pdf_3_2
-        else : err_pdf_down_3_2 += err_pdf_3_2
-
-        if ratio_4_2 > central_ratio_4_2 : err_pdf_up_4_2 += err_pdf_4_2
-        else : err_pdf_down_4_2 += err_pdf_4_2
+        err_pdf_1_2 += (ratio_1_2-central_ratio_1_2)**2
+        err_pdf_3_2 += (ratio_3_2-central_ratio_3_2)**2
+        err_pdf_4_2 += (ratio_4_2-central_ratio_4_2)**2
 
         
-    return [err_pdf_up_1_2**.5, err_pdf_down_1_2**.5, err_pdf_up_3_2**.5, err_pdf_down_3_2**.5, err_pdf_up_4_2**.5, err_pdf_down_4_2**.5]
+    return [err_pdf_1_2**.5, err_pdf_3_2**.5, err_pdf_4_2**.5]
         
 
 ################################
@@ -1023,16 +1012,16 @@ def makeRatioPlots (mass_2, ratio_12, ratio_32, ratio_42, err_12_up, err_12_down
 
 def getTotalMassError(mtmu_1, err_1, mtmu_2, err_2, mtmu_3, err_3, mtmu_4, err_4):
 
-    pdf_error_1_up = pdf_error_1_down = 0
+    pdf_error_1 =  0
     extr_error_1_up = extr_error_1_down = 0
     scale_error_1_up = scale_error_1_down = mtmu_1
-    pdf_error_2_up = pdf_error_2_down = 0
+    pdf_error_2 = 0
     extr_error_2_up = extr_error_2_down = 0
     scale_error_2_up = scale_error_2_down = mtmu_2
-    pdf_error_3_up = pdf_error_3_down = 0
+    pdf_error_3 = 0
     extr_error_3_up = extr_error_3_down = 0
     scale_error_3_up = scale_error_3_down = mtmu_3
-    pdf_error_4_up = pdf_error_4_down = 0
+    pdf_error_4 = 0
     extr_error_4_up = extr_error_4_down = 0
     scale_error_4_up = scale_error_4_down = mtmu_4
 
@@ -1042,23 +1031,16 @@ def getTotalMassError(mtmu_1, err_1, mtmu_2, err_2, mtmu_3, err_3, mtmu_4, err_4
         mass_and_err_3 = getMassAndError(3, 'nominal', 'nominal', pdf , 0 , 0 )
         mass_and_err_4 = getMassAndError(4, 'nominal', 'nominal', pdf , 0 , 0 )
 
-        if mass_and_err_1[0] > mtmu_1 : pdf_error_1_up += (mass_and_err_1[0]-mtmu_1)**2
-        else: pdf_error_1_down += (mass_and_err_1[0]-mtmu_1)**2
-        if mass_and_err_2[0] > mtmu_2 : pdf_error_2_up += (mass_and_err_2[0]-mtmu_2)**2
-        else: pdf_error_2_down += (mass_and_err_2[0]-mtmu_2)**2
-        if mass_and_err_3[0] > mtmu_3 : pdf_error_3_up += (mass_and_err_3[0]-mtmu_3)**2
-        else: pdf_error_3_down += (mass_and_err_3[0]-mtmu_3)**2
-        if mass_and_err_4[0] > mtmu_4 : pdf_error_4_up += (mass_and_err_4[0]-mtmu_4)**2
-        else: pdf_error_4_down += (mass_and_err_4[0]-mtmu_4)**2
+        pdf_error_1 += (mass_and_err_1[0]-mtmu_1)**2
+        pdf_error_2 += (mass_and_err_2[0]-mtmu_2)**2
+        pdf_error_3 += (mass_and_err_3[0]-mtmu_3)**2
+        pdf_error_4 += (mass_and_err_4[0]-mtmu_4)**2
         
-    pdf_error_1_up = pdf_error_1_up**.5
-    pdf_error_1_down = pdf_error_1_down**.5
-    pdf_error_2_up = pdf_error_2_up**.5
-    pdf_error_2_down = pdf_error_2_down**.5
-    pdf_error_3_up = pdf_error_3_up**.5
-    pdf_error_3_down = pdf_error_3_down**.5
-    pdf_error_4_up = pdf_error_4_up**.5
-    pdf_error_4_down = pdf_error_4_down**.5
+    pdf_error_1 = pdf_error_1**.5
+    pdf_error_2 = pdf_error_2**.5
+    pdf_error_3 = pdf_error_3**.5
+    pdf_error_4 = pdf_error_4**.5
+
 
     for extr in range(-len(var.extr_1_up),len(var.extr_1_up)+1) :
         if extr == 0 : continue        
@@ -1122,30 +1104,30 @@ def getTotalMassError(mtmu_1, err_1, mtmu_2, err_2, mtmu_3, err_3, mtmu_4, err_4
     scale_error_4_up = scale_error_4_up - mtmu_4
     scale_error_4_down = mtmu_4 - scale_error_4_down
     
-    fit_error_1_up = (pdf_error_1_up**2 + extr_error_1_up**2 + err_1**2)**.5
-    fit_error_1_down = (pdf_error_1_down**2 + extr_error_1_down**2 + err_1**2)**.5
-    fit_error_2_up = (pdf_error_2_up**2 + extr_error_2_up**2 + err_2**2)**.5
-    fit_error_2_down = (pdf_error_2_down**2 + extr_error_2_down**2 + err_2**2)**.5
-    fit_error_3_up = (pdf_error_3_up**2 + extr_error_3_up**2 + err_3**2)**.5
-    fit_error_3_down = (pdf_error_3_down**2 + extr_error_3_down**2 + err_3**2)**.5
-    fit_error_4_up = (pdf_error_4_up**2 + extr_error_4_up**2 + err_4**2)**.5
-    fit_error_4_down = (pdf_error_4_down**2 + extr_error_4_down**2 + err_4**2)**.5
+    fit_error_1_up = (pdf_error_1**2 + extr_error_1_up**2 + err_1**2)**.5
+    fit_error_1_down = (pdf_error_1**2 + extr_error_1_down**2 + err_1**2)**.5
+    fit_error_2_up = (pdf_error_2**2 + extr_error_2_up**2 + err_2**2)**.5
+    fit_error_2_down = (pdf_error_2**2 + extr_error_2_down**2 + err_2**2)**.5
+    fit_error_3_up = (pdf_error_3**2 + extr_error_3_up**2 + err_3**2)**.5
+    fit_error_3_down = (pdf_error_3**2 + extr_error_3_down**2 + err_3**2)**.5
+    fit_error_4_up = (pdf_error_4**2 + extr_error_4_up**2 + err_4**2)**.5
+    fit_error_4_down = (pdf_error_4**2 + extr_error_4_down**2 + err_4**2)**.5
 
-    tot_error_1_up = (pdf_error_1_up**2 + extr_error_1_up**2 + scale_error_1_up**2 + err_1**2)**.5
-    tot_error_1_down = (pdf_error_1_down**2 + extr_error_1_down**2 + scale_error_1_down**2 + err_1**2)**.5
-    tot_error_2_up = (pdf_error_2_up**2 + extr_error_2_up**2 + scale_error_2_up**2 + err_2**2)**.5
-    tot_error_2_down = (pdf_error_2_down**2 + extr_error_2_down**2 + scale_error_2_down**2 + err_2**2)**.5
-    tot_error_3_up = (pdf_error_3_up**2 + extr_error_3_up**2 + scale_error_3_up**2 + err_3**2)**.5
-    tot_error_3_down = (pdf_error_3_down**2 + extr_error_3_down**2 + scale_error_3_down**2 + err_3**2)**.5
-    tot_error_4_up = (pdf_error_4_up**2 + extr_error_4_up**2 + scale_error_4_up**2 + err_4**2)**.5
-    tot_error_4_down = (pdf_error_4_down**2 + extr_error_4_down**2 + scale_error_4_down**2 + err_4**2)**.5
+    tot_error_1_up = (pdf_error_1**2 + extr_error_1_up**2 + scale_error_1_up**2 + err_1**2)**.5
+    tot_error_1_down = (pdf_error_1**2 + extr_error_1_down**2 + scale_error_1_down**2 + err_1**2)**.5
+    tot_error_2_up = (pdf_error_2**2 + extr_error_2_up**2 + scale_error_2_up**2 + err_2**2)**.5
+    tot_error_2_down = (pdf_error_2**2 + extr_error_2_down**2 + scale_error_2_down**2 + err_2**2)**.5
+    tot_error_3_up = (pdf_error_3**2 + extr_error_3_up**2 + scale_error_3_up**2 + err_3**2)**.5
+    tot_error_3_down = (pdf_error_3**2 + extr_error_3_down**2 + scale_error_3_down**2 + err_3**2)**.5
+    tot_error_4_up = (pdf_error_4**2 + extr_error_4_up**2 + scale_error_4_up**2 + err_4**2)**.5
+    tot_error_4_down = (pdf_error_4**2 + extr_error_4_down**2 + scale_error_4_down**2 + err_4**2)**.5
 
 
     print()
-    print('mt_mu1 =', round(mtmu_1,1), '+/-', round(err_1,1), '(fit) +', round(pdf_error_1_up,1), '-', round(pdf_error_1_down,1), '(pdf) +', round(extr_error_1_up,1), '-', round(extr_error_1_down,1), '(extr) +', round(scale_error_1_up,1), '-', round(scale_error_1_down,1), '(scale) =', round(mtmu_1,1), '+', round(tot_error_1_up,1), '-', round(tot_error_1_down,1), '(tot)') 
-    print('mt_mu2 =', round(mtmu_2,1), '+/-', round(err_2,1), '(fit) +', round(pdf_error_2_up,1), '-', round(pdf_error_2_down,1), '(pdf) +', round(extr_error_2_up,1), '-', round(extr_error_2_down,1), '(extr) +', round(scale_error_2_up,1), '-', round(scale_error_2_down,1), '(scale) =', round(mtmu_2,1), '+', round(tot_error_2_up,1), '-', round(tot_error_2_down,1), '(tot)') 
-    print('mt_mu3 =', round(mtmu_3,1), '+/-', round(err_3,1), '(fit) +', round(pdf_error_3_up,1), '-', round(pdf_error_3_down,1), '(pdf) +', round(extr_error_3_up,1), '-', round(extr_error_3_down,1), '(extr) +', round(scale_error_3_up,1), '-', round(scale_error_3_down,1), '(scale) =', round(mtmu_3,1), '+', round(tot_error_3_up,1), '-', round(tot_error_3_down,1), '(tot)') 
-    print('mt_mu4 =', round(mtmu_4,1), '+/-', round(err_4,1), '(fit) +', round(pdf_error_4_up,1), '-', round(pdf_error_4_down,1), '(pdf) +', round(extr_error_4_up,1), '-', round(extr_error_4_down,1), '(extr) +', round(scale_error_4_up,1), '-', round(scale_error_4_down,1), '(scale) =', round(mtmu_4,1), '+', round(tot_error_4_up,1), '-', round(tot_error_4_down,1), '(tot)') 
+    print('mt_mu1 =', round(mtmu_1,1), '+/-', round(err_1,1), '(fit) +/-', round(pdf_error_1,1),  '(pdf) +', round(extr_error_1_up,1), '-', round(extr_error_1_down,1), '(extr) +', round(scale_error_1_up,1), '-', round(scale_error_1_down,1), '(scale) =', round(mtmu_1,1), '+', round(tot_error_1_up,1), '-', round(tot_error_1_down,1), '(tot)') 
+    print('mt_mu2 =', round(mtmu_2,1), '+/-', round(err_2,1), '(fit) +/-', round(pdf_error_2,1),  '(pdf) +', round(extr_error_2_up,1), '-', round(extr_error_2_down,1), '(extr) +', round(scale_error_2_up,1), '-', round(scale_error_2_down,1), '(scale) =', round(mtmu_2,1), '+', round(tot_error_2_up,1), '-', round(tot_error_2_down,1), '(tot)') 
+    print('mt_mu3 =', round(mtmu_3,1), '+/-', round(err_3,1), '(fit) +/-', round(pdf_error_3,1),  '(pdf) +', round(extr_error_3_up,1), '-', round(extr_error_3_down,1), '(extr) +', round(scale_error_3_up,1), '-', round(scale_error_3_down,1), '(scale) =', round(mtmu_3,1), '+', round(tot_error_3_up,1), '-', round(tot_error_3_down,1), '(tot)') 
+    print('mt_mu4 =', round(mtmu_4,1), '+/-', round(err_4,1), '(fit) +/-', round(pdf_error_4,1),  '(pdf) +', round(extr_error_4_up,1), '-', round(extr_error_4_down,1), '(extr) +', round(scale_error_4_up,1), '-', round(scale_error_4_down,1), '(scale) =', round(mtmu_4,1), '+', round(tot_error_4_up,1), '-', round(tot_error_4_down,1), '(tot)') 
     print()
     
     return [fit_error_1_up, fit_error_1_down, fit_error_2_up, fit_error_2_down, fit_error_3_up, fit_error_3_down, fit_error_4_up, fit_error_4_down,
@@ -2075,12 +2057,10 @@ def getTotalError (ratios_and_errs, pdf_errors, extr_errors, scale_errors):
     err_ratio_3_2 = ratios_and_errs[4]
     err_ratio_4_2 = ratios_and_errs[5]
 
-    err_pdf_1_2_up = pdf_errors[0]
-    err_pdf_1_2_down = pdf_errors[1]
-    err_pdf_3_2_up = pdf_errors[2]
-    err_pdf_3_2_down = pdf_errors[3]
-    err_pdf_4_2_up = pdf_errors[4]
-    err_pdf_4_2_down = pdf_errors[5]
+    err_pdf_1_2 = pdf_errors[0]
+    err_pdf_3_2 = pdf_errors[1]
+    err_pdf_4_2 = pdf_errors[2]
+
 
     err_extr_1_2_up = extr_errors[0]
     err_extr_1_2_down = extr_errors[1]
@@ -2089,12 +2069,12 @@ def getTotalError (ratios_and_errs, pdf_errors, extr_errors, scale_errors):
     err_extr_4_2_up = extr_errors[4]
     err_extr_4_2_down = extr_errors[5]
 
-    err_1_2_up = (err_ratio_1_2**2 + err_pdf_1_2_up**2 + err_extr_1_2_up **2)**.5
-    err_1_2_down = (err_ratio_1_2**2 + err_pdf_1_2_down**2 + err_extr_1_2_down **2)**.5
-    err_3_2_up = (err_ratio_3_2**2 + err_pdf_3_2_up**2 + err_extr_3_2_up **2)**.5
-    err_3_2_down = (err_ratio_3_2**2 + err_pdf_3_2_down**2 + err_extr_3_2_down **2)**.5
-    err_4_2_up = (err_ratio_4_2**2 + err_pdf_4_2_up**2 + err_extr_4_2_up **2)**.5
-    err_4_2_down = (err_ratio_4_2**2 + err_pdf_4_2_down**2 + err_extr_4_2_down **2)**.5
+    err_1_2_up = (err_ratio_1_2**2 + err_pdf_1_2**2 + err_extr_1_2_up **2)**.5
+    err_1_2_down = (err_ratio_1_2**2 + err_pdf_1_2**2 + err_extr_1_2_down **2)**.5
+    err_3_2_up = (err_ratio_3_2**2 + err_pdf_3_2**2 + err_extr_3_2_up **2)**.5
+    err_3_2_down = (err_ratio_3_2**2 + err_pdf_3_2**2 + err_extr_3_2_down **2)**.5
+    err_4_2_up = (err_ratio_4_2**2 + err_pdf_4_2**2 + err_extr_4_2_up **2)**.5
+    err_4_2_down = (err_ratio_4_2**2 + err_pdf_4_2**2 + err_extr_4_2_down **2)**.5
 
     if do_scale_variations and scale_errors != []:
         err_scale_1_2_up = scale_errors[0]
@@ -2118,8 +2098,7 @@ def getTotalError (ratios_and_errs, pdf_errors, extr_errors, scale_errors):
         print('\n')
         print('uncertainties ratio_1_2:\n')
         print('experimental =', round(err_ratio_1_2,3), round(err_ratio_1_2/ratio_1_2*100.,2), '%')
-        print('PDFs up =', round(err_pdf_1_2_up,3), round(err_pdf_1_2_up/ratio_1_2*100.,2), '%')
-        print('PDFs down =', round(err_pdf_1_2_down,3), round(err_pdf_1_2_down/ratio_1_2*100.,2), '%')
+        print('PDFs =', round(err_pdf_1_2,3), round(err_pdf_1_2/ratio_1_2*100.,2), '%')
         print('extr up =', round(err_extr_1_2_up,3), round(err_extr_1_2_up/ratio_1_2*100.,2), '%')
         print('extr down =', round(err_extr_1_2_down,3), round(err_extr_1_2_down/ratio_1_2*100.,2), '%')
         if do_scale_variations:
@@ -2130,8 +2109,7 @@ def getTotalError (ratios_and_errs, pdf_errors, extr_errors, scale_errors):
         print('\n')
         print('uncertainties ratio_3_2:\n')
         print('experimental =', round(err_ratio_3_2,3), round(err_ratio_3_2/ratio_3_2*100.,2), '%')
-        print('PDFs up =', round(err_pdf_3_2_up,3), round(err_pdf_3_2_up/ratio_3_2*100.,2), '%')
-        print('PDFs down =', round(err_pdf_3_2_down,3), round(err_pdf_3_2_down/ratio_3_2*100.,2), '%')
+        print('PDFs =', round(err_pdf_3_2,3), round(err_pdf_3_2/ratio_3_2*100.,2), '%')
         print('extr up =', round(err_extr_3_2_up,3), round(err_extr_3_2_up/ratio_3_2*100.,2), '%')
         print('extr down =', round(err_extr_3_2_down,3), round(err_extr_3_2_down/ratio_3_2*100.,2), '%')
         if do_scale_variations:
@@ -2143,8 +2121,7 @@ def getTotalError (ratios_and_errs, pdf_errors, extr_errors, scale_errors):
         print('\n')
         print('uncertainties ratio_4_2:\n')
         print('experimental =', round(err_ratio_4_2,3), round(err_ratio_4_2/ratio_4_2*100.,2), '%')
-        print('PDFs up =', round(err_pdf_4_2_up,3), round(err_pdf_4_2_up/ratio_4_2*100.,2), '%')
-        print('PDFs down =', round(err_pdf_4_2_down,3), round(err_pdf_4_2_down/ratio_4_2*100.,2), '%')
+        print('PDFs =', round(err_pdf_4_2,3), round(err_pdf_4_2/ratio_4_2*100.,2), '%')
         print('extr up =', round(err_extr_4_2_up,3), round(err_extr_4_2_up/ratio_4_2*100.,2), '%')
         print('extr down =', round(err_extr_4_2_down,3), round(err_extr_4_2_down/ratio_4_2*100.,2), '%')
         if do_scale_variations:
